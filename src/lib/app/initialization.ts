@@ -1,10 +1,10 @@
 import {
-    initializeI18n,
-    mapDeviceLocaleToLanguageKey,
+  initializeI18n,
+  mapDeviceLocaleToLanguageKey,
 } from '@/lib/i18n/config';
 import supabase from '@/lib/supabase/client';
 import { ensureFonts } from '@/theme/fonts';
-import { LanguageKey } from '@/types';
+import { DEFAULT_LANGUAGE, LanguageKey } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_LOCALE_STORE_KEY = 'appearance_locale';
@@ -31,14 +31,23 @@ async function initializeLocale(): Promise<void> {
     // Get saved locale or auto-detect device language
     const savedLocale = await AsyncStorage.getItem(STORAGE_LOCALE_STORE_KEY);
     const locale: LanguageKey =
-      (savedLocale as LanguageKey) || mapDeviceLocaleToLanguageKey() || 'en';
+      (savedLocale as LanguageKey) ||
+      mapDeviceLocaleToLanguageKey() ||
+      undefined;
 
     // Load fonts and initialize i18n in parallel
-    await Promise.all([ensureFonts(locale), initializeI18n(locale)]);
+    await Promise.all([
+      ensureFonts(DEFAULT_LANGUAGE),
+      locale && ensureFonts(locale),
+      initializeI18n(locale),
+    ]);
   } catch (error) {
     console.error('Locale initialization error:', error);
-    // Fallback to English
-    await Promise.all([ensureFonts('en'), initializeI18n('en')]);
+    // Fallback to default language
+    await Promise.all([
+      ensureFonts(DEFAULT_LANGUAGE),
+      initializeI18n(DEFAULT_LANGUAGE),
+    ]);
   }
 }
 

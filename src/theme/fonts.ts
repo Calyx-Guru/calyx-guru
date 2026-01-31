@@ -1,6 +1,6 @@
 import { LanguageKey } from '@/types';
 
-import { loadAsync, useFonts } from 'expo-font';
+import { loadAsync } from 'expo-font';
 
 export type FontRegistryType = {
   body: string;
@@ -26,10 +26,6 @@ export const fontRegistry: Record<LanguageKey, FontRegistryType> = {
     body: 'NotoSansJP-Regular',
   },
 };
-
-useFonts({
-  'Roboto-Regular': require('@/assets/fonts/roboto-latin/Roboto-Regular.ttf'),
-});
 
 const fontMap: Record<string, number> = {
   'Roboto-Regular': require('@/assets/fonts/roboto-latin/Roboto-Regular.ttf'),
