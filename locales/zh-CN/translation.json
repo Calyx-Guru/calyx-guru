@@ -1,0 +1,14 @@
+{
+  "common": {
+    "welcome": "欢迎",
+    "hello": "你好",
+    "goodbye": "再见",
+    "ok": "确定",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "settings": "设置",
+    "language": "语言"
+  }
+}

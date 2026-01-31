@@ -1,0 +1,14 @@
+{
+  "common": {
+    "welcome": "Chào mừng",
+    "hello": "Xin chào",
+    "goodbye": "Tạm biệt",
+    "ok": "Được",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "settings": "Cài đặt",
+    "language": "Ngôn ngữ"
+  }
+}

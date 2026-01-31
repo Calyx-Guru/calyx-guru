@@ -1,0 +1,14 @@
+{
+  "common": {
+    "welcome": "歡迎",
+    "hello": "你好",
+    "goodbye": "再見",
+    "ok": "確定",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "刪除",
+    "edit": "編輯",
+    "settings": "設定",
+    "language": "語言"
+  }
+}
