@@ -1,4 +1,4 @@
-import { LanguageKey } from '@/types';
+import { LanguageKey, SizeType } from '@/types';
 
 import { loadAsync } from 'expo-font';
 
@@ -7,9 +7,7 @@ export type FontRegistryType = {
   accent: string;
 };
 
-export type FontSizeType = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
-
-export const fontSizes: Record<LanguageKey, Record<FontSizeType, number>> = {
+export const fontSizes: Record<LanguageKey, Record<SizeType, number>> = {
   en: {
     xs: 8,
     sm: 10,

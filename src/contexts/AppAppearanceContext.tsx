@@ -17,11 +17,10 @@ import {
   fontRegistry,
   FontRegistryType,
   fontSizes,
-  FontSizeType,
 } from '@/theme/fonts';
 import { layoutProfiles } from '@/theme/layout';
 import { spacing, SpacingType } from '@/theme/spacing';
-import { LanguageKey, ThemeMode } from '@/types';
+import { LanguageKey, SizeType, ThemeMode } from '@/types';
 
 type AppAppearance = {
   platform: typeof Platform.OS;
@@ -33,7 +32,7 @@ type AppAppearance = {
   colors: ThemeColorType;
   fontRegistry: FontRegistryType;
   fallbackFontRegistry: FontRegistryType;
-  fontSize: Record<FontSizeType, number>;
+  fontSize: Record<SizeType, number>;
   spacing: SpacingType;
   lineHeightScale: number;
   fontsLoaded: boolean;
@@ -103,6 +102,8 @@ export function AppAppearanceProvider({
         ]),
       ) as SpacingType['text'],
       dense: spacing.dense,
+      buttonWidth: spacing.buttonWidth,
+      buttonHeight: spacing.buttonHeight,
     };
   }, [layout.textSpacingMultiplier]);
 

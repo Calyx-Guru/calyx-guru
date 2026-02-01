@@ -1,13 +1,12 @@
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
 import i18n from '@/lib/i18n/config';
-import { ColorType } from '@/theme/colors';
-import { FontSizeType } from '@/theme/fonts';
+import { ColorType, SizeType } from '@/types';
 import { PropsWithChildren, useContext } from 'react';
 import { Text } from 'react-native';
 
 type BodyTextProps = {
   color?: ColorType;
-  size?: FontSizeType;
+  size?: SizeType;
   translate?: boolean;
 };
 

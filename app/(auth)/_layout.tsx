@@ -1,33 +1,11 @@
 import HeaderComponent from '@/components/home/HeaderComponent';
 import { AppAppearanceProvider } from '@/contexts/AppAppearanceContext';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
-import { initializeApp } from '@/lib/app/initialization';
 import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  useEffect(() => {
-    async function prepare() {
-      try {
-        // Initialize app (load fonts, i18n, check auth)
-        await initializeApp();
-      } catch (error) {
-        console.error('Error during app initialization:', error);
-      } finally {
-        // Hide the splash screen once initialization is complete
-        await SplashScreen.hideAsync();
-      }
-    }
-
-    prepare();
-  }, []);
-
+export default function AuthLayout() {
   return (
     <SupabaseAuthProvider>
       <AppAppearanceProvider>
@@ -40,8 +18,7 @@ export default function RootLayout() {
                 headerShown: false,
               }}
             >
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="SignUp" options={{ headerShown: false }} />
             </Stack>
           </View>
         </SafeAreaView>
