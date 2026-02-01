@@ -3,6 +3,11 @@ import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { Appearance, Platform } from 'react-native';
 
 import {
+  DEFAULT_LANGUAGE,
+  STORAGE_LOCALE_STORE_KEY,
+  STORAGE_THEME_STORE_KEY,
+} from '@/constants';
+import {
   initializeI18n,
   mapDeviceLocaleToLanguageKey,
 } from '@/lib/i18n/config';
@@ -10,13 +15,7 @@ import colors, { ThemeColorType } from '@/theme/colors';
 import { ensureFonts, fontRegistry, FontRegistryType } from '@/theme/fonts';
 import { layoutProfiles } from '@/theme/layout';
 import { spacing, SpacingType } from '@/theme/spacing';
-import {
-  DEFAULT_LANGUAGE,
-  LanguageKey,
-  STORAGE_LOCALE_STORE_KEY,
-  STORAGE_THEME_STORE_KEY,
-  ThemeMode,
-} from '@/types';
+import { LanguageKey, ThemeMode } from '@/types';
 
 type AppAppearance = {
   platform: typeof Platform.OS;

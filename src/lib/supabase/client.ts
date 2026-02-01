@@ -1,11 +1,14 @@
+import { USE_MOCK_DATA } from '@/constants/general';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
+import createMockSupabaseClient from './mockClient';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+// Skip credential validation when using mock data
+if (!USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
   throw new Error(
     'Missing Supabase credentials. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file',
   );
@@ -58,13 +61,24 @@ const customStorage = {
   },
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: customStorage as any,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+// Create either a real or mock Supabase client based on the USE_MOCK_DATA flag
+export const supabase: SupabaseClient = USE_MOCK_DATA
+  ? (createMockSupabaseClient() as any)
+  : createClient(supabaseUrl!, supabaseAnonKey!, {
+      auth: {
+        storage: customStorage as any,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+if (!USE_MOCK_DATA) {
+  console.log('Using real Supabase client');
+} else {
+  console.log(
+    'Using mock Supabase client - set USE_MOCK_DATA to false in constants/general.ts to use real API',
+  );
+}
 
 export default supabase;

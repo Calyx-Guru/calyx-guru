@@ -47,10 +47,15 @@ export function mapDeviceLocaleToLanguageKey(): LanguageKey {
   return localeMap[deviceLocale] || 'en';
 }
 
+let curentLanguage: LanguageKey | null = null;
+
 /**
  * Initialize i18n with the provided language
  */
 export async function initializeI18n(language: LanguageKey): Promise<void> {
+  if (!language || curentLanguage === language) return;
+  curentLanguage = language;
+
   if (i18n.isInitialized) {
     await i18n.changeLanguage(language);
     return;

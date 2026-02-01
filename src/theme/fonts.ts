@@ -40,11 +40,12 @@ const loaded = new Set<string>();
 export async function loadFont(name: string, source: number) {
   if (loaded.has(name)) return;
 
-  await loadAsync({ [name]: source });
   loaded.add(name);
+  await loadAsync({ [name]: source });
 }
 
 export async function ensureFonts(language: LanguageKey) {
+  if (!language) return;
   const registry = fontRegistry[language];
   for (const [key, name] of Object.entries(registry)) {
     const source = fontMap[name];

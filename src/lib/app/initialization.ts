@@ -1,10 +1,11 @@
+import { DEFAULT_LANGUAGE } from '@/constants';
 import {
   initializeI18n,
   mapDeviceLocaleToLanguageKey,
 } from '@/lib/i18n/config';
 import supabase from '@/lib/supabase/client';
 import { ensureFonts } from '@/theme/fonts';
-import { DEFAULT_LANGUAGE, LanguageKey } from '@/types';
+import { LanguageKey } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_LOCALE_STORE_KEY = 'appearance_locale';
@@ -38,7 +39,8 @@ async function initializeLocale(): Promise<void> {
     // Load fonts and initialize i18n in parallel
     await Promise.all([
       ensureFonts(DEFAULT_LANGUAGE),
-      locale && ensureFonts(locale),
+      initializeI18n(DEFAULT_LANGUAGE),
+      ensureFonts(locale),
       initializeI18n(locale),
     ]);
   } catch (error) {

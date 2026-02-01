@@ -4,6 +4,7 @@ import { initializeApp } from '@/lib/app/initialization';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -28,12 +29,21 @@ export default function RootLayout() {
   return (
     <SupabaseAuthProvider>
       <AppAppearanceProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
+        <View style={styles.container}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          />
+        </View>
       </AppAppearanceProvider>
     </SupabaseAuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+});
