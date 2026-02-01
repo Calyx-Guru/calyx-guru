@@ -5,18 +5,18 @@ import { FontSizeType } from '@/theme/fonts';
 import { PropsWithChildren, useContext } from 'react';
 import { Text } from 'react-native';
 
-type BodyTextProps = {
+type AccentTextProps = {
   color?: ColorType;
   size?: FontSizeType;
   translate?: boolean;
 };
 
-export function BodyText({
+export function AccentText({
   children,
   color = 'primary',
   size = 'md',
   translate = true,
-}: PropsWithChildren<BodyTextProps>) {
+}: PropsWithChildren<AccentTextProps>) {
   const {
     colors,
     fallbackLocale,
@@ -32,7 +32,7 @@ export function BodyText({
   return (
     <Text
       style={{
-        fontFamily: fontRegistryToUse.body,
+        fontFamily: fontRegistryToUse.accent,
         fontSize: fontSize[size],
         color: colors[color],
       }}

@@ -1,10 +1,14 @@
-import { AppAppearanceProvider } from '@/contexts/AppAppearanceContext';
+import HeaderComponent from '@/components/home/HeaderComponent';
+import {
+  AppAppearanceProvider
+} from '@/contexts/AppAppearanceContext';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 import { initializeApp } from '@/lib/app/initialization';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -29,13 +33,19 @@ export default function RootLayout() {
   return (
     <SupabaseAuthProvider>
       <AppAppearanceProvider>
-        <View style={styles.container}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          />
-        </View>
+        <SafeAreaView style={styles.container}>
+          {/* Header Component - style it so it will float on top */}
+          <HeaderComponent style={styles.headerComponent} />
+          <View style={styles.container}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="index" />
+            </Stack>
+          </View>
+        </SafeAreaView>
       </AppAppearanceProvider>
     </SupabaseAuthProvider>
   );
@@ -44,6 +54,12 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  headerComponent: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
   },
 });

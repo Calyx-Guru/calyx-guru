@@ -12,7 +12,13 @@ import {
   mapDeviceLocaleToLanguageKey,
 } from '@/lib/i18n/config';
 import colors, { ThemeColorType } from '@/theme/colors';
-import { ensureFonts, fontRegistry, FontRegistryType } from '@/theme/fonts';
+import {
+  ensureFonts,
+  fontRegistry,
+  FontRegistryType,
+  fontSizes,
+  FontSizeType,
+} from '@/theme/fonts';
 import { layoutProfiles } from '@/theme/layout';
 import { spacing, SpacingType } from '@/theme/spacing';
 import { LanguageKey, ThemeMode } from '@/types';
@@ -27,6 +33,7 @@ type AppAppearance = {
   colors: ThemeColorType;
   fontRegistry: FontRegistryType;
   fallbackFontRegistry: FontRegistryType;
+  fontSize: Record<FontSizeType, number>;
   spacing: SpacingType;
   lineHeightScale: number;
   fontsLoaded: boolean;
@@ -44,6 +51,7 @@ export const AppAppearanceContext = createContext<AppAppearance>({
   colors: colors['dark'],
   fontRegistry: fontRegistry[DEFAULT_LANGUAGE],
   fallbackFontRegistry: fontRegistry[DEFAULT_LANGUAGE],
+  fontSize: fontSizes[DEFAULT_LANGUAGE],
   spacing,
   lineHeightScale: 1,
   fontsLoaded: false,
@@ -109,7 +117,7 @@ export function AppAppearanceProvider({
       fallbackFontRegistry: fontRegistry[DEFAULT_LANGUAGE],
 
       colors: colors[resolvedTheme],
-      // fonts,
+      fontSize: fontSizes[langKey],
       spacing: resolvedSpacing,
       lineHeightScale: layout.lineHeightScale,
       fontsLoaded,

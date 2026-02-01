@@ -20,6 +20,11 @@ if (!USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
  */
 const customStorage = {
   getItem: async (key: string) => {
+    // Use browser localStorage if available (for web builds)
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+
     try {
       // Use SecureStore for auth tokens
       if (key.includes('token') || key.includes('supabase')) {
@@ -34,6 +39,11 @@ const customStorage = {
     }
   },
   setItem: async (key: string, value: string) => {
+    // Use browser localStorage if available (for web builds)
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.setItem(key, value);
+    }
+
     try {
       // Use SecureStore for auth tokens
       if (key.includes('token') || key.includes('supabase')) {
@@ -47,6 +57,11 @@ const customStorage = {
     }
   },
   removeItem: async (key: string) => {
+    // Use browser localStorage if available (for web builds)
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.removeItem(key);
+    }
+
     try {
       // Try removing from SecureStore first (for tokens)
       if (key.includes('token') || key.includes('supabase')) {
