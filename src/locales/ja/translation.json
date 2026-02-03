@@ -10,5 +10,52 @@
     "edit": "編集",
     "settings": "設定",
     "language": "言語"
+  },
+  "auth": {
+    "welcome": "おかえりなさい",
+    "signInDescription": "アカウントにサインインして続行",
+    "signIn": "サインイン",
+    "signUp": "サインアップ",
+    "noAccount": "アカウントをお持ちですか？",
+    "orContinueWith": "または以下でサインイン",
+    "signInGoogle": "Googleでサインイン",
+    "signInApple": "Appleでサインイン",
+    "signInFacebook": "Facebookでサインイン",
+    "signInTwitter": "X（Twitter）でサインイン",
+    "signInDiscord": "Discordでサインイン",
+    "signInKakao": "Kakaoでサインイン",
+    "signInLinkedIn": "LinkedInでサインイン",
+    "signInTwitch": "Twitchでサインイン"
+  },
+  "forms": {
+    "labels": {
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "confirmPassword": "パスワード確認",
+      "fullName": "名前",
+      "dateOfBirth": "生年月日",
+      "gender": "性別",
+      "birthPlace": "出生地"
+    },
+    "placeholders": {
+      "email": "you@example.com",
+      "password": "パスワードを入力してください",
+      "confirmPassword": "パスワードを確認してください",
+      "fullName": "山田太郎",
+      "dateOfBirth": "1990-01-15",
+      "gender": "男性、女性、またはその他",
+      "birthPlace": "都市、国"
+    },
+    "errors": {
+      "emailRequired": "メールアドレスが必要です",
+      "emailInvalid": "有効なメールアドレスを入力してください",
+      "emailExists": "このメールアドレスは既に登録されています",
+      "passwordRequired": "パスワードが必要です",
+      "passwordTooShort": "パスワードは8文字以上である必要があります",
+      "confirmPasswordRequired": "パスワードを確認してください",
+      "passwordMismatch": "パスワードが一致しません",
+      "dateFormatInvalid": "YYYY-MM-DD形式を使用してください",
+      "signUpFailed": "サインアップに失敗しました。もう一度お試しください。"
+    }
   }
 }

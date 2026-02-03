@@ -9,4 +9,6 @@ export type ColorType =
   | 'warning'
   | 'danger'
   | 'light'
-  | 'dark';
+  | 'dark'
+  | 'white'
+  | 'grey';

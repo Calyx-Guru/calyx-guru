@@ -10,5 +10,52 @@
     "edit": "编辑",
     "settings": "设置",
     "language": "语言"
+  },
+  "auth": {
+    "welcome": "欢迎回来",
+    "signInDescription": "登录到您的账户以继续",
+    "signIn": "登录",
+    "signUp": "注册",
+    "noAccount": "没有账户？",
+    "orContinueWith": "或使用以下方式继续",
+    "signInGoogle": "使用 Google 登录",
+    "signInApple": "使用 Apple 登录",
+    "signInFacebook": "使用 Facebook 登录",
+    "signInTwitter": "使用 X (Twitter) 登录",
+    "signInDiscord": "使用 Discord 登录",
+    "signInKakao": "使用 Kakao 登录",
+    "signInLinkedIn": "使用 LinkedIn 登录",
+    "signInTwitch": "使用 Twitch 登录"
+  },
+  "forms": {
+    "labels": {
+      "email": "电子邮箱",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "fullName": "全名",
+      "dateOfBirth": "出生日期",
+      "gender": "性别",
+      "birthPlace": "出生地"
+    },
+    "placeholders": {
+      "email": "you@example.com",
+      "password": "输入密码",
+      "confirmPassword": "确认您的密码",
+      "fullName": "张三",
+      "dateOfBirth": "1990-01-15",
+      "gender": "男性、女性或其他",
+      "birthPlace": "城市、国家"
+    },
+    "errors": {
+      "emailRequired": "需要电子邮件",
+      "emailInvalid": "请输入有效的电子邮件地址",
+      "emailExists": "此电子邮件已注册",
+      "passwordRequired": "需要密码",
+      "passwordTooShort": "密码必须至少8个字符",
+      "confirmPasswordRequired": "请确认您的密码",
+      "passwordMismatch": "密码不匹配",
+      "dateFormatInvalid": "请使用YYYY-MM-DD格式",
+      "signUpFailed": "注册失败。请重试。"
+    }
   }
 }

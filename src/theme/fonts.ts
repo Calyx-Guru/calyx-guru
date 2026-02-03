@@ -5,6 +5,7 @@ import { loadAsync } from 'expo-font';
 export type FontRegistryType = {
   body: string;
   accent: string;
+  heading: string;
 };
 
 export const fontSizes: Record<LanguageKey, Record<SizeType, number>> = {
@@ -68,26 +69,32 @@ export const fontRegistry: Record<LanguageKey, FontRegistryType> = {
   en: {
     body: 'Roboto-Regular',
     accent: 'CormorantSC-Bold',
+    heading: 'Roboto-Bold',
   },
   'zh-CN': {
     body: 'NotoSansSC-Regular',
     accent: 'ZCOOLXiaoWei-Regular',
+    heading: 'NotoSansSC-Bold',
   },
   'zh-TW': {
     body: 'NotoSansTC-Regular',
     accent: 'UoqMunThenKhung-Regular',
+    heading: 'NotoSansTC-Bold',
   },
   vi: {
     body: 'Roboto-Regular',
     accent: 'CormorantSC-Bold',
+    heading: 'Roboto-Bold',
   },
   kr: {
     body: 'NotoSansKR-Regular',
     accent: 'NotoSansKR-Bold',
+    heading: 'NotoSansKR-Bold',
   },
   ja: {
     body: 'NotoSansJP-Regular',
     accent: 'NotoSansJP-Bold',
+    heading: 'NotoSansJP-Bold',
   },
 };
 

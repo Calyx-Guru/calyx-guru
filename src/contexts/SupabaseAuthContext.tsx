@@ -2,6 +2,16 @@ import supabase from '@/lib/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 
+export type OAuthProvider =
+  | 'apple'
+  | 'discord'
+  | 'facebook'
+  | 'google'
+  | 'kakao'
+  | 'linkedin_oidc'
+  | 'twitter'
+  | 'twitch';
+
 type SupabaseAuth = {
   user: User | null;
   session: Session | null;
@@ -10,7 +20,7 @@ type SupabaseAuth = {
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  signInWithOAuth: (provider: 'github' | 'google') => Promise<void>;
+  signInWithOAuth: (provider: OAuthProvider) => Promise<void>;
 };
 
 export const SupabaseAuthContext = createContext<SupabaseAuth>({
@@ -101,10 +111,10 @@ export function SupabaseAuthProvider({
     }
   }, []);
 
-  const signInWithOAuth = useCallback(async (provider: 'github' | 'google') => {
+  const signInWithOAuth = useCallback(async (provider: OAuthProvider) => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: provider as any,
       });
       if (error) throw error;
     } catch (error) {

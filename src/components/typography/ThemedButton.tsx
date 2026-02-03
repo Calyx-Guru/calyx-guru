@@ -11,6 +11,7 @@ type ThemedButtonProps = {
   labelColor?: ColorType;
   labelSize?: SizeType;
   translate?: boolean;
+  style?: object;
   onPress?: () => void;
 };
 
@@ -23,6 +24,7 @@ export function ThemedButton({
   labelColor = 'light',
   labelSize = 'md',
   translate = true,
+  style,
 }: PropsWithChildren<ThemedButtonProps>) {
   const {
     colors,
@@ -47,6 +49,7 @@ export function ThemedButton({
           minWidth: spacing.buttonWidth[size],
           minHeight: spacing.buttonHeight[size],
         },
+        style,
       ]}
       onPress={onPress}
     >

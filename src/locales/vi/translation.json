@@ -10,5 +10,52 @@
     "edit": "Chỉnh sửa",
     "settings": "Cài đặt",
     "language": "Ngôn ngữ"
+  },
+  "auth": {
+    "welcome": "Chào mừng trở lại",
+    "signInDescription": "Đăng nhập vào tài khoản của bạn để tiếp tục",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "noAccount": "Bạn chưa có tài khoản?",
+    "orContinueWith": "Hoặc tiếp tục với",
+    "signInGoogle": "Đăng nhập bằng Google",
+    "signInApple": "Đăng nhập bằng Apple",
+    "signInFacebook": "Đăng nhập bằng Facebook",
+    "signInTwitter": "Đăng nhập bằng X (Twitter)",
+    "signInDiscord": "Đăng nhập bằng Discord",
+    "signInKakao": "Đăng nhập bằng Kakao",
+    "signInLinkedIn": "Đăng nhập bằng LinkedIn",
+    "signInTwitch": "Đăng nhập bằng Twitch"
+  },
+  "forms": {
+    "labels": {
+      "email": "Email",
+      "password": "Mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "fullName": "Họ tên",
+      "dateOfBirth": "Ngày sinh",
+      "gender": "Giới tính",
+      "birthPlace": "Nơi sinh"
+    },
+    "placeholders": {
+      "email": "you@example.com",
+      "password": "Nhập mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu của bạn",
+      "fullName": "Nguyễn Văn A",
+      "dateOfBirth": "1990-01-15",
+      "gender": "nam, nữ hoặc khác",
+      "birthPlace": "Thành phố, Đất nước"
+    },
+    "errors": {
+      "emailRequired": "Cần nhập email",
+      "emailInvalid": "Vui lòng nhập một địa chỉ email hợp lệ",
+      "emailExists": "Email này đã được đăng ký",
+      "passwordRequired": "Cần nhập mật khẩu",
+      "passwordTooShort": "Mật khẩu phải dài ít nhất 8 ký tự",
+      "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu của bạn",
+      "passwordMismatch": "Mật khẩu không khớp",
+      "dateFormatInvalid": "Vui lòng sử dụng định dạng YYYY-MM-DD",
+      "signUpFailed": "Đăng ký thất bại. Vui lòng thử lại."
+    }
   }
 }

@@ -10,5 +10,52 @@
     "edit": "Edit",
     "settings": "Settings",
     "language": "Language"
+  },
+  "auth": {
+    "welcome": "Welcome Back",
+    "signInDescription": "Sign in to your account to continue",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "noAccount": "Don't have an account?",
+    "orContinueWith": "Or continue with",
+    "signInGoogle": "Sign in with Google",
+    "signInApple": "Sign in with Apple",
+    "signInFacebook": "Sign in with Facebook",
+    "signInTwitter": "Sign in with X (Twitter)",
+    "signInDiscord": "Sign in with Discord",
+    "signInKakao": "Sign in with Kakao",
+    "signInLinkedIn": "Sign in with LinkedIn",
+    "signInTwitch": "Sign in with Twitch"
+  },
+  "forms": {
+    "labels": {
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "fullName": "Full Name",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "birthPlace": "Birth Place"
+    },
+    "placeholders": {
+      "email": "you@example.com",
+      "password": "Enter a password",
+      "confirmPassword": "Confirm your password",
+      "fullName": "John Doe",
+      "dateOfBirth": "1990-01-15",
+      "gender": "male, female, or other",
+      "birthPlace": "City, Country"
+    },
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "emailExists": "This email is already registered",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordMismatch": "Passwords do not match",
+      "dateFormatInvalid": "Please use YYYY-MM-DD format",
+      "signUpFailed": "Sign up failed. Please try again."
+    }
   }
 }

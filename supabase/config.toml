@@ -1,13 +1,5 @@
 # Supabase Configuration
 
-[project]
-account_id = ""
-db_url = "postgresql://postgres:postgres@localhost:54322/postgres"
-default_schema = "public"
-jwt_secret = "your-super-secret-jwt-token-change-me-in-production"
-jwt_exp = 3600
-max_rows = 1000
-
 [api]
 enabled = true
 port = 54321
@@ -17,15 +9,10 @@ max_rows = 1000
 
 [db]
 port = 54322
-major_version = 15
+major_version = 17
 
 [realtime]
-enabled = true
-max_bytes_per_second = 1000000
-max_channels_per_client = 128
-max_joins_per_second = 500
-max_presence_channels = 1000
-max_presence_users_per_channel = 100
+enabled = false
 
 [studio]
 enabled = true
@@ -37,17 +24,10 @@ file_size_limit = 52428800
 
 [auth]
 enable_signup = true
-enable_anonymous_signups = false
 jwt_expiry = 3600
 additional_jwt_claims = {}
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
-enable_session_refresh_token_rotation = false
-session_refresh_token_reuse_interval = 0
-max_enrolled_factors = 10
-mailer_autoconfirm = false
-sms_autoconfirm = false
-other.postgres.pool_size = 10
 
 [functions."hello-world"]
 verify_jwt = true

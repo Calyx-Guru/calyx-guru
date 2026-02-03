@@ -10,5 +10,52 @@
     "edit": "편집",
     "settings": "설정",
     "language": "언어"
+  },
+  "auth": {
+    "welcome": "다시 돌아오셨습니다",
+    "signInDescription": "계정에 로그인하여 계속",
+    "signIn": "로그인",
+    "signUp": "회원가입",
+    "noAccount": "계정이 없으신가요?",
+    "orContinueWith": "또는 다음으로 계속",
+    "signInGoogle": "Google로 로그인",
+    "signInApple": "Apple로 로그인",
+    "signInFacebook": "Facebook으로 로그인",
+    "signInTwitter": "X(Twitter)로 로그인",
+    "signInDiscord": "Discord로 로그인",
+    "signInKakao": "Kakao로 로그인",
+    "signInLinkedIn": "LinkedIn으로 로그인",
+    "signInTwitch": "Twitch로 로그인"
+  },
+  "forms": {
+    "labels": {
+      "email": "이메일",
+      "password": "비밀번호",
+      "confirmPassword": "비밀번호 확인",
+      "fullName": "이름",
+      "dateOfBirth": "생년월일",
+      "gender": "성별",
+      "birthPlace": "출생지"
+    },
+    "placeholders": {
+      "email": "you@example.com",
+      "password": "비밀번호를 입력하세요",
+      "confirmPassword": "비밀번호를 확인하세요",
+      "fullName": "김철수",
+      "dateOfBirth": "1990-01-15",
+      "gender": "남성, 여성 또는 기타",
+      "birthPlace": "도시, 국가"
+    },
+    "errors": {
+      "emailRequired": "이메일이 필요합니다",
+      "emailInvalid": "유효한 이메일 주소를 입력하세요",
+      "emailExists": "이 이메일은 이미 등록되어 있습니다",
+      "passwordRequired": "비밀번호가 필요합니다",
+      "passwordTooShort": "비밀번호는 최소 8자 이상이어야 합니다",
+      "confirmPasswordRequired": "비밀번호를 확인하세요",
+      "passwordMismatch": "비밀번호가 일치하지 않습니다",
+      "dateFormatInvalid": "YYYY-MM-DD 형식을 사용하세요",
+      "signUpFailed": "회원가입에 실패했습니다. 다시 시도하세요."
+    }
   }
 }

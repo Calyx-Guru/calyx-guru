@@ -8,8 +8,12 @@ import { View } from 'react-native';
 export default function Index() {
   const { colors } = useContext(AppAppearanceContext);
 
-  const onButtonPress = () => {
+  const onSignUpButtonPress = () => {
     router.push('/(auth)/SignUp');
+  };
+
+  const onSignInButtonPress = () => {
+    router.push('/(auth)/SignIn');
   };
 
   return (
@@ -23,7 +27,8 @@ export default function Index() {
       }}
     >
       <BodyText>common.welcome</BodyText>
-      <ThemedButton onPress={onButtonPress}>common.settings</ThemedButton>
+      <ThemedButton onPress={onSignUpButtonPress}>common.settings</ThemedButton>
+      <ThemedButton onPress={onSignInButtonPress}>common.settings</ThemedButton>
     </View>
   );
 }

@@ -8,6 +8,7 @@ type BodyTextProps = {
   color?: ColorType;
   size?: SizeType;
   translate?: boolean;
+  style?: object;
 };
 
 export function BodyText({
@@ -15,6 +16,7 @@ export function BodyText({
   color = 'primary',
   size = 'md',
   translate = true,
+  style,
 }: PropsWithChildren<BodyTextProps>) {
   const {
     colors,
@@ -30,11 +32,14 @@ export function BodyText({
   // If font is not loaded, use the fallback locale to translate
   return (
     <Text
-      style={{
-        fontFamily: fontRegistryToUse.body,
-        fontSize: fontSize[size],
-        color: colors[color],
-      }}
+      style={[
+        {
+          fontFamily: fontRegistryToUse.body,
+          fontSize: fontSize[size],
+          color: colors[color],
+        },
+        style,
+      ]}
     >
       {translate
         ? i18n.t(children as string, {
