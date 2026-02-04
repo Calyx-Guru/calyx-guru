@@ -1,41 +1,90 @@
+import { BodyText } from '@/components/typography/BodyText';
+import { TextInput } from '@/components/typography/TextInput';
+import { ThemedButton } from '@/components/typography/ThemedButton';
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
-import { OAuthProvider } from '@/contexts/SupabaseAuthContext';
-import { useContext } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
-import { BodyText } from '../typography/BodyText';
-import { TextInput } from '../typography/TextInput';
-import { ThemedButton } from '../typography/ThemedButton';
+import {
+  OAuthProvider,
+  SupabaseAuthContext,
+} from '@/contexts/SupabaseAuthContext';
+import { router } from 'expo-router';
+import { useContext, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { OAuthButton } from './OAuthButton';
 
-type SignInFormProps = {
-  email: string;
-  password: string;
-  isSigningIn: boolean;
-  loadingProvider: OAuthProvider | null;
-  errors: {
+export function SignInForm() {
+  const { signIn, signInWithOAuth } = useContext(SupabaseAuthContext);
+  const { colors, spacing } = useContext(AppAppearanceContext);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(
+    null,
+  );
+  const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
-  };
-  onEmailChange: (email: string) => void;
-  onPasswordChange: (password: string) => void;
-  onEmailSignIn: () => void;
-  onOAuthSignIn: (provider: OAuthProvider) => void;
-  onSignUpPress: () => void;
-};
+  }>({});
 
-export function SignInForm({
-  email,
-  password,
-  isSigningIn,
-  loadingProvider,
-  errors,
-  onEmailChange,
-  onPasswordChange,
-  onEmailSignIn,
-  onOAuthSignIn,
-  onSignUpPress,
-}: SignInFormProps) {
-  const { colors, spacing } = useContext(AppAppearanceContext);
+  const validateForm = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    if (!email.trim()) {
+      newErrors.email = 'forms.errors.emailRequired';
+    } else if (!email.includes('@')) {
+      newErrors.email = 'forms.errors.emailInvalid';
+    }
+
+    if (!password) {
+      newErrors.password = 'forms.errors.passwordRequired';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleEmailSignIn = async () => {
+    if (!validateForm()) return;
+
+    setIsSigningIn(true);
+    try {
+      await signIn(email, password);
+      router.replace('/');
+    } catch (error: any) {
+      Alert.alert(
+        'Sign In Failed',
+        error.message || 'An error occurred during sign in. Please try again.',
+      );
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleOAuthSignIn = async (provider: OAuthProvider) => {
+    setLoadingProvider(provider);
+    try {
+      await signInWithOAuth(provider);
+      // Note: OAuth redirect will be handled by Supabase
+    } catch (error: any) {
+      Alert.alert(
+        `${provider} Sign In Failed`,
+        error.message ||
+          `Failed to sign in with ${provider}. Please try again.`,
+      );
+    } finally {
+      setLoadingProvider(null);
+    }
+  };
+
+  const handleSignUpPress = () => {
+    router.push('/(auth)/SignUp');
+  };
 
   return (
     <ScrollView
@@ -68,7 +117,7 @@ export function SignInForm({
           label="forms.labels.email"
           placeholder="forms.placeholders.email"
           value={email}
-          onChangeText={onEmailChange}
+          onChangeText={setEmail}
           error={errors.email}
           editable={!isSigningIn && !loadingProvider}
           keyboardType="email-address"
@@ -79,7 +128,7 @@ export function SignInForm({
           label="forms.labels.password"
           placeholder="forms.placeholders.password"
           value={password}
-          onChangeText={onPasswordChange}
+          onChangeText={setPassword}
           error={errors.password}
           editable={!isSigningIn && !loadingProvider}
           secureTextEntry
@@ -87,7 +136,7 @@ export function SignInForm({
         />
 
         <ThemedButton
-          onPress={onEmailSignIn}
+          onPress={handleEmailSignIn}
           background="primary"
           labelColor="light"
           size="md"
@@ -134,7 +183,7 @@ export function SignInForm({
       >
         <OAuthButton
           provider="google"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'google'}
           disabled={
             isSigningIn ||
@@ -143,7 +192,7 @@ export function SignInForm({
         />
         <OAuthButton
           provider="apple"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'apple'}
           disabled={
             isSigningIn ||
@@ -152,7 +201,7 @@ export function SignInForm({
         />
         <OAuthButton
           provider="facebook"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'facebook'}
           disabled={
             isSigningIn ||
@@ -161,7 +210,7 @@ export function SignInForm({
         />
         <OAuthButton
           provider="twitter"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'twitter'}
           disabled={
             isSigningIn ||
@@ -170,7 +219,7 @@ export function SignInForm({
         />
         <OAuthButton
           provider="discord"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'discord'}
           disabled={
             isSigningIn ||
@@ -179,7 +228,7 @@ export function SignInForm({
         />
         <OAuthButton
           provider="kakao"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'kakao'}
           disabled={
             isSigningIn ||
@@ -188,7 +237,7 @@ export function SignInForm({
         />
         <OAuthButton
           provider="linkedin_oidc"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'linkedin_oidc'}
           disabled={
             isSigningIn ||
@@ -197,7 +246,7 @@ export function SignInForm({
         />
         <OAuthButton
           provider="twitch"
-          onPress={onOAuthSignIn}
+          onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'twitch'}
           disabled={
             isSigningIn ||
@@ -220,7 +269,7 @@ export function SignInForm({
           auth.noAccount
         </BodyText>
         <ThemedButton
-          onPress={onSignUpPress}
+          onPress={handleSignUpPress}
           background="dark"
           border="primary"
           labelColor="primary"

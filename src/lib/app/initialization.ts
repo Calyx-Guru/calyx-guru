@@ -3,7 +3,6 @@ import {
   initializeI18n,
   mapDeviceLocaleToLanguageKey,
 } from '@/lib/i18n/config';
-import supabase from '@/lib/supabase/client';
 import { ensureFonts } from '@/theme/fonts';
 import { LanguageKey } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +16,7 @@ const STORAGE_LOCALE_STORE_KEY = 'appearance_locale';
 export async function initializeApp(): Promise<void> {
   try {
     // Run all initialization tasks in parallel for better performance
-    await Promise.all([initializeLocale(), initializeAuth()]);
+    await Promise.all([initializeLocale()]);
   } catch (error) {
     console.error('App initialization error:', error);
     // Continue even if initialization fails - app will still work with defaults
@@ -50,23 +49,5 @@ async function initializeLocale(): Promise<void> {
       ensureFonts(DEFAULT_LANGUAGE),
       initializeI18n(DEFAULT_LANGUAGE),
     ]);
-  }
-}
-
-/**
- * Initialize authentication
- * This checks if user is already logged in
- */
-async function initializeAuth(): Promise<void> {
-  try {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      console.log('User is already logged in:', data.session.user.email);
-    } else {
-      console.log('No user logged in');
-    }
-  } catch (error) {
-    console.error('Auth initialization error:', error);
-    // Continue without throwing - auth context will handle state
   }
 }

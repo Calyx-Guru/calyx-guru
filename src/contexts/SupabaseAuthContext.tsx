@@ -1,4 +1,8 @@
 import supabase from '@/lib/supabase/client';
+import {
+  fetchUserProfile
+} from '@/lib/supabase/userProfileService';
+import { useUserProfileStore } from '@/store/userProfileStore';
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 
@@ -43,7 +47,7 @@ export function SupabaseAuthProvider({
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get initial session on mount
+  // Get initial session on mount and subscribe to changes
   useEffect(() => {
     const getSession = async () => {
       try {
@@ -52,6 +56,18 @@ export function SupabaseAuthProvider({
         } = await supabase.auth.getSession();
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
+
+        // Load user profile if logged in
+        if (initialSession?.user) {
+          try {
+            const userProfile = await fetchUserProfile(initialSession.user.id);
+            if (userProfile) {
+              useUserProfileStore.getState().setProfile(userProfile);
+            }
+          } catch (error) {
+            console.error('Error loading user profile:', error);
+          }
+        }
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
@@ -68,6 +84,20 @@ export function SupabaseAuthProvider({
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setIsLoading(false);
+
+      // Load profile on sign in, clear on sign out
+      if (event === 'SIGNED_IN' && newSession?.user) {
+        try {
+          const userProfile = await fetchUserProfile(newSession.user.id);
+          if (userProfile) {
+            useUserProfileStore.getState().setProfile(userProfile);
+          }
+        } catch (error) {
+          console.error('Error loading user profile:', error);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        useUserProfileStore.getState().clearProfile();
+      }
     });
 
     return () => {
