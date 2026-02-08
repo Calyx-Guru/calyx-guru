@@ -59,13 +59,24 @@ create policy "Public profiles are viewable by only owner."
   on public.profiles for select
   using (auth.uid() = id);
 
-create policy "Users can insert their own profile."
-  on public.profiles for insert
-  with check (auth.uid() = id);
-
 create policy "Users can update own profile."
   on public.profiles for update
   using (auth.uid() = id);
 
 create index idx_profiles_username on public.profiles (username);
 create index idx_profiles_email on public.profiles (email);
+
+-- Create trigger function to automatically create a profile when a user is created
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, email, created_at, updated_at)
+  values (new.id, new.email, now(), now());
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- Create trigger that fires when a new user is inserted
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
