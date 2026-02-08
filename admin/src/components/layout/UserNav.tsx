@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { LogOut, Settings, User } from 'lucide-react';
@@ -42,7 +42,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-10 rounded-full"
+          className="relative h-10 w-10 rounded-full p-0"
           aria-label="User menu"
         >
           <div className="flex h-full w-full items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -53,7 +53,7 @@ export function UserNav() {
                 className="h-full w-full rounded-full object-cover"
               />
             ) : (
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium w-100">
                 {user?.email ? getInitials(user.email) : 'U'}
               </span>
             )}

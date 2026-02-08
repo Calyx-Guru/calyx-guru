@@ -1,4 +1,5 @@
 import { Dashboard } from '@/pages/Dashboard';
+import { FortunePoemsPage } from '@/pages/FortunePoemsPage';
 import { Settings } from '@/pages/Settings';
 import { SignIn } from '@/pages/SignIn';
 import { Users } from '@/pages/Users';
@@ -31,6 +32,7 @@ export function App() {
           <>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/fortune-poems" element={<FortunePoemsPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Settings />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

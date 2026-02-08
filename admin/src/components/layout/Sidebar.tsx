@@ -1,12 +1,13 @@
 import { cn } from '@/lib/utils';
 import {
-    BarChart3,
-    BookOpen,
-    Calendar,
-    Home,
-    Settings,
-    Users,
-    type LucideIcon,
+  BarChart3,
+  BookOpen,
+  Calendar,
+  Home,
+  Settings,
+  Sparkles,
+  Users,
+  type LucideIcon,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
@@ -26,6 +27,11 @@ const navItems: NavItem[] = [
     title: 'Users',
     href: '/users',
     icon: Users,
+  },
+  {
+    title: 'Fortune Poems',
+    href: '/fortune-poems',
+    icon: Sparkles,
   },
   {
     title: 'Content',

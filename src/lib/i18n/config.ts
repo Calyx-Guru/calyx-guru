@@ -6,7 +6,7 @@ import { initReactI18next } from 'react-i18next';
 // Import translation files
 import enTranslations from '@/locales/en/translation.json';
 import jaTranslations from '@/locales/ja/translation.json';
-import krTranslations from '@/locales/kr/translation.json';
+import koTranslations from '@/locales/ko/translation.json';
 import viTranslations from '@/locales/vi/translation.json';
 import zhCNTranslations from '@/locales/zh-CN/translation.json';
 import zhTWTranslations from '@/locales/zh-TW/translation.json';
@@ -16,7 +16,7 @@ const resources = {
   'zh-CN': { translation: zhCNTranslations },
   'zh-TW': { translation: zhTWTranslations },
   vi: { translation: viTranslations },
-  kr: { translation: krTranslations },
+  ko: { translation: koTranslations },
   ja: { translation: jaTranslations },
 };
 
@@ -38,8 +38,8 @@ export function mapDeviceLocaleToLanguageKey(): LanguageKey {
     'zh-TW': 'zh-TW',
     vi: 'vi',
     'vi-VN': 'vi',
-    ko: 'kr',
-    'ko-KR': 'kr',
+    ko: 'ko',
+    'ko-KR': 'ko',
     ja: 'ja',
     'ja-JP': 'ja',
   };
