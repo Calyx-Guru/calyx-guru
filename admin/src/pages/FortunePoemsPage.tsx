@@ -16,17 +16,25 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SUPPORTED_LANGUAGES } from '@/constants';
+import { usePageState } from '@/hooks/usePageState';
 import supabase from '@/lib/supabase/client';
 import type { FortunePoemContentType, LanguageKey } from '@/types';
 import Handsontable from 'handsontable';
-import { registerAllModules } from 'handsontable/registry';
-import { AlertCircle, Loader2, Plus, Save, X } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowUpWideNarrow,
+  Loader2,
+  Plus,
+  Save,
+  X,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-registerAllModules();
+interface FortunePoemsPageState {
+  selectedLanguage: LanguageKey;
+}
 
 interface Manifest {
-  version: number;
   lastUpdated: string;
   languages: {
     [key in LanguageKey]?: number;
@@ -34,18 +42,26 @@ interface Manifest {
 }
 
 const DEFAULT_MANIFEST: Manifest = {
-  version: 1,
   lastUpdated: new Date().toISOString(),
   languages: {},
 };
 
 export function FortunePoemsPage() {
+  const [pageState, setPageState] = usePageState<FortunePoemsPageState>(
+    'fortunePoems',
+    { selectedLanguage: 'en' },
+  );
+
+  const updatePageState = (updates: Partial<FortunePoemsPageState>) => {
+    setPageState({ ...pageState, ...updates });
+  };
+
   const hotTableRef = useRef(null);
   const hotInstanceRef = useRef<any>(null);
   const isUpdatingFromTable = useRef(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageKey>('en');
+
   const [poems, setPoems] = useState<FortunePoemContentType[]>([]);
-  const [manifest, setManifest] = useState<Manifest>(DEFAULT_MANIFEST);
+  const [manifest, setManifest] = useState<Manifest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -60,8 +76,12 @@ export function FortunePoemsPage() {
 
   // Load poems when language changes
   useEffect(() => {
-    loadPoems(selectedLanguage);
-  }, [selectedLanguage]);
+    if (manifest) {
+      loadPoems(pageState.selectedLanguage);
+    } else {
+      setLoading(true);
+    }
+  }, [pageState.selectedLanguage, manifest]);
 
   const loadManifest = async () => {
     try {
@@ -90,6 +110,12 @@ export function FortunePoemsPage() {
 
   const loadPoems = async (language: LanguageKey) => {
     try {
+      if (!manifest) {
+        setLoading(false);
+        setError(null);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       const version = manifest.languages[language] || 1;
@@ -99,7 +125,11 @@ export function FortunePoemsPage() {
         .from('fortune_data')
         .download(fileName);
 
-      if (downloadError && downloadError.message !== 'Not found') {
+      if (
+        downloadError &&
+        downloadError.message !== 'Not found' &&
+        downloadError.message !== '{}'
+      ) {
         throw downloadError;
       }
 
@@ -122,23 +152,26 @@ export function FortunePoemsPage() {
     }
   };
 
-  const savePoems = async () => {
+  const versionUpPoems = async () => {
     try {
+      if (!manifest) return;
+
       setLoading(true);
 
       // Update manifest
       const updatedManifest = {
         ...manifest,
-        version: manifest.version,
         lastUpdated: new Date().toISOString(),
         languages: {
           ...manifest.languages,
-          [selectedLanguage]: (manifest.languages[selectedLanguage] || 0) + 1,
+          [pageState.selectedLanguage]:
+            (manifest.languages[pageState.selectedLanguage] || 0) + 1,
         },
       };
 
-      const version = updatedManifest.languages[selectedLanguage] || 1;
-      const fileName = `fortune_poems/${selectedLanguage}-${version}.json`;
+      const version =
+        updatedManifest.languages[pageState.selectedLanguage] || 1;
+      const fileName = `fortune_poems/${pageState.selectedLanguage}-${version}.json`;
 
       const { error: uploadError } = await supabase.storage
         .from('fortune_data')
@@ -170,11 +203,35 @@ export function FortunePoemsPage() {
     }
   };
 
+  const savePoems = async () => {
+    try {
+      if (!manifest) return;
+
+      setLoading(true);
+
+      const version = manifest.languages[pageState.selectedLanguage] || 1;
+      const fileName = `fortune_poems/${pageState.selectedLanguage}-${version}.json`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('fortune_data')
+        .upload(fileName, JSON.stringify(poems, null, 2), {
+          upsert: true,
+          contentType: 'application/json',
+        });
+
+      if (uploadError) throw uploadError;
+    } catch (err: any) {
+      setError(`Failed to save poems: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addRow = () => {
     const newPoem: FortunePoemContentType = {
       drawNo:
         poems.length > 0 ? Math.max(...poems.map((p) => p.drawNo)) + 1 : 1,
-      language: selectedLanguage,
+      language: pageState.selectedLanguage,
       fortuneTellingPoem: '',
       poetry: '',
       insights: '',
@@ -247,7 +304,7 @@ export function FortunePoemsPage() {
       insights: row[3] ?? '',
       divineWill: row[4] ?? '',
       allusion: row[5] ?? '',
-      language: selectedLanguage,
+      language: pageState.selectedLanguage,
     }));
     setPoems(updatedPoems);
     setTimeout(() => {
@@ -338,7 +395,7 @@ export function FortunePoemsPage() {
     return () => {
       // Don't destroy on every render, only when component unmounts
     };
-  }, [poems, selectedLanguage]);
+  }, [poems, pageState.selectedLanguage]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -364,15 +421,15 @@ export function FortunePoemsPage() {
           <CardContent>
             <div className="flex items-center gap-4">
               <Select
-                value={selectedLanguage}
-                onValueChange={(value) =>
-                  setSelectedLanguage(value as LanguageKey)
-                }
+                value={pageState.selectedLanguage}
+                onValueChange={(value) => {
+                  updatePageState({ selectedLanguage: value as LanguageKey });
+                }}
               >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Select language" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-180">
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <SelectItem key={lang} value={lang}>
                       {lang}
@@ -381,7 +438,7 @@ export function FortunePoemsPage() {
                 </SelectContent>
               </Select>
               <Button
-                onClick={() => loadPoems(selectedLanguage)}
+                onClick={() => loadPoems(pageState.selectedLanguage)}
                 disabled={loading}
               >
                 {loading ? (
@@ -414,13 +471,28 @@ export function FortunePoemsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>
-                  {selectedLanguage.toUpperCase()} - {poems.length} poems
+                  {pageState.selectedLanguage.toUpperCase()} - {poems.length}{' '}
+                  poems
                 </CardTitle>
                 <CardDescription>
-                  Version: {manifest.languages[selectedLanguage] || 1}
+                  Version:{' '}
+                  {manifest?.languages[pageState.selectedLanguage] || 1}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
+                <Button onClick={versionUpPoems} disabled={loading} size="sm">
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUpWideNarrow className="mr-2 h-4 w-4" />
+                      Version Up
+                    </>
+                  )}
+                </Button>
                 <Button
                   onClick={addRow}
                   disabled={loading}
@@ -468,7 +540,7 @@ export function FortunePoemsPage() {
             {!loading && poems.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">
-                  No poems yet for {selectedLanguage.toUpperCase()}
+                  No poems yet for {pageState.selectedLanguage.toUpperCase()}
                 </p>
                 <Button onClick={addRow} variant="outline">
                   <Plus className="mr-2 h-4 w-4" />
