@@ -1,5 +1,4 @@
 import { DashboardLayout } from '@/components/layout';
-import { AutoTextarea } from '@/components/ui/auto-textarea';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -26,9 +25,13 @@ import {
   Loader2,
   Plus,
   Save,
-  X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+
+const PAGE_STATE_PREFIX = 'fortunePoems';
+const STORAGE_BUCKET = 'fortune_data';
+const STORAGE_FOLDER = 'fortune_poems';
+const MANIFEST_FILE_NAME = 'manifest.json';
 
 interface FortunePoemsPageState {
   selectedLanguage: LanguageKey;
@@ -46,9 +49,13 @@ const DEFAULT_MANIFEST: Manifest = {
   languages: {},
 };
 
+function makeFilePath(language: LanguageKey, version: number) {
+  return `${STORAGE_FOLDER}/${language}-${version}.json`;
+}
+
 export function FortunePoemsPage() {
   const [pageState, setPageState] = usePageState<FortunePoemsPageState>(
-    'fortunePoems',
+    PAGE_STATE_PREFIX,
     { selectedLanguage: 'en' },
   );
 
@@ -64,10 +71,6 @@ export function FortunePoemsPage() {
   const [manifest, setManifest] = useState<Manifest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editingPoem, setEditingPoem] = useState<FortunePoemContentType | null>(
-    null,
-  );
 
   // Load manifest on component mount
   useEffect(() => {
@@ -87,8 +90,8 @@ export function FortunePoemsPage() {
     try {
       setLoading(true);
       const { data, error: downloadError } = await supabase.storage
-        .from('fortune_data')
-        .download('fortune_poems/manifest.json');
+        .from(STORAGE_BUCKET)
+        .download(`${STORAGE_FOLDER}/${MANIFEST_FILE_NAME}`);
 
       if (downloadError && downloadError.message !== 'Not found') {
         throw downloadError;
@@ -119,10 +122,10 @@ export function FortunePoemsPage() {
       setLoading(true);
       setError(null);
       const version = manifest.languages[language] || 1;
-      const fileName = `fortune_poems/${language}-${version}.json`;
+      const fileName = makeFilePath(language, version);
 
       const { data, error: downloadError } = await supabase.storage
-        .from('fortune_data')
+        .from(STORAGE_BUCKET)
         .download(fileName);
 
       if (
@@ -171,10 +174,10 @@ export function FortunePoemsPage() {
 
       const version =
         updatedManifest.languages[pageState.selectedLanguage] || 1;
-      const fileName = `fortune_poems/${pageState.selectedLanguage}-${version}.json`;
+      const fileName = makeFilePath(pageState.selectedLanguage, version);
 
       const { error: uploadError } = await supabase.storage
-        .from('fortune_data')
+        .from(STORAGE_BUCKET)
         .upload(fileName, JSON.stringify(poems, null, 2), {
           upsert: true,
           contentType: 'application/json',
@@ -185,9 +188,9 @@ export function FortunePoemsPage() {
       setManifest(updatedManifest);
 
       const { error: manifestError } = await supabase.storage
-        .from('fortune_data')
+        .from(STORAGE_BUCKET)
         .upload(
-          'fortune_poems/manifest.json',
+          `${STORAGE_FOLDER}/${MANIFEST_FILE_NAME}`,
           JSON.stringify(updatedManifest, null, 2),
           {
             upsert: true,
@@ -210,10 +213,10 @@ export function FortunePoemsPage() {
       setLoading(true);
 
       const version = manifest.languages[pageState.selectedLanguage] || 1;
-      const fileName = `fortune_poems/${pageState.selectedLanguage}-${version}.json`;
+      const fileName = makeFilePath(pageState.selectedLanguage, version);
 
       const { error: uploadError } = await supabase.storage
-        .from('fortune_data')
+        .from(STORAGE_BUCKET)
         .upload(fileName, JSON.stringify(poems, null, 2), {
           upsert: true,
           contentType: 'application/json',
@@ -241,57 +244,28 @@ export function FortunePoemsPage() {
     setPoems([...poems, newPoem]);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const deleteRow = (_index: number) => {
-    // Row deletion handled by Handsontable context menu
-  };
-
-  const updatePoem = (
-    index: number,
-    field: keyof FortunePoemContentType,
-    value: any,
-  ) => {
-    const updated = [...poems];
-    updated[index] = { ...updated[index], [field]: value };
-    setPoems(updated);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const openEditModal = (_index: number) => {
-    // Edit modal functionality
-  };
-
-  const closeEditModal = () => {
-    setEditingIndex(null);
-    setEditingPoem(null);
-  };
-
-  const updateEditingPoem = (
-    field: keyof FortunePoemContentType,
-    value: any,
-  ) => {
-    if (editingPoem) {
-      setEditingPoem({ ...editingPoem, [field]: value });
-    }
-  };
-
-  const saveEditedPoem = () => {
-    if (editingIndex !== null && editingPoem) {
-      updatePoem(editingIndex, 'drawNo', editingPoem.drawNo);
-      Object.keys(editingPoem).forEach((key) => {
-        if (key !== 'drawNo') {
-          updatePoem(
-            editingIndex,
-            key as keyof FortunePoemContentType,
-            (editingPoem as any)[key],
-          );
-        }
-      });
-      closeEditModal();
-    }
-  };
-
   const handleTableChange = (_changes: any, _source: any) => {
+    if (!hotInstanceRef.current) return;
+    const data = hotInstanceRef.current.getData?.();
+    if (!data) return;
+
+    isUpdatingFromTable.current = true;
+    const updatedPoems = data.map((row: any[]) => ({
+      drawNo: row[0] ?? 0,
+      fortuneTellingPoem: row[1] ?? '',
+      poetry: row[2] ?? '',
+      insights: row[3] ?? '',
+      divineWill: row[4] ?? '',
+      allusion: row[5] ?? '',
+      language: pageState.selectedLanguage,
+    }));
+    setPoems(updatedPoems);
+    setTimeout(() => {
+      isUpdatingFromTable.current = false;
+    }, 0);
+  };
+
+  const handleTableRemoveRow = (index: number, amount: number) => {
     if (!hotInstanceRef.current) return;
     const data = hotInstanceRef.current.getData?.();
     if (!data) return;
@@ -378,6 +352,7 @@ export function FortunePoemsPage() {
             },
           },
           afterChange: handleTableChange,
+          afterRemoveRow: handleTableRemoveRow,
           licenseKey: 'non-commercial-and-evaluation',
           stretchH: 'all',
           manualColumnResize: true,
@@ -550,125 +525,6 @@ export function FortunePoemsPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Edit Modal */}
-        {editingIndex !== null && editingPoem && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-              <CardHeader className="sticky top-0 bg-background border-b flex items-center justify-between">
-                <div>
-                  <CardTitle>Edit Poem #{editingPoem.drawNo}</CardTitle>
-                  <CardDescription>
-                    Edit all fields for this poem
-                  </CardDescription>
-                </div>
-                <button
-                  onClick={closeEditModal}
-                  className="p-1 hover:bg-muted rounded"
-                  title="Close"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Draw Number
-                  </label>
-                  <input
-                    type="number"
-                    value={editingPoem.drawNo}
-                    onChange={(e) =>
-                      updateEditingPoem('drawNo', parseInt(e.target.value) || 0)
-                    }
-                    className="w-full border rounded-md p-2 outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Fortune Telling Poem
-                  </label>
-                  <AutoTextarea
-                    value={editingPoem.fortuneTellingPoem}
-                    onChange={(e) =>
-                      updateEditingPoem('fortuneTellingPoem', e.target.value)
-                    }
-                    minRows={1}
-                    maxRows={20}
-                    placeholder="Enter the fortune telling poem..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Poetry
-                  </label>
-                  <AutoTextarea
-                    value={editingPoem.poetry}
-                    onChange={(e) =>
-                      updateEditingPoem('poetry', e.target.value)
-                    }
-                    minRows={1}
-                    maxRows={20}
-                    placeholder="Enter the poetry..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Insights
-                  </label>
-                  <AutoTextarea
-                    value={editingPoem.insights}
-                    onChange={(e) =>
-                      updateEditingPoem('insights', e.target.value)
-                    }
-                    minRows={1}
-                    maxRows={20}
-                    placeholder="Enter the insights..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Divine Will
-                  </label>
-                  <AutoTextarea
-                    value={editingPoem.divineWill}
-                    onChange={(e) =>
-                      updateEditingPoem('divineWill', e.target.value)
-                    }
-                    minRows={1}
-                    maxRows={20}
-                    placeholder="Enter the divine will..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Allusion
-                  </label>
-                  <AutoTextarea
-                    value={editingPoem.allusion}
-                    onChange={(e) =>
-                      updateEditingPoem('allusion', e.target.value)
-                    }
-                    minRows={1}
-                    maxRows={20}
-                    placeholder="Enter the allusion..."
-                  />
-                </div>
-              </CardContent>
-              <div className="sticky bottom-0 bg-background border-t p-4 flex items-center justify-end gap-2">
-                <Button onClick={closeEditModal} variant="outline">
-                  Cancel
-                </Button>
-                <Button onClick={saveEditedPoem}>Save Changes</Button>
-              </div>
-            </Card>
-          </div>
-        )}
       </div>
     </DashboardLayout>
   );
