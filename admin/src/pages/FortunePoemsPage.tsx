@@ -2,48 +2,47 @@ import { DashboardLayout } from '@/components/layout';
 import { AutoTextarea } from '@/components/ui/auto-textarea';
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { SUPPORTED_LANGUAGES } from '@/constants';
 import supabase from '@/lib/supabase/client';
 import type { FortunePoemContentType, LanguageKey } from '@/types';
-import {
-    AlertCircle,
-    Edit,
-    Loader2,
-    Plus,
-    Save,
-    Trash2,
-    X,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import Handsontable from 'handsontable';
+import { registerAllModules } from 'handsontable/registry';
+import { AlertCircle, Loader2, Plus, Save, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
+registerAllModules();
 
 interface Manifest {
-  version: string;
+  version: number;
   lastUpdated: string;
   languages: {
-    [key in LanguageKey]?: string;
+    [key in LanguageKey]?: number;
   };
 }
 
 const DEFAULT_MANIFEST: Manifest = {
-  version: '1.0.0',
+  version: 1,
   lastUpdated: new Date().toISOString(),
   languages: {},
 };
 
 export function FortunePoemsPage() {
+  const hotTableRef = useRef(null);
+  const hotInstanceRef = useRef<any>(null);
+  const isUpdatingFromTable = useRef(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageKey>('en');
   const [poems, setPoems] = useState<FortunePoemContentType[]>([]);
   const [manifest, setManifest] = useState<Manifest>(DEFAULT_MANIFEST);
@@ -93,7 +92,7 @@ export function FortunePoemsPage() {
     try {
       setLoading(true);
       setError(null);
-      const version = manifest.languages[language] || '1.0.0';
+      const version = manifest.languages[language] || 1;
       const fileName = `fortune_poems/${language}-${version}.json`;
 
       const { data, error: downloadError } = await supabase.storage
@@ -126,7 +125,19 @@ export function FortunePoemsPage() {
   const savePoems = async () => {
     try {
       setLoading(true);
-      const version = manifest.languages[selectedLanguage] || '1.0.0';
+
+      // Update manifest
+      const updatedManifest = {
+        ...manifest,
+        version: manifest.version,
+        lastUpdated: new Date().toISOString(),
+        languages: {
+          ...manifest.languages,
+          [selectedLanguage]: (manifest.languages[selectedLanguage] || 0) + 1,
+        },
+      };
+
+      const version = updatedManifest.languages[selectedLanguage] || 1;
       const fileName = `fortune_poems/${selectedLanguage}-${version}.json`;
 
       const { error: uploadError } = await supabase.storage
@@ -138,15 +149,6 @@ export function FortunePoemsPage() {
 
       if (uploadError) throw uploadError;
 
-      // Update manifest
-      const updatedManifest = {
-        ...manifest,
-        lastUpdated: new Date().toISOString(),
-        languages: {
-          ...manifest.languages,
-          [selectedLanguage]: version,
-        },
-      };
       setManifest(updatedManifest);
 
       const { error: manifestError } = await supabase.storage
@@ -182,8 +184,9 @@ export function FortunePoemsPage() {
     setPoems([...poems, newPoem]);
   };
 
-  const deleteRow = (index: number) => {
-    setPoems(poems.filter((_, i) => i !== index));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const deleteRow = (_index: number) => {
+    // Row deletion handled by Handsontable context menu
   };
 
   const updatePoem = (
@@ -196,14 +199,23 @@ export function FortunePoemsPage() {
     setPoems(updated);
   };
 
-  const openEditModal = (index: number) => {
-    setEditingIndex(index);
-    setEditingPoem({ ...poems[index] });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const openEditModal = (_index: number) => {
+    // Edit modal functionality
   };
 
   const closeEditModal = () => {
     setEditingIndex(null);
     setEditingPoem(null);
+  };
+
+  const updateEditingPoem = (
+    field: keyof FortunePoemContentType,
+    value: any,
+  ) => {
+    if (editingPoem) {
+      setEditingPoem({ ...editingPoem, [field]: value });
+    }
   };
 
   const saveEditedPoem = () => {
@@ -222,14 +234,121 @@ export function FortunePoemsPage() {
     }
   };
 
-  const updateEditingPoem = (
-    field: keyof FortunePoemContentType,
-    value: any,
-  ) => {
-    if (editingPoem) {
-      setEditingPoem({ ...editingPoem, [field]: value });
-    }
+  const handleTableChange = (_changes: any, _source: any) => {
+    if (!hotInstanceRef.current) return;
+    const data = hotInstanceRef.current.getData?.();
+    if (!data) return;
+
+    isUpdatingFromTable.current = true;
+    const updatedPoems = data.map((row: any[]) => ({
+      drawNo: row[0] ?? 0,
+      fortuneTellingPoem: row[1] ?? '',
+      poetry: row[2] ?? '',
+      insights: row[3] ?? '',
+      divineWill: row[4] ?? '',
+      allusion: row[5] ?? '',
+      language: selectedLanguage,
+    }));
+    setPoems(updatedPoems);
+    setTimeout(() => {
+      isUpdatingFromTable.current = false;
+    }, 0);
   };
+
+  // Initialize Handsontable on mount or when poems change
+  useEffect(() => {
+    if (!hotTableRef.current) return;
+
+    const container = hotTableRef.current as HTMLElement;
+
+    const tableData = poems.map((poem) => [
+      poem.drawNo,
+      poem.fortuneTellingPoem,
+      poem.poetry,
+      poem.insights,
+      poem.divineWill,
+      poem.allusion,
+    ]);
+
+    // If instance exists, just update the data (unless update is coming from table itself)
+    if (hotInstanceRef.current && !isUpdatingFromTable.current) {
+      hotInstanceRef.current.loadData(tableData);
+      return;
+    }
+
+    // Reset the flag after checking
+    if (isUpdatingFromTable.current) {
+      return;
+    }
+
+    // Initialize Handsontable only once
+    const initTable = () => {
+      try {
+        // Check if instance exists, if so destroy it first
+        if (hotInstanceRef.current) {
+          hotInstanceRef.current.destroy();
+        }
+
+        const instance = new Handsontable(container, {
+          data: tableData,
+          colHeaders: [
+            'Draw No',
+            'Fortune Telling Poem',
+            'Poetry',
+            'Insights',
+            'Divine Will',
+            'Allusion',
+          ],
+          rowHeaders: true,
+          height: 580,
+          columns: [
+            { type: 'numeric', width: 80 },
+            { type: 'text', width: 240 },
+            { type: 'text', width: 160 },
+            { type: 'text', width: 160 },
+            { type: 'text', width: 160 },
+            { type: 'text', width: 480 },
+          ],
+          contextMenu: {
+            items: {
+              row_above: { name: 'Insert row above' },
+              row_below: { name: 'Insert row below' },
+              hsep1: '---------',
+              remove_row: { name: 'Delete row' },
+              hsep2: '---------',
+              copy: { name: 'Copy' },
+              paste: { name: 'Paste' },
+            },
+          },
+          afterChange: handleTableChange,
+          licenseKey: 'non-commercial-and-evaluation',
+          stretchH: 'all',
+          manualColumnResize: true,
+          themeName: 'ht-theme-main',
+        });
+
+        hotInstanceRef.current = instance;
+      } catch (err) {
+        console.error('Failed to initialize Handsontable:', err);
+      }
+    };
+
+    initTable();
+
+    return () => {
+      // Don't destroy on every render, only when component unmounts
+    };
+  }, [poems, selectedLanguage]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (hotInstanceRef.current) {
+        hotInstanceRef.current.destroy();
+        hotInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <DashboardLayout title="Fortune Poems">
@@ -298,7 +417,7 @@ export function FortunePoemsPage() {
                   {selectedLanguage.toUpperCase()} - {poems.length} poems
                 </CardTitle>
                 <CardDescription>
-                  Version: {manifest.languages[selectedLanguage] || '1.0.0'}
+                  Version: {manifest.languages[selectedLanguage] || 1}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -328,92 +447,33 @@ export function FortunePoemsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {loading && poems.length === 0 ? (
+            {loading && poems.length === 0 && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="overflow-x-auto border rounded-md">
-                  <table className="w-full border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-muted/50">
-                        <th className="border p-2 text-left font-semibold w-16">
-                          Draw No
-                        </th>
-                        <th className="border p-2 text-left font-semibold">
-                          Fortune Telling Poem
-                        </th>
-                        <th className="border p-2 text-left font-semibold">
-                          Poetry
-                        </th>
-                        <th className="border p-2 text-left font-semibold">
-                          Insights
-                        </th>
-                        <th className="border p-2 text-left font-semibold">
-                          Divine Will
-                        </th>
-                        <th className="border p-2 text-left font-semibold">
-                          Allusion
-                        </th>
-                        <th className="border p-2 text-center font-semibold w-12">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {poems.map((poem, index) => (
-                        <tr key={index} className="hover:bg-muted/30">
-                          <td className="border p-2 text-center font-semibold">
-                            {poem.drawNo}
-                          </td>
-                          <td className="border p-2 max-w-xs truncate text-sm">
-                            {poem.fortuneTellingPoem}
-                          </td>
-                          <td className="border p-2 max-w-xs truncate text-xs text-muted-foreground">
-                            {poem.poetry}
-                          </td>
-                          <td className="border p-2 max-w-xs truncate text-xs text-muted-foreground">
-                            {poem.insights}
-                          </td>
-                          <td className="border p-2 max-w-xs truncate text-xs text-muted-foreground">
-                            {poem.divineWill}
-                          </td>
-                          <td className="border p-2 max-w-xs truncate text-xs text-muted-foreground">
-                            {poem.allusion}
-                          </td>
-                          <td className="border p-2 text-center flex items-center justify-center gap-1">
-                            <button
-                              onClick={() => openEditModal(index)}
-                              className="p-1 hover:bg-primary/10 rounded"
-                              title="Edit row"
-                            >
-                              <Edit className="h-4 w-4 text-primary" />
-                            </button>
-                            <button
-                              onClick={() => deleteRow(index)}
-                              className="p-1 hover:bg-destructive/10 rounded"
-                              title="Delete row"
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                {poems.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">
-                      No poems yet for {selectedLanguage.toUpperCase()}
-                    </p>
-                    <Button onClick={addRow} variant="outline">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create First Poem
-                    </Button>
-                  </div>
-                )}
+            )}
+
+            <div className="space-y-4">
+              <div
+                ref={hotTableRef}
+                style={{
+                  width: '100%',
+                  height: '600px',
+                  overflow: 'hidden',
+                  display: loading || poems.length === 0 ? 'none' : 'block',
+                }}
+              />
+            </div>
+
+            {!loading && poems.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  No poems yet for {selectedLanguage.toUpperCase()}
+                </p>
+                <Button onClick={addRow} variant="outline">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Poem
+                </Button>
               </div>
             )}
           </CardContent>
