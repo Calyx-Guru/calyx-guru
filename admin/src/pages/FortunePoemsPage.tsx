@@ -14,10 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { SUPPORTED_LANGUAGES } from '@/constants';
+import {
+  FORTUNE_POEMS_STORAGE_FOLDER,
+  MASTER_DATA_MANIFEST_FILE_NAME,
+  STORAGE_BUCKET,
+  SUPPORTED_LANGUAGES,
+} from '@/constants';
+import { DEFAULT_MASTER_DATA_MANIFEST } from '@/constants/MasterData';
 import { usePageState } from '@/hooks/usePageState';
 import supabase from '@/lib/supabase/client';
 import type { FortunePoemContentType, LanguageKey } from '@/types';
+import { type MasterDataManifest } from '@/types/MasterDataManifest';
 import Handsontable from 'handsontable';
 import {
   AlertCircle,
@@ -29,28 +36,13 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 const PAGE_STATE_PREFIX = 'fortunePoems';
-const STORAGE_BUCKET = 'fortune_data';
-const STORAGE_FOLDER = 'fortune_poems';
-const MANIFEST_FILE_NAME = 'manifest.json';
 
 interface FortunePoemsPageState {
   selectedLanguage: LanguageKey;
 }
 
-interface Manifest {
-  lastUpdated: string;
-  languages: {
-    [key in LanguageKey]?: number;
-  };
-}
-
-const DEFAULT_MANIFEST: Manifest = {
-  lastUpdated: new Date().toISOString(),
-  languages: {},
-};
-
 function makeFilePath(language: LanguageKey, version: number) {
-  return `${STORAGE_FOLDER}/${language}-${version}.json`;
+  return `${FORTUNE_POEMS_STORAGE_FOLDER}/${language}-${version}.json`;
 }
 
 export function FortunePoemsPage() {
@@ -68,7 +60,7 @@ export function FortunePoemsPage() {
   const isUpdatingFromTable = useRef(false);
 
   const [poems, setPoems] = useState<FortunePoemContentType[]>([]);
-  const [manifest, setManifest] = useState<Manifest | null>(null);
+  const [manifest, setManifest] = useState<MasterDataManifest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +83,7 @@ export function FortunePoemsPage() {
       setLoading(true);
       const { data, error: downloadError } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .download(`${STORAGE_FOLDER}/${MANIFEST_FILE_NAME}`);
+        .download(MASTER_DATA_MANIFEST_FILE_NAME);
 
       if (downloadError && downloadError.message !== 'Not found') {
         throw downloadError;
@@ -101,11 +93,11 @@ export function FortunePoemsPage() {
         const text = await data.text();
         setManifest(JSON.parse(text));
       } else {
-        setManifest(DEFAULT_MANIFEST);
+        setManifest(DEFAULT_MASTER_DATA_MANIFEST);
       }
     } catch (err: any) {
       console.log('Manifest not found, using default');
-      setManifest(DEFAULT_MANIFEST);
+      setManifest(DEFAULT_MASTER_DATA_MANIFEST);
     } finally {
       setLoading(false);
     }
@@ -121,7 +113,7 @@ export function FortunePoemsPage() {
 
       setLoading(true);
       setError(null);
-      const version = manifest.languages[language] || 1;
+      const version = manifest.fortunePoems.languages[language] || 1;
       const fileName = makeFilePath(language, version);
 
       const { data, error: downloadError } = await supabase.storage
@@ -166,9 +158,10 @@ export function FortunePoemsPage() {
         ...manifest,
         lastUpdated: new Date().toISOString(),
         languages: {
-          ...manifest.languages,
+          ...manifest.fortunePoems.languages,
           [pageState.selectedLanguage]:
-            (manifest.languages[pageState.selectedLanguage] || 0) + 1,
+            (manifest.fortunePoems.languages[pageState.selectedLanguage] || 0) +
+            1,
         },
       };
 
@@ -190,7 +183,7 @@ export function FortunePoemsPage() {
       const { error: manifestError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(
-          `${STORAGE_FOLDER}/${MANIFEST_FILE_NAME}`,
+          'MANIFEST_FILE_NAME',
           JSON.stringify(updatedManifest, null, 2),
           {
             upsert: true,
@@ -212,7 +205,8 @@ export function FortunePoemsPage() {
 
       setLoading(true);
 
-      const version = manifest.languages[pageState.selectedLanguage] || 1;
+      const version =
+        manifest.fortunePoems.languages[pageState.selectedLanguage] || 1;
       const fileName = makeFilePath(pageState.selectedLanguage, version);
 
       const { error: uploadError } = await supabase.storage
@@ -451,7 +445,9 @@ export function FortunePoemsPage() {
                 </CardTitle>
                 <CardDescription>
                   Version:{' '}
-                  {manifest?.languages[pageState.selectedLanguage] || 1}
+                  {manifest?.fortunePoems.languages[
+                    pageState.selectedLanguage
+                  ] || 1}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">

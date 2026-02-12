@@ -9,3 +9,7 @@ export const SUPPORTED_LANGUAGES: LanguageKey[] = [
   'kr',
   'ja',
 ];
+
+export const STORAGE_BUCKET = 'fortune_data';
+export const MASTER_DATA_MANIFEST_FILE_NAME = 'manifest.json';
+export const FORTUNE_POEMS_STORAGE_FOLDER = 'fortune_poems';

@@ -1,4 +1,4 @@
-import { USE_MOCK_DATA } from '@/constants/general';
+import { USE_MOCK_DATA } from '@/constants/common';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
