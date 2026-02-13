@@ -156,17 +156,19 @@ export function FortunePoemsPage() {
       // Update manifest
       const updatedManifest = {
         ...manifest,
-        lastUpdated: new Date().toISOString(),
-        languages: {
-          ...manifest.fortunePoems.languages,
-          [pageState.selectedLanguage]:
-            (manifest.fortunePoems.languages[pageState.selectedLanguage] || 0) +
-            1,
+        fortunePoems: {
+          lastUpdated: new Date().toISOString(),
+          languages: {
+            ...manifest.fortunePoems.languages,
+            [pageState.selectedLanguage]:
+              (manifest.fortunePoems.languages[pageState.selectedLanguage] ||
+                0) + 1,
+          },
         },
       };
 
       const version =
-        updatedManifest.languages[pageState.selectedLanguage] || 1;
+        updatedManifest.fortunePoems.languages[pageState.selectedLanguage] || 1;
       const fileName = makeFilePath(pageState.selectedLanguage, version);
 
       const { error: uploadError } = await supabase.storage
@@ -183,7 +185,7 @@ export function FortunePoemsPage() {
       const { error: manifestError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(
-          'MANIFEST_FILE_NAME',
+          MASTER_DATA_MANIFEST_FILE_NAME,
           JSON.stringify(updatedManifest, null, 2),
           {
             upsert: true,
