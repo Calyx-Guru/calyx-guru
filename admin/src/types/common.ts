@@ -1,1 +1,1 @@
-export type LanguageKey = 'en' | 'zh-CN' | 'zh-TW' | 'vi' | 'kr' | 'ja';
+export type LanguageKey = 'en' | 'zh-CN' | 'zh-TW' | 'vi' | 'ko' | 'ja';

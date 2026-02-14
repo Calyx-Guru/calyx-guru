@@ -6,9 +6,17 @@ export const SUPPORTED_LANGUAGES: LanguageKey[] = [
   'zh-CN',
   'zh-TW',
   'vi',
-  'kr',
+  'ko',
   'ja',
 ];
+export const LANGUAGE_LABELS: Record<LanguageKey, string> = {
+  en: 'English',
+  'zh-CN': 'Chinese (Simplified)',
+  'zh-TW': 'Chinese (Traditional)',
+  vi: 'Vietnamese',
+  ko: 'Korean',
+  ja: 'Japanese',
+};
 
 export const STORAGE_BUCKET = 'fortune_data';
 export const MASTER_DATA_MANIFEST_FILE_NAME = 'manifest.json';

@@ -9,10 +9,10 @@ dotenv.config({
 });
 
 import {
-    FORTUNE_POEMS_STORAGE_FOLDER,
-    MASTER_DATA_MANIFEST_FILE_NAME,
-    STORAGE_BUCKET,
-    SUPPORTED_LANGUAGES,
+  FORTUNE_POEMS_STORAGE_FOLDER,
+  MASTER_DATA_MANIFEST_FILE_NAME,
+  STORAGE_BUCKET,
+  SUPPORTED_LANGUAGES,
 } from '@/constants';
 import type { LanguageKey, MasterDataManifest } from '@/types';
 import { createClient } from '@supabase/supabase-js';
@@ -64,12 +64,20 @@ async function downloadLanguageFiles(
 ): Promise<void> {
   console.log(`\n📥 Downloading language files...`);
 
+  const fileData: Record<LanguageKey, any> = {
+    en: [],
+    ja: [],
+    ko: [],
+    vi: [],
+    'zh-CN': [],
+    'zh-TW': [],
+  };
   for (const language of SUPPORTED_LANGUAGES) {
     const version = versions[language] || 1;
 
     const fileName = `${remoteFolder}/${language}-${version}.json`;
 
-    let fileContent = '[]';
+    let fileContent = [];
     try {
       const { data, error } = await supabase.storage
         .from(STORAGE_BUCKET)
@@ -79,7 +87,8 @@ async function downloadLanguageFiles(
         throw error;
       }
 
-      fileContent = await data.text();
+      const text = await data.text();
+      fileContent = JSON.parse(text);
       console.log(`✓ Downloaded ${language}.json (v${version})`);
     } catch (error) {
       console.error(
@@ -87,10 +96,11 @@ async function downloadLanguageFiles(
       );
     }
 
-    const filePath = path.join(masterDataDir, remoteFolder, `${language}.json`);
-    ensureDirectoryExists(path.dirname(filePath));
-    fs.writeFileSync(filePath, fileContent);
+    fileData[language] = fileContent;
   }
+
+  const filePath = path.join(masterDataDir, `${remoteFolder}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(fileData, null, 2));
 }
 
 async function main(): Promise<void> {

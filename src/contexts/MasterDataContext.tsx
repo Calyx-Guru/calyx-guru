@@ -1,9 +1,9 @@
 'use client';
 
 import {
-    MASTER_DATA_MANIFEST_FILE_NAME,
-    STORAGE_BUCKET,
-    SUPPORTED_LANGUAGES,
+  MASTER_DATA_MANIFEST_FILE_NAME,
+  STORAGE_BUCKET,
+  SUPPORTED_LANGUAGES,
 } from '@/constants';
 import { supabase } from '@/lib/supabase/client';
 import type { LanguageKey, MasterDataManifest } from '@/types';
@@ -11,12 +11,7 @@ import type { FortunePoemContentType } from '@/types/FortunePoems';
 import { createContext, useEffect, useState } from 'react';
 
 // Import built-in JSON files
-import fortunePoemsEN from '@/masterdata/fortune_poems/en.json';
-import fortunePoemsJA from '@/masterdata/fortune_poems/ja.json';
-import fortunePoemsKO from '@/masterdata/fortune_poems/ko.json';
-import fortunePoemsVI from '@/masterdata/fortune_poems/vi.json';
-import fortunePoemsZHCN from '@/masterdata/fortune_poems/zh-CN.json';
-import fortunePoemsZHTW from '@/masterdata/fortune_poems/zh-TW.json';
+import fortunePoemsRaw from '@/masterdata/fortune_poems.json';
 import localManifestRaw from '@/masterdata/manifest.json';
 
 // Type the localManifest - it may only have partial language versions
@@ -36,14 +31,8 @@ export const MasterDataContext = createContext<
   MasterDataContextType | undefined
 >(undefined);
 
-const LOCAL_POEMS_MAP: Record<LanguageKey, FortunePoemContentType[]> = {
-  en: fortunePoemsEN as FortunePoemContentType[],
-  ko: fortunePoemsKO as FortunePoemContentType[],
-  ja: fortunePoemsJA as FortunePoemContentType[],
-  'zh-CN': fortunePoemsZHCN as FortunePoemContentType[],
-  'zh-TW': fortunePoemsZHTW as FortunePoemContentType[],
-  vi: fortunePoemsVI as FortunePoemContentType[],
-};
+const LOCAL_POEMS_MAP: Record<LanguageKey, FortunePoemContentType[]> =
+  fortunePoemsRaw as unknown as Record<LanguageKey, FortunePoemContentType[]>;
 
 export function MasterDataProvider({
   children,

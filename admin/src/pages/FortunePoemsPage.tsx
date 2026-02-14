@@ -23,12 +23,14 @@ import {
 import { DEFAULT_MASTER_DATA_MANIFEST } from '@/constants/MasterData';
 import { usePageState } from '@/hooks/usePageState';
 import supabase from '@/lib/supabase/client';
+import { languageKeyToLabel } from '@/lib/utils';
 import type { FortunePoemContentType, LanguageKey } from '@/types';
 import { type MasterDataManifest } from '@/types/MasterDataManifest';
 import Handsontable from 'handsontable';
 import {
   AlertCircle,
   ArrowUpWideNarrow,
+  ChevronDown,
   Loader2,
   Plus,
   Save,
@@ -63,6 +65,7 @@ export function FortunePoemsPage() {
   const [manifest, setManifest] = useState<MasterDataManifest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLanguageCardCollapsed, setIsLanguageCardCollapsed] = useState(false);
 
   // Load manifest on component mount
   useEffect(() => {
@@ -327,7 +330,7 @@ export function FortunePoemsPage() {
             'Allusion',
           ],
           rowHeaders: true,
-          height: 580,
+          height: '100%',
           columns: [
             { type: 'numeric', width: 80 },
             { type: 'text', width: 240 },
@@ -380,54 +383,70 @@ export function FortunePoemsPage() {
 
   return (
     <DashboardLayout title="Fortune Poems">
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 h-full">
         {/* Language Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Language</CardTitle>
-            <CardDescription>
-              Choose a language to view and edit fortune poems
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <Select
-                value={pageState.selectedLanguage}
-                onValueChange={(value) => {
-                  updatePageState({ selectedLanguage: value as LanguageKey });
-                }}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent className="z-180">
-                  {SUPPORTED_LANGUAGES.map((lang) => (
-                    <SelectItem key={lang} value={lang}>
-                      {lang}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={() => loadPoems(pageState.selectedLanguage)}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  'Reload'
-                )}
-              </Button>
+        <Card className="flex-shrink-0">
+          <CardHeader
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setIsLanguageCardCollapsed(!isLanguageCardCollapsed)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Select Language</CardTitle>
+                <CardDescription>
+                  {isLanguageCardCollapsed
+                    ? `Current: ${languageKeyToLabel(pageState.selectedLanguage)}`
+                    : 'Choose a language to view and edit fortune poems'}
+                </CardDescription>
+              </div>
+              <ChevronDown
+                className={`h-5 w-5 transition-transform duration-200 ${
+                  isLanguageCardCollapsed ? '-rotate-90' : ''
+                }`}
+              />
             </div>
-          </CardContent>
+          </CardHeader>
+          {!isLanguageCardCollapsed && (
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <Select
+                  value={pageState.selectedLanguage}
+                  onValueChange={(value) => {
+                    updatePageState({ selectedLanguage: value as LanguageKey });
+                  }}
+                >
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent className="z-180">
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <SelectItem key={lang} value={lang}>
+                        {languageKeyToLabel(lang)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={() => loadPoems(pageState.selectedLanguage)}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Reload'
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          )}
         </Card>
 
         {/* Error Display */}
         {error && (
-          <div className="rounded-md bg-destructive/10 p-4 flex items-start gap-3">
+          <div className="rounded-md bg-destructive/10 p-4 flex items-start gap-3 flex-shrink-0">
             <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="font-semibold text-destructive">Error</h3>
@@ -437,13 +456,13 @@ export function FortunePoemsPage() {
         )}
 
         {/* Grid Editor */}
-        <Card>
-          <CardHeader>
+        <Card className="flex flex-col flex-1 min-h-0">
+          <CardHeader className="flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>
-                  {pageState.selectedLanguage.toUpperCase()} - {poems.length}{' '}
-                  poems
+                  {languageKeyToLabel(pageState.selectedLanguage)}
+                  {!loading && <span> - {poems.length} poems</span>}
                 </CardTitle>
                 <CardDescription>
                   Version:{' '}
@@ -491,24 +510,12 @@ export function FortunePoemsPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col min-h-0">
             {loading && poems.length === 0 && (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             )}
-
-            <div className="space-y-4">
-              <div
-                ref={hotTableRef}
-                style={{
-                  width: '100%',
-                  height: '600px',
-                  overflow: 'hidden',
-                  display: loading || poems.length === 0 ? 'none' : 'block',
-                }}
-              />
-            </div>
 
             {!loading && poems.length === 0 && (
               <div className="text-center py-8">
@@ -521,6 +528,18 @@ export function FortunePoemsPage() {
                 </Button>
               </div>
             )}
+
+            <div className="flex-1 min-h-0">
+              <div
+                ref={hotTableRef}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  overflow: 'auto',
+                  display: loading || poems.length === 0 ? 'none' : 'block',
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
