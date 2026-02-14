@@ -4,9 +4,9 @@ import {
   BookOpen,
   Calendar,
   Home,
+  Languages,
   Settings,
   Sparkles,
-  Users,
   type LucideIcon,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
@@ -24,14 +24,14 @@ const navItems: NavItem[] = [
     icon: Home,
   },
   {
-    title: 'Users',
-    href: '/users',
-    icon: Users,
-  },
-  {
     title: 'Fortune Poems',
     href: '/fortune-poems',
     icon: Sparkles,
+  },
+  {
+    title: 'Localization',
+    href: '/localization',
+    icon: Languages,
   },
   {
     title: 'Content',

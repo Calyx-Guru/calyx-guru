@@ -1,7 +1,7 @@
 import type { LanguageKey } from './common';
 
 export type FortunePoemContentType = {
-  drawNo: number;
+  drawNo: string;
   language: LanguageKey;
   fortuneTellingPoem: string;
   poetry: string;

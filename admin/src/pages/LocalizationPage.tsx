@@ -1,0 +1,455 @@
+import { DashboardLayout } from '@/components/layout';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  LOCALIZATION_FILE_NAME,
+  MASTER_DATA_MANIFEST_FILE_NAME,
+  STORAGE_BUCKET,
+} from '@/constants';
+import { MasterDataContext } from '@/contexts/MasterDataContext';
+import supabase from '@/lib/supabase/client';
+import type { LocalizationTranslationType } from '@/types/Localization';
+import Handsontable from 'handsontable';
+import {
+  AlertCircle,
+  ArrowUpWideNarrow,
+  Loader2,
+  Plus,
+  Save,
+} from 'lucide-react';
+import { useContext, useEffect, useRef, useState } from 'react';
+
+function makeFilePath(version: number) {
+  return `${LOCALIZATION_FILE_NAME}-${version}.json`;
+}
+
+export function LocalizationPage() {
+  const hotTableRef = useRef(null);
+  const hotInstanceRef = useRef<any>(null);
+  const lastUpdateTimestampRef = useRef<number>(0);
+  const {
+    manifest,
+    refetch: refetchManifest,
+    setManifest,
+  } = useContext(MasterDataContext);
+
+  const [translations, setTranslations] = useState<
+    LocalizationTranslationType[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load translations when manifest changes
+  useEffect(() => {
+    if (manifest) {
+      loadTranslations();
+    } else {
+      setLoading(true);
+    }
+  }, [manifest]);
+
+  const loadTranslations = async () => {
+    try {
+      if (!manifest) {
+        setLoading(false);
+        setError(null);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      const version = manifest.localization.version || 1;
+      const fileName = makeFilePath(version);
+
+      const { data, error: downloadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .download(fileName);
+
+      if (
+        downloadError &&
+        downloadError.message !== 'Not found' &&
+        downloadError.message !== '{}'
+      ) {
+        throw downloadError;
+      }
+
+      if (data) {
+        const text = await data.text();
+        const translations = JSON.parse(text);
+        // Clear the timestamp to signal this is external data (not from table)
+        lastUpdateTimestampRef.current = 0;
+        setTranslations(translations);
+      } else {
+        // File not found, start with empty object
+        lastUpdateTimestampRef.current = 0;
+        setTranslations([]);
+      }
+    } catch (err: any) {
+      // Only show real errors, not "file not found"
+      if (err.message && !err.message.includes('Not found')) {
+        setError(`Failed to load translations: ${err.message}`);
+      }
+      lastUpdateTimestampRef.current = 0;
+      setTranslations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTranslationsFromTable = (): LocalizationTranslationType[] => {
+    if (!hotInstanceRef.current) return translations;
+    const data = hotInstanceRef.current.getData?.();
+    if (!data) return translations;
+
+    return data.map((row: any[]) => ({
+      key: row[0] ?? '',
+      translations: {
+        'zh-TW': row[1] ?? '',
+        'zh-CN': row[2] ?? '',
+        en: row[3] ?? '',
+        ja: row[4] ?? '',
+        ko: row[5] ?? '',
+        vi: row[6] ?? '',
+      },
+    }));
+  };
+
+  const versionUpPoems = async () => {
+    try {
+      if (!manifest) return;
+
+      setLoading(true);
+
+      const currentTranslations = getTranslationsFromTable();
+
+      // Update manifest
+      const updatedManifest = {
+        ...manifest,
+        localization: {
+          lastUpdated: new Date().toISOString(),
+          version: (manifest.localization.version || 1) + 1,
+        },
+      };
+
+      const version = updatedManifest.localization.version || 1;
+      const fileName = makeFilePath(version);
+
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(fileName, JSON.stringify(currentTranslations, null, 2), {
+          upsert: true,
+          contentType: 'application/json',
+        });
+
+      if (uploadError) throw uploadError;
+
+      setManifest(updatedManifest);
+
+      const { error: manifestError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(
+          MASTER_DATA_MANIFEST_FILE_NAME,
+          JSON.stringify(updatedManifest, null, 2),
+          {
+            upsert: true,
+            contentType: 'application/json',
+          },
+        );
+
+      if (manifestError) throw manifestError;
+    } catch (err: any) {
+      setError(`Failed to save translations: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveTranslations = async () => {
+    try {
+      if (!manifest) return;
+
+      setLoading(true);
+
+      const currentTranslations = getTranslationsFromTable();
+
+      const version = manifest.localization.version || 1;
+      const fileName = makeFilePath(version);
+
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(fileName, JSON.stringify(currentTranslations, null, 2), {
+          upsert: true,
+          contentType: 'application/json',
+        });
+
+      if (uploadError) throw uploadError;
+    } catch (err: any) {
+      setError(`Failed to save translations: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addRow = () => {
+    if (!hotInstanceRef.current) return;
+    const newRow: LocalizationTranslationType = {
+      key: '',
+      translations: {
+        'zh-TW': '',
+        'zh-CN': '',
+        en: '',
+        ja: '',
+        ko: '',
+        vi: '',
+      },
+    };
+
+    lastUpdateTimestampRef.current = 0;
+    setTranslations([...translations, newRow]);
+  };
+
+  const handleTableChange = (_changes: any, _source: any) => {
+    if (!hotInstanceRef.current) return;
+    const data = hotInstanceRef.current.getData?.();
+    if (!data) return;
+
+    // Set timestamp to mark this update as coming from the table
+    lastUpdateTimestampRef.current = Date.now();
+    const updatedTranslations = data.map((row: any[]) => ({
+      key: row[0] ?? '',
+      translations: {
+        'zh-TW': row[1] ?? '',
+        'zh-CN': row[2] ?? '',
+        en: row[3] ?? '',
+        ja: row[4] ?? '',
+        ko: row[5] ?? '',
+        vi: row[6] ?? '',
+      },
+    }));
+    setTranslations(updatedTranslations);
+  };
+
+  const handleTableRemoveRow = () => {
+    if (!hotInstanceRef.current) return;
+    const data = hotInstanceRef.current.getData?.();
+    if (!data) return;
+
+    // Set timestamp to mark this update as coming from the table
+    lastUpdateTimestampRef.current = Date.now();
+    const updatedTranslations = data.map((row: any[]) => ({
+      key: row[0] ?? '',
+      translations: {
+        'zh-TW': row[1] ?? '',
+        'zh-CN': row[2] ?? '',
+        en: row[3] ?? '',
+        ja: row[4] ?? '',
+        ko: row[5] ?? '',
+        vi: row[6] ?? '',
+      },
+    }));
+    setTranslations(updatedTranslations);
+  };
+
+  // Initialize Handsontable on mount
+  useEffect(() => {
+    refetchManifest();
+
+    if (!hotTableRef.current) return;
+
+    const container = hotTableRef.current as HTMLElement;
+
+    const initTable = () => {
+      try {
+        const instance = new Handsontable(container, {
+          data: [],
+          colHeaders: [
+            'Key',
+            'Traditional Chinese',
+            'Simplified Chinese',
+            'English',
+            'Japanese',
+            'Korean',
+            'Vietnamese',
+          ],
+          rowHeaders: true,
+          height: '100%',
+          columns: [
+            { type: 'text', width: 80 },
+            { type: 'text', width: 240 },
+            { type: 'text', width: 240 },
+            { type: 'text', width: 240 },
+            { type: 'text', width: 240 },
+            { type: 'text', width: 240 },
+            { type: 'text', width: 240 },
+          ],
+          contextMenu: {
+            items: {
+              row_above: { name: 'Insert row above' },
+              row_below: { name: 'Insert row below' },
+              hsep1: '---------',
+              remove_row: { name: 'Delete row' },
+              hsep2: '---------',
+              copy: { name: 'Copy' },
+              paste: { name: 'Paste' },
+            },
+          },
+          afterChange: handleTableChange,
+          afterRemoveRow: handleTableRemoveRow,
+          licenseKey: 'non-commercial-and-evaluation',
+          stretchH: 'all',
+          manualColumnResize: true,
+          themeName: 'ht-theme-main',
+        });
+
+        hotInstanceRef.current = instance;
+      } catch (err) {
+        console.error('Failed to initialize Handsontable:', err);
+      }
+    };
+
+    initTable();
+
+    return () => {
+      if (hotInstanceRef.current) {
+        hotInstanceRef.current.destroy();
+        hotInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update table data when translations change
+  useEffect(() => {
+    if (!hotInstanceRef.current) return;
+
+    // Check if this update came from the table (within last 100ms)
+    const now = Date.now();
+    const isFromTable = now - lastUpdateTimestampRef.current < 100;
+
+    // If the update came from the table, skip re-rendering to avoid loops
+    if (isFromTable) {
+      return;
+    }
+
+    const tableData = translations.map((translation) => [
+      translation.key,
+      translation.translations['zh-TW'] ?? '',
+      translation.translations['zh-CN'] ?? '',
+      translation.translations.en ?? '',
+      translation.translations.ja ?? '',
+      translation.translations.ko ?? '',
+      translation.translations.vi ?? '',
+    ]);
+
+    hotInstanceRef.current.loadData(tableData);
+  }, [translations]);
+
+  return (
+    <DashboardLayout title="Localization">
+      <div className="flex flex-col gap-6 h-full">
+        {/* Error Display */}
+        {error && (
+          <div className="rounded-md bg-destructive/10 p-4 flex items-start gap-3 flex-shrink-0">
+            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-destructive">Error</h3>
+              <p className="text-sm text-destructive/80">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Grid Editor */}
+        <Card className="flex flex-col flex-1 min-h-0">
+          <CardHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle></CardTitle>
+                <CardDescription>
+                  Version: {manifest?.localization.version || 1}
+                </CardDescription>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button onClick={versionUpPoems} disabled={loading} size="sm">
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      </>
+                    ) : (
+                      <>
+                        <ArrowUpWideNarrow className="mr-2 h-4 w-4" />
+                      </>
+                    )}
+                    Version Up
+                  </Button>
+                  <Button
+                    onClick={addRow}
+                    disabled={loading}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Row
+                  </Button>
+                  <Button
+                    onClick={saveTranslations}
+                    disabled={loading}
+                    size="sm"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                      </>
+                    )}
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col min-h-0">
+            {loading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            )}
+
+            {!loading && translations.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  No translations yet
+                </p>
+                <Button onClick={addRow} variant="outline">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Translation
+                </Button>
+              </div>
+            )}
+
+            <div className="flex-1 min-h-0">
+              <div
+                ref={hotTableRef}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  overflow: 'auto',
+                  display:
+                    loading || translations.length === 0 ? 'none' : 'block',
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
+}

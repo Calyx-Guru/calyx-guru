@@ -2,7 +2,6 @@ import { Dashboard } from '@/pages/Dashboard';
 import { FortunePoemsPage } from '@/pages/FortunePoemsPage';
 import { Settings } from '@/pages/Settings';
 import { SignIn } from '@/pages/SignIn';
-import { Users } from '@/pages/Users';
 import {
   Navigate,
   Route,
@@ -10,6 +9,7 @@ import {
   Routes,
 } from 'react-router-dom';
 import { useSupabaseAuth } from './hooks/useSupabaseAuth';
+import { LocalizationPage } from './pages/LocalizationPage';
 
 export function App() {
   const { user, isLoading } = useSupabaseAuth();
@@ -31,8 +31,8 @@ export function App() {
         {user ? (
           <>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/users" element={<Users />} />
             <Route path="/fortune-poems" element={<FortunePoemsPage />} />
+            <Route path="/localization" element={<LocalizationPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Settings />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

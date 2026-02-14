@@ -20,12 +20,11 @@ import {
   STORAGE_BUCKET,
   SUPPORTED_LANGUAGES,
 } from '@/constants';
-import { DEFAULT_MASTER_DATA_MANIFEST } from '@/constants/MasterData';
+import { MasterDataContext } from '@/contexts/MasterDataContext';
 import { usePageState } from '@/hooks/usePageState';
 import supabase from '@/lib/supabase/client';
 import { languageKeyToLabel } from '@/lib/utils';
 import type { FortunePoemContentType, LanguageKey } from '@/types';
-import { type MasterDataManifest } from '@/types/MasterDataManifest';
 import Handsontable from 'handsontable';
 import {
   AlertCircle,
@@ -33,9 +32,10 @@ import {
   ChevronDown,
   Loader2,
   Plus,
+  RefreshCcwDotIcon,
   Save,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 const PAGE_STATE_PREFIX = 'fortunePoems';
 
@@ -48,29 +48,29 @@ function makeFilePath(language: LanguageKey, version: number) {
 }
 
 export function FortunePoemsPage() {
+  const hotTableRef = useRef(null);
+  const hotInstanceRef = useRef<any>(null);
+  const lastUpdateTimestampRef = useRef<number>(0);
+  const {
+    manifest,
+    refetch: refetchManifest,
+    setManifest,
+  } = useContext(MasterDataContext);
+
+  const [poems, setPoems] = useState<FortunePoemContentType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLanguageCardCollapsed, setIsLanguageCardCollapsed] = useState(false);
+
   const [pageState, setPageState] = usePageState<FortunePoemsPageState>(
     PAGE_STATE_PREFIX,
     { selectedLanguage: 'en' },
   );
 
   const updatePageState = (updates: Partial<FortunePoemsPageState>) => {
+    lastUpdateTimestampRef.current = 0;
     setPageState({ ...pageState, ...updates });
   };
-
-  const hotTableRef = useRef(null);
-  const hotInstanceRef = useRef<any>(null);
-  const isUpdatingFromTable = useRef(false);
-
-  const [poems, setPoems] = useState<FortunePoemContentType[]>([]);
-  const [manifest, setManifest] = useState<MasterDataManifest | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isLanguageCardCollapsed, setIsLanguageCardCollapsed] = useState(false);
-
-  // Load manifest on component mount
-  useEffect(() => {
-    loadManifest();
-  }, []);
 
   // Load poems when language changes
   useEffect(() => {
@@ -80,31 +80,6 @@ export function FortunePoemsPage() {
       setLoading(true);
     }
   }, [pageState.selectedLanguage, manifest]);
-
-  const loadManifest = async () => {
-    try {
-      setLoading(true);
-      const { data, error: downloadError } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .download(MASTER_DATA_MANIFEST_FILE_NAME);
-
-      if (downloadError && downloadError.message !== 'Not found') {
-        throw downloadError;
-      }
-
-      if (data) {
-        const text = await data.text();
-        setManifest(JSON.parse(text));
-      } else {
-        setManifest(DEFAULT_MASTER_DATA_MANIFEST);
-      }
-    } catch (err: any) {
-      console.log('Manifest not found, using default');
-      setManifest(DEFAULT_MASTER_DATA_MANIFEST);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadPoems = async (language: LanguageKey) => {
     try {
@@ -134,9 +109,11 @@ export function FortunePoemsPage() {
       if (data) {
         const text = await data.text();
         const poemsData = JSON.parse(text);
+        lastUpdateTimestampRef.current = 0;
         setPoems(Array.isArray(poemsData) ? poemsData : []);
       } else {
         // File not found, start with empty array
+        lastUpdateTimestampRef.current = 0;
         setPoems([]);
       }
     } catch (err: any) {
@@ -144,6 +121,7 @@ export function FortunePoemsPage() {
       if (err.message && !err.message.includes('Not found')) {
         setError(`Failed to load poems: ${err.message}`);
       }
+      lastUpdateTimestampRef.current = 0;
       setPoems([]);
     } finally {
       setLoading(false);
@@ -231,8 +209,7 @@ export function FortunePoemsPage() {
 
   const addRow = () => {
     const newPoem: FortunePoemContentType = {
-      drawNo:
-        poems.length > 0 ? Math.max(...poems.map((p) => p.drawNo)) + 1 : 1,
+      drawNo: String(poems.length + 1),
       language: pageState.selectedLanguage,
       fortuneTellingPoem: '',
       poetry: '',
@@ -240,6 +217,7 @@ export function FortunePoemsPage() {
       divineWill: '',
       allusion: '',
     };
+    lastUpdateTimestampRef.current = 0;
     setPoems([...poems, newPoem]);
   };
 
@@ -248,9 +226,9 @@ export function FortunePoemsPage() {
     const data = hotInstanceRef.current.getData?.();
     if (!data) return;
 
-    isUpdatingFromTable.current = true;
+    lastUpdateTimestampRef.current = Date.now();
     const updatedPoems = data.map((row: any[]) => ({
-      drawNo: row[0] ?? 0,
+      drawNo: row[0] ?? '',
       fortuneTellingPoem: row[1] ?? '',
       poetry: row[2] ?? '',
       insights: row[3] ?? '',
@@ -259,9 +237,6 @@ export function FortunePoemsPage() {
       language: pageState.selectedLanguage,
     }));
     setPoems(updatedPoems);
-    setTimeout(() => {
-      isUpdatingFromTable.current = false;
-    }, 0);
   };
 
   const handleTableRemoveRow = (index: number, amount: number) => {
@@ -269,7 +244,7 @@ export function FortunePoemsPage() {
     const data = hotInstanceRef.current.getData?.();
     if (!data) return;
 
-    isUpdatingFromTable.current = true;
+    lastUpdateTimestampRef.current = Date.now();
     const updatedPoems = data.map((row: any[]) => ({
       drawNo: row[0] ?? 0,
       fortuneTellingPoem: row[1] ?? '',
@@ -280,36 +255,15 @@ export function FortunePoemsPage() {
       language: pageState.selectedLanguage,
     }));
     setPoems(updatedPoems);
-    setTimeout(() => {
-      isUpdatingFromTable.current = false;
-    }, 0);
   };
 
-  // Initialize Handsontable on mount or when poems change
+  // Initialize Handsontable on mount
   useEffect(() => {
+    refetchManifest();
+
     if (!hotTableRef.current) return;
 
     const container = hotTableRef.current as HTMLElement;
-
-    const tableData = poems.map((poem) => [
-      poem.drawNo,
-      poem.fortuneTellingPoem,
-      poem.poetry,
-      poem.insights,
-      poem.divineWill,
-      poem.allusion,
-    ]);
-
-    // If instance exists, just update the data (unless update is coming from table itself)
-    if (hotInstanceRef.current && !isUpdatingFromTable.current) {
-      hotInstanceRef.current.loadData(tableData);
-      return;
-    }
-
-    // Reset the flag after checking
-    if (isUpdatingFromTable.current) {
-      return;
-    }
 
     // Initialize Handsontable only once
     const initTable = () => {
@@ -320,7 +274,7 @@ export function FortunePoemsPage() {
         }
 
         const instance = new Handsontable(container, {
-          data: tableData,
+          data: [],
           colHeaders: [
             'Draw No',
             'Fortune Telling Poem',
@@ -332,7 +286,7 @@ export function FortunePoemsPage() {
           rowHeaders: true,
           height: '100%',
           columns: [
-            { type: 'numeric', width: 80 },
+            { type: 'text', width: 80 },
             { type: 'text', width: 240 },
             { type: 'text', width: 160 },
             { type: 'text', width: 160 },
@@ -367,19 +321,37 @@ export function FortunePoemsPage() {
     initTable();
 
     return () => {
-      // Don't destroy on every render, only when component unmounts
-    };
-  }, [poems, pageState.selectedLanguage]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
       if (hotInstanceRef.current) {
         hotInstanceRef.current.destroy();
         hotInstanceRef.current = null;
       }
     };
   }, []);
+
+  // Update table data when poems or language changes
+  useEffect(() => {
+    if (!hotInstanceRef.current) return;
+
+    const tableData = poems.map((poem) => [
+      poem.drawNo,
+      poem.fortuneTellingPoem,
+      poem.poetry,
+      poem.insights,
+      poem.divineWill,
+      poem.allusion,
+    ]);
+
+    // Check if this update came from the table (within last 100ms)
+    const now = Date.now();
+    const isFromTable = now - lastUpdateTimestampRef.current < 100;
+
+    // If the update came from the table, skip re-rendering to avoid loops
+    if (isFromTable) {
+      return;
+    }
+
+    hotInstanceRef.current.loadData(tableData);
+  }, [poems, pageState.selectedLanguage]);
 
   return (
     <DashboardLayout title="Fortune Poems">
@@ -426,19 +398,6 @@ export function FortunePoemsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button
-                  onClick={() => loadPoems(pageState.selectedLanguage)}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Reload'
-                  )}
-                </Button>
               </div>
             </CardContent>
           )}
@@ -462,28 +421,42 @@ export function FortunePoemsPage() {
               <div>
                 <CardTitle>
                   {languageKeyToLabel(pageState.selectedLanguage)}
-                  {!loading && <span> - {poems.length} poems</span>}
                 </CardTitle>
                 <CardDescription>
                   Version:{' '}
                   {manifest?.fortunePoems.languages[
                     pageState.selectedLanguage
                   ] || 1}
+                  {!loading && <span> ({poems.length} poems)</span>}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => loadPoems(pageState.selectedLanguage)}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCcwDotIcon className="mr-2 h-4 w-4" />
+                    </>
+                  )}
+                  Reload
+                </Button>
                 <Button onClick={versionUpPoems} disabled={loading} size="sm">
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
                     </>
                   ) : (
                     <>
                       <ArrowUpWideNarrow className="mr-2 h-4 w-4" />
-                      Version Up
                     </>
                   )}
+                  Version Up
                 </Button>
                 <Button
                   onClick={addRow}
@@ -498,14 +471,13 @@ export function FortunePoemsPage() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
                     </>
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Save
                     </>
                   )}
+                  Save
                 </Button>
               </div>
             </div>

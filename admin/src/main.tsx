@@ -10,6 +10,7 @@ import 'handsontable/styles/ht-theme-horizon.css';
 import 'handsontable/styles/ht-theme-main.css';
 
 import App from './App.tsx';
+import { MasterDataProvider } from './contexts/MasterDataContext.tsx';
 import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext.tsx';
 
 registerAllModules();
@@ -17,7 +18,9 @@ registerAllModules();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SupabaseAuthProvider>
-      <App />
+      <MasterDataProvider>
+        <App />
+      </MasterDataProvider>
     </SupabaseAuthProvider>
   </StrictMode>,
 );

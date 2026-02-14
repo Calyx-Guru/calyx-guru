@@ -20,4 +20,5 @@ export const LANGUAGE_LABELS: Record<LanguageKey, string> = {
 
 export const STORAGE_BUCKET = 'fortune_data';
 export const MASTER_DATA_MANIFEST_FILE_NAME = 'manifest.json';
+export const LOCALIZATION_FILE_NAME = 'localization.json';
 export const FORTUNE_POEMS_STORAGE_FOLDER = 'fortune_poems';
