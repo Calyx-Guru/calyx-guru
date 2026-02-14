@@ -32,7 +32,6 @@ function makeFilePath(version: number) {
 export function LocalizationPage() {
   const hotTableRef = useRef(null);
   const hotInstanceRef = useRef<any>(null);
-  const lastUpdateTimestampRef = useRef<number>(0);
   const {
     manifest,
     refetch: refetchManifest,
@@ -44,6 +43,7 @@ export function LocalizationPage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tableUpdateTimestamp, setTableUpdateTimestamp] = useState(0);
 
   // Load translations when manifest changes
   useEffect(() => {
@@ -83,11 +83,11 @@ export function LocalizationPage() {
         const text = await data.text();
         const translations = JSON.parse(text);
         // Clear the timestamp to signal this is external data (not from table)
-        lastUpdateTimestampRef.current = 0;
+        setTableUpdateTimestamp(Date.now());
         setTranslations(translations);
       } else {
         // File not found, start with empty object
-        lastUpdateTimestampRef.current = 0;
+        setTableUpdateTimestamp(Date.now());
         setTranslations([]);
       }
     } catch (err: any) {
@@ -95,7 +95,7 @@ export function LocalizationPage() {
       if (err.message && !err.message.includes('Not found')) {
         setError(`Failed to load translations: ${err.message}`);
       }
-      lastUpdateTimestampRef.current = 0;
+      setTableUpdateTimestamp(Date.now());
       setTranslations([]);
     } finally {
       setLoading(false);
@@ -210,7 +210,7 @@ export function LocalizationPage() {
       },
     };
 
-    lastUpdateTimestampRef.current = 0;
+    setTableUpdateTimestamp(Date.now());
     setTranslations([...translations, newRow]);
   };
 
@@ -219,8 +219,6 @@ export function LocalizationPage() {
     const data = hotInstanceRef.current.getData?.();
     if (!data) return;
 
-    // Set timestamp to mark this update as coming from the table
-    lastUpdateTimestampRef.current = Date.now();
     const updatedTranslations = data.map((row: any[]) => ({
       key: row[0] ?? '',
       translations: {
@@ -240,8 +238,6 @@ export function LocalizationPage() {
     const data = hotInstanceRef.current.getData?.();
     if (!data) return;
 
-    // Set timestamp to mark this update as coming from the table
-    lastUpdateTimestampRef.current = Date.now();
     const updatedTranslations = data.map((row: any[]) => ({
       key: row[0] ?? '',
       translations: {
@@ -327,15 +323,6 @@ export function LocalizationPage() {
   useEffect(() => {
     if (!hotInstanceRef.current) return;
 
-    // Check if this update came from the table (within last 100ms)
-    const now = Date.now();
-    const isFromTable = now - lastUpdateTimestampRef.current < 100;
-
-    // If the update came from the table, skip re-rendering to avoid loops
-    if (isFromTable) {
-      return;
-    }
-
     const tableData = translations.map((translation) => [
       translation.key,
       translation.translations['zh-TW'] ?? '',
@@ -347,7 +334,7 @@ export function LocalizationPage() {
     ]);
 
     hotInstanceRef.current.loadData(tableData);
-  }, [translations]);
+  }, [tableUpdateTimestamp]);
 
   return (
     <DashboardLayout title="Localization">

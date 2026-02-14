@@ -1,3 +1,4 @@
+import { LanguageSelector } from '@/components/LanguageSelector';
 import { DashboardLayout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,17 +9,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   FORTUNE_POEMS_STORAGE_FOLDER,
   MASTER_DATA_MANIFEST_FILE_NAME,
   STORAGE_BUCKET,
-  SUPPORTED_LANGUAGES,
 } from '@/constants';
 import { MasterDataContext } from '@/contexts/MasterDataContext';
 import { usePageState } from '@/hooks/usePageState';
@@ -29,13 +22,19 @@ import Handsontable from 'handsontable';
 import {
   AlertCircle,
   ArrowUpWideNarrow,
-  ChevronDown,
   Loader2,
   Plus,
   RefreshCcwDotIcon,
   Save,
 } from 'lucide-react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 const PAGE_STATE_PREFIX = 'fortunePoems';
 
@@ -50,7 +49,6 @@ function makeFilePath(language: LanguageKey, version: number) {
 export function FortunePoemsPage() {
   const hotTableRef = useRef(null);
   const hotInstanceRef = useRef<any>(null);
-  const lastUpdateTimestampRef = useRef<number>(0);
   const {
     manifest,
     refetch: refetchManifest,
@@ -60,17 +58,20 @@ export function FortunePoemsPage() {
   const [poems, setPoems] = useState<FortunePoemContentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLanguageCardCollapsed, setIsLanguageCardCollapsed] = useState(false);
+  const [tableUpdateTimestamp, setTableUpdateTimestamp] = useState(0);
 
   const [pageState, setPageState] = usePageState<FortunePoemsPageState>(
     PAGE_STATE_PREFIX,
     { selectedLanguage: 'en' },
   );
 
-  const updatePageState = (updates: Partial<FortunePoemsPageState>) => {
-    lastUpdateTimestampRef.current = 0;
-    setPageState({ ...pageState, ...updates });
-  };
+  const updatePageState = useCallback(
+    (updates: Partial<FortunePoemsPageState>) => {
+      setTableUpdateTimestamp(Date.now());
+      setPageState((prev) => ({ ...prev, ...updates }));
+    },
+    [setPageState],
+  );
 
   // Load poems when language changes
   useEffect(() => {
@@ -109,11 +110,11 @@ export function FortunePoemsPage() {
       if (data) {
         const text = await data.text();
         const poemsData = JSON.parse(text);
-        lastUpdateTimestampRef.current = 0;
+        setTableUpdateTimestamp(Date.now());
         setPoems(Array.isArray(poemsData) ? poemsData : []);
       } else {
         // File not found, start with empty array
-        lastUpdateTimestampRef.current = 0;
+        setTableUpdateTimestamp(Date.now());
         setPoems([]);
       }
     } catch (err: any) {
@@ -121,7 +122,7 @@ export function FortunePoemsPage() {
       if (err.message && !err.message.includes('Not found')) {
         setError(`Failed to load poems: ${err.message}`);
       }
-      lastUpdateTimestampRef.current = 0;
+      setTableUpdateTimestamp(Date.now());
       setPoems([]);
     } finally {
       setLoading(false);
@@ -217,7 +218,7 @@ export function FortunePoemsPage() {
       divineWill: '',
       allusion: '',
     };
-    lastUpdateTimestampRef.current = 0;
+    setTableUpdateTimestamp(Date.now());
     setPoems([...poems, newPoem]);
   };
 
@@ -226,7 +227,6 @@ export function FortunePoemsPage() {
     const data = hotInstanceRef.current.getData?.();
     if (!data) return;
 
-    lastUpdateTimestampRef.current = Date.now();
     const updatedPoems = data.map((row: any[]) => ({
       drawNo: row[0] ?? '',
       fortuneTellingPoem: row[1] ?? '',
@@ -244,7 +244,6 @@ export function FortunePoemsPage() {
     const data = hotInstanceRef.current.getData?.();
     if (!data) return;
 
-    lastUpdateTimestampRef.current = Date.now();
     const updatedPoems = data.map((row: any[]) => ({
       drawNo: row[0] ?? 0,
       fortuneTellingPoem: row[1] ?? '',
@@ -341,68 +340,26 @@ export function FortunePoemsPage() {
       poem.allusion,
     ]);
 
-    // Check if this update came from the table (within last 100ms)
-    const now = Date.now();
-    const isFromTable = now - lastUpdateTimestampRef.current < 100;
-
-    // If the update came from the table, skip re-rendering to avoid loops
-    if (isFromTable) {
-      return;
-    }
-
     hotInstanceRef.current.loadData(tableData);
-  }, [poems, pageState.selectedLanguage]);
+  }, [tableUpdateTimestamp]);
+
+  const headerContent = useMemo(
+    () => (
+      <LanguageSelector
+        value={pageState.selectedLanguage}
+        onValueChange={(value) => {
+          setTableUpdateTimestamp(Date.now());
+          updatePageState({ selectedLanguage: value as LanguageKey });
+        }}
+        disabled={loading}
+      />
+    ),
+    [loading],
+  );
 
   return (
-    <DashboardLayout title="Fortune Poems">
+    <DashboardLayout title="Fortune Poems" headerContent={headerContent}>
       <div className="flex flex-col gap-6 h-full">
-        {/* Language Selection */}
-        <Card className="flex-shrink-0">
-          <CardHeader
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => setIsLanguageCardCollapsed(!isLanguageCardCollapsed)}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Select Language</CardTitle>
-                <CardDescription>
-                  {isLanguageCardCollapsed
-                    ? `Current: ${languageKeyToLabel(pageState.selectedLanguage)}`
-                    : 'Choose a language to view and edit fortune poems'}
-                </CardDescription>
-              </div>
-              <ChevronDown
-                className={`h-5 w-5 transition-transform duration-200 ${
-                  isLanguageCardCollapsed ? '-rotate-90' : ''
-                }`}
-              />
-            </div>
-          </CardHeader>
-          {!isLanguageCardCollapsed && (
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <Select
-                  value={pageState.selectedLanguage}
-                  onValueChange={(value) => {
-                    updatePageState({ selectedLanguage: value as LanguageKey });
-                  }}
-                >
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent className="z-180">
-                    {SUPPORTED_LANGUAGES.map((lang) => (
-                      <SelectItem key={lang} value={lang}>
-                        {languageKeyToLabel(lang)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          )}
-        </Card>
-
         {/* Error Display */}
         {error && (
           <div className="rounded-md bg-destructive/10 p-4 flex items-start gap-3 flex-shrink-0">

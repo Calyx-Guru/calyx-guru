@@ -1,13 +1,18 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { UserNav } from './UserNav';
 
 interface DashboardLayoutProps {
   children: ReactNode;
   title?: string;
+  headerContent?: ReactNode;
 }
 
-export function DashboardLayout({ children, title }: DashboardLayoutProps) {
+export function DashboardLayout({
+  children,
+  title,
+  headerContent,
+}: DashboardLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
@@ -23,6 +28,10 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
             {title && (
               <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
             )}
+          </div>
+
+          <div className="flex flex-1 items-center justify-start px-4">
+            {headerContent}
           </div>
 
           <div className="flex items-center gap-4">
