@@ -8,9 +8,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
+  DEFAULT_HANDSON_TABLE_OPTIONS,
   LOCALIZATION_FILE_NAME,
-  MASTER_DATA_MANIFEST_FILE_NAME,
-  STORAGE_BUCKET,
+  STORAGE_BUCKET
 } from '@/constants';
 import { MasterDataContext } from '@/contexts/MasterDataContext';
 import supabase from '@/lib/supabase/client';
@@ -35,7 +35,7 @@ export function LocalizationPage() {
   const {
     manifest,
     refetch: refetchManifest,
-    setManifest,
+    updateManifest,
   } = useContext(MasterDataContext);
 
   const [translations, setTranslations] = useState<
@@ -149,20 +149,7 @@ export function LocalizationPage() {
 
       if (uploadError) throw uploadError;
 
-      setManifest(updatedManifest);
-
-      const { error: manifestError } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .upload(
-          MASTER_DATA_MANIFEST_FILE_NAME,
-          JSON.stringify(updatedManifest, null, 2),
-          {
-            upsert: true,
-            contentType: 'application/json',
-          },
-        );
-
-      if (manifestError) throw manifestError;
+      updateManifest(updatedManifest);
     } catch (err: any) {
       setError(`Failed to save translations: ${err.message}`);
     } finally {
@@ -263,6 +250,7 @@ export function LocalizationPage() {
     const initTable = () => {
       try {
         const instance = new Handsontable(container, {
+          ...DEFAULT_HANDSON_TABLE_OPTIONS,
           data: [],
           colHeaders: [
             'Key',
@@ -273,8 +261,6 @@ export function LocalizationPage() {
             'Korean',
             'Vietnamese',
           ],
-          rowHeaders: true,
-          height: '100%',
           columns: [
             { type: 'text', width: 80 },
             { type: 'text', width: 240 },
@@ -284,23 +270,8 @@ export function LocalizationPage() {
             { type: 'text', width: 240 },
             { type: 'text', width: 240 },
           ],
-          contextMenu: {
-            items: {
-              row_above: { name: 'Insert row above' },
-              row_below: { name: 'Insert row below' },
-              hsep1: '---------',
-              remove_row: { name: 'Delete row' },
-              hsep2: '---------',
-              copy: { name: 'Copy' },
-              paste: { name: 'Paste' },
-            },
-          },
           afterChange: handleTableChange,
           afterRemoveRow: handleTableRemoveRow,
-          licenseKey: 'non-commercial-and-evaluation',
-          stretchH: 'all',
-          manualColumnResize: true,
-          themeName: 'ht-theme-main',
         });
 
         hotInstanceRef.current = instance;

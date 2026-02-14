@@ -9,7 +9,7 @@ export type MasterData = {
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  setManifest: React.Dispatch<React.SetStateAction<MasterDataManifest | null>>;
+  updateManifest: (manifest: MasterDataManifest | null) => Promise<void>;
 };
 
 export const MasterDataContext = createContext<MasterData>({
@@ -17,7 +17,7 @@ export const MasterDataContext = createContext<MasterData>({
   isLoading: true,
   error: null,
   refetch: async () => {},
-  setManifest: () => {},
+  updateManifest: async () => {},
 });
 
 export function MasterDataProvider({
@@ -64,6 +64,21 @@ export function MasterDataProvider({
     loadManifest();
   }, []);
 
+  const updateManifest = async (updatedManifest: MasterDataManifest | null) => {
+    setManifest(updatedManifest);
+
+    await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(
+        MASTER_DATA_MANIFEST_FILE_NAME,
+        JSON.stringify(updatedManifest, null, 2),
+        {
+          upsert: true,
+          contentType: 'application/json',
+        },
+      );
+  };
+
   return (
     <MasterDataContext.Provider
       value={{
@@ -71,7 +86,7 @@ export function MasterDataProvider({
         isLoading,
         error,
         refetch: loadManifest,
-        setManifest,
+        updateManifest,
       }}
     >
       {children}

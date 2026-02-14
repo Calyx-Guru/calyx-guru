@@ -9,8 +9,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
+  DEFAULT_HANDSON_TABLE_OPTIONS,
   FORTUNE_POEMS_STORAGE_FOLDER,
-  MASTER_DATA_MANIFEST_FILE_NAME,
   STORAGE_BUCKET,
 } from '@/constants';
 import { MasterDataContext } from '@/contexts/MasterDataContext';
@@ -52,7 +52,7 @@ export function FortunePoemsPage() {
   const {
     manifest,
     refetch: refetchManifest,
-    setManifest,
+    updateManifest,
   } = useContext(MasterDataContext);
 
   const [poems, setPoems] = useState<FortunePoemContentType[]>([]);
@@ -162,20 +162,7 @@ export function FortunePoemsPage() {
 
       if (uploadError) throw uploadError;
 
-      setManifest(updatedManifest);
-
-      const { error: manifestError } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .upload(
-          MASTER_DATA_MANIFEST_FILE_NAME,
-          JSON.stringify(updatedManifest, null, 2),
-          {
-            upsert: true,
-            contentType: 'application/json',
-          },
-        );
-
-      if (manifestError) throw manifestError;
+      updateManifest(updatedManifest);
     } catch (err: any) {
       setError(`Failed to save poems: ${err.message}`);
     } finally {
@@ -273,6 +260,7 @@ export function FortunePoemsPage() {
         }
 
         const instance = new Handsontable(container, {
+          ...DEFAULT_HANDSON_TABLE_OPTIONS,
           data: [],
           colHeaders: [
             'Draw No',
@@ -282,8 +270,6 @@ export function FortunePoemsPage() {
             'Divine Will',
             'Allusion',
           ],
-          rowHeaders: true,
-          height: '100%',
           columns: [
             { type: 'text', width: 80 },
             { type: 'text', width: 240 },
@@ -292,23 +278,8 @@ export function FortunePoemsPage() {
             { type: 'text', width: 160 },
             { type: 'text', width: 480 },
           ],
-          contextMenu: {
-            items: {
-              row_above: { name: 'Insert row above' },
-              row_below: { name: 'Insert row below' },
-              hsep1: '---------',
-              remove_row: { name: 'Delete row' },
-              hsep2: '---------',
-              copy: { name: 'Copy' },
-              paste: { name: 'Paste' },
-            },
-          },
           afterChange: handleTableChange,
           afterRemoveRow: handleTableRemoveRow,
-          licenseKey: 'non-commercial-and-evaluation',
-          stretchH: 'all',
-          manualColumnResize: true,
-          themeName: 'ht-theme-main',
         });
 
         hotInstanceRef.current = instance;
