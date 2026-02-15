@@ -4,10 +4,9 @@ import { MasterDataProvider } from '@/contexts/MasterDataContext';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 import { useMasterData } from '@/hooks/useMasterData';
 import { initializeApp } from '@/lib/app/initialization';
-import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Keep the splash screen visible while we fetch resources
@@ -32,7 +31,7 @@ function AppContent() {
     }
 
     prepare();
-  }, [initializeMasterData]);
+  }, []);
 
   if (!isReady) {
     return null;
@@ -43,7 +42,7 @@ function AppContent() {
       <SafeAreaView style={styles.container}>
         {/* Header Component - style it so it will float on top */}
         <HeaderComponent style={styles.headerComponent} />
-        <View style={styles.container}>
+        {/* <View style={styles.container}>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -52,7 +51,7 @@ function AppContent() {
             <Stack.Screen name="index" />
             <Stack.Screen name="(auth)" />
           </Stack>
-        </View>
+        </View> */}
       </SafeAreaView>
     </AppAppearanceProvider>
   );

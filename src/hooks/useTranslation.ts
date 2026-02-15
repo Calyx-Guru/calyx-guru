@@ -9,5 +9,5 @@ import { useTranslation as useReactI18nextTranslation } from 'react-i18next';
  * <Text>{t('common.welcome')}</Text>
  */
 export function useTranslation() {
-  return useReactI18nextTranslation();
+  return useReactI18nextTranslation('translation');
 }

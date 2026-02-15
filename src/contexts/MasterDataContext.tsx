@@ -52,18 +52,19 @@ export function MasterDataProvider({
       setError(null);
 
       // Load manifest from Supabase storage
-      const { data, error: downloadError } = await supabase.storage
+      const { data } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .download(MASTER_DATA_MANIFEST_FILE_NAME);
+        .getPublicUrl(MASTER_DATA_MANIFEST_FILE_NAME);
 
-      if (downloadError) {
-        throw new Error(
-          `Failed to download manifest: ${downloadError.message}`,
-        );
+      const url = data.publicUrl;
+      const res = await fetch(url);
+      const json = await res.json();
+
+      if (!json) {
+        throw new Error(`Failed to download manifest: No data returned`);
       }
 
-      const manifestText = await data.text();
-      const remoteManifest: MasterDataManifest = JSON.parse(manifestText);
+      const remoteManifest: MasterDataManifest = json;
       setManifest(remoteManifest);
 
       // Check for version updates

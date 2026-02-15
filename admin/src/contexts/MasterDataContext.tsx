@@ -28,15 +28,28 @@ export function MasterDataProvider({
   const [manifest, setManifest] = useState<MasterDataManifest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const lastFetchTimeRef = React.useRef<number>(0);
 
   const loadManifest = async () => {
     try {
+      if (manifest) {
+        if (Date.now() - lastFetchTimeRef.current < 5 * 1000) {
+          return;
+        }
+      }
+
       setIsLoading(true);
       setError(null);
 
       const { data, error: downloadError } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .download(MASTER_DATA_MANIFEST_FILE_NAME);
+        .download(
+          MASTER_DATA_MANIFEST_FILE_NAME,
+          {},
+          {
+            cache: 'no-cache',
+          },
+        );
 
       if (downloadError && downloadError.message !== 'Not found') {
         throw downloadError;
@@ -50,6 +63,8 @@ export function MasterDataProvider({
         console.log('Manifest not found in storage, using default');
         setManifest(DEFAULT_MASTER_DATA_MANIFEST);
       }
+
+      lastFetchTimeRef.current = Date.now();
     } catch (err: any) {
       console.error('Error loading manifest:', err);
       setError(err.message ?? 'Failed to load manifest');

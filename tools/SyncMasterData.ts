@@ -1,13 +1,3 @@
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load environment variables from .env and .env.local (local overrides)
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-dotenv.config({
-  path: path.resolve(process.cwd(), '.env.local'),
-  override: true,
-});
-
 import {
   FORTUNE_POEMS_STORAGE_FOLDER,
   MASTER_DATA_MANIFEST_FILE_NAME,
@@ -16,7 +6,17 @@ import {
 } from '@/constants';
 import type { LanguageKey, MasterDataManifest } from '@/types';
 import { createClient } from '@supabase/supabase-js';
+import { Argument, Command } from 'commander';
+import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'path';
+
+// Load environment variables from .env and .env.local (local overrides)
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({
+  path: path.resolve(process.cwd(), '.env.local'),
+  override: true,
+});
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -59,7 +59,9 @@ async function downloadManifest(): Promise<MasterDataManifest> {
 }
 
 async function downloadLanguageFiles(
-  versions: Record<LanguageKey, number>,
+  versions: {
+    [key in LanguageKey]?: number;
+  },
   remoteFolder: string,
 ): Promise<void> {
   console.log(`\n📥 Downloading language files...`);
@@ -103,7 +105,7 @@ async function downloadLanguageFiles(
   fs.writeFileSync(filePath, JSON.stringify(fileData, null, 2));
 }
 
-async function main(): Promise<void> {
+async function download(): Promise<void> {
   try {
     console.log(`🔄 Syncing Master Data...`);
     console.log(`   Storage: ${STORAGE_BUCKET}`);
@@ -131,4 +133,31 @@ async function main(): Promise<void> {
   }
 }
 
-main();
+const program = new Command();
+
+program
+  .name('sync-master-data')
+  .description(
+    'Sync master data from Supabase storage to local src/masterdata folder',
+  )
+  .version('1.0.0');
+
+program
+  .addArgument(
+    new Argument('<action>', 'Action to perform')
+      .choices(['download'])
+      .default('download'),
+  )
+  .action(async (action: string) => {
+    try {
+      if (action === 'download') {
+        await download();
+      } else {
+        throw new Error(`Unknown action: ${action}`);
+      }
+    } catch (error) {
+      console.error('Error syncing master data:', error);
+    }
+  });
+
+program.parse(process.argv);
