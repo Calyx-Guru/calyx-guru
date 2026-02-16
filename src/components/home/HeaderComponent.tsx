@@ -1,5 +1,5 @@
+import { AccentText } from '@/components/typography/AccentText';
 import { StyleSheet, View } from 'react-native';
-import { AccentText } from '../typography/AccentText';
 
 type HeaderComponentProps = {
   style?: object;
@@ -7,7 +7,7 @@ type HeaderComponentProps = {
 
 export default function HeaderComponent({ style }: HeaderComponentProps) {
   return (
-    <View style={[styles.headerContainer, style]}>
+    <View style={[styles.headerContent, style]}>
       <AccentText size="md">Frequency: 85%</AccentText>
       <AccentText size="md">Lunar Solar</AccentText>
     </View>
@@ -15,7 +15,11 @@ export default function HeaderComponent({ style }: HeaderComponentProps) {
 }
 
 const styles = StyleSheet.create({
-  headerContainer: {
-    flex: 1,
+  headerContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });

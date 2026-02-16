@@ -9,6 +9,7 @@ export type ThemeColorType = {
   border: string;
   grey: string;
   tab: string;
+  text: string;
   astroCard: string;
   overlay: string;
   buttonBg: string;
@@ -32,6 +33,7 @@ const colors: Record<ThemeMode, ThemeColorType> = {
     border: 'black',
     grey: 'grey',
     tab: 'white',
+    text: 'black',
     astroCard: '#532929',
     overlay: 'rgba(255, 255, 255, 1)',
     buttonBg: '#7728DC',
@@ -53,6 +55,7 @@ const colors: Record<ThemeMode, ThemeColorType> = {
     border: 'black',
     grey: 'grey',
     tab: 'white',
+    text: 'black',
     astroCard: '#532929',
     overlay: 'rgba(255, 255, 255, 1)',
     buttonBg: '#7728DC',
@@ -75,6 +78,7 @@ const colors: Record<ThemeMode, ThemeColorType> = {
     input: 'white',
     border: 'white',
     tab: '#0D114E',
+    text: 'white',
     astroCard: '#F1F1F1',
     buttonBg: '#7728DC',
     primary: '#7728DC',
