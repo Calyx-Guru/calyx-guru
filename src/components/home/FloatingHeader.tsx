@@ -1,4 +1,5 @@
 import { AccentText } from '@/components/typography/AccentText';
+import { useAppAppearance } from '@/contexts/AppAppearanceContext';
 import { useEffect, useRef } from 'react';
 import {
   Animated,
@@ -23,6 +24,7 @@ export default function FloatingHeader({
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerOpacity = useRef(new Animated.Value(1)).current;
+  const { colors } = useAppAppearance();
 
   // Animate header opacity based on scroll position
   useEffect(() => {
@@ -62,10 +64,15 @@ export default function FloatingHeader({
           {
             paddingTop: insets.top,
             opacity: headerOpacity,
+            backgroundColor: colors.primary,
           },
         ]}
       >
-        {title && <AccentText size="md">{title}</AccentText>}
+        {title && (
+          <AccentText color="onPrimary" size="md">
+            {title}
+          </AccentText>
+        )}
       </Animated.View>
 
       {/* Scrollable Content */}

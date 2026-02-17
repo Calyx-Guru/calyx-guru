@@ -45,7 +45,7 @@ export const fontSizes: Record<LanguageKey, Record<SizeType, number>> = {
     '2xl': 30,
     '3xl': 36,
   },
-  kr: {
+  ko: {
     xs: 8,
     sm: 10,
     md: 12,
@@ -86,7 +86,7 @@ export const fontRegistry: Record<LanguageKey, FontRegistryType> = {
     accent: 'CormorantSC-Bold',
     heading: 'Roboto-Bold',
   },
-  kr: {
+  ko: {
     body: 'NotoSansKR-Regular',
     accent: 'NotoSansKR-Bold',
     heading: 'NotoSansKR-Bold',

@@ -20,12 +20,13 @@ export default function TabsLayout() {
       screenOptions={
         {
           headerShown: false,
+          sceneStyle: { backgroundColor: colors.background },
           tabBarStyle: {
-            backgroundColor: colors.background,
-            borderTopColor: colors.border || '#e0e0e0',
+            backgroundColor: colors.surfaceVariant,
+            borderTopColor: colors.outline,
           },
           tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.text,
+          tabBarInactiveTintColor: colors.primaryContainer,
         } as BottomTabNavigationOptions
       }
     >

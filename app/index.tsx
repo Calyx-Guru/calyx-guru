@@ -22,8 +22,8 @@ export default function Index() {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.background,
-        height: '100%',
+        backgroundColor: '#000',
+        height: 1024,
       }}
     >
       <BodyText>common.welcome</BodyText>

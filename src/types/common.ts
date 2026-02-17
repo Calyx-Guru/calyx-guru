@@ -1,14 +1,6 @@
+import { ThemeColorType } from '@/theme/colors';
+
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type LanguageKey = 'en' | 'zh-CN' | 'zh-TW' | 'vi' | 'ko' | 'ja';
 export type SizeType = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
-export type ColorType =
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'info'
-  | 'warning'
-  | 'danger'
-  | 'light'
-  | 'dark'
-  | 'white'
-  | 'grey';
+export type ColorType = keyof ThemeColorType;

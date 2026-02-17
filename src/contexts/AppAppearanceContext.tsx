@@ -150,3 +150,5 @@ export function AppAppearanceProvider({
     </AppAppearanceContext.Provider>
   );
 }
+
+export const useAppAppearance = () => React.useContext(AppAppearanceContext);
