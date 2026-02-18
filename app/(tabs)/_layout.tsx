@@ -24,9 +24,10 @@ export default function TabsLayout() {
           tabBarStyle: {
             backgroundColor: colors.surfaceVariant,
             borderTopColor: colors.outline,
+            paddingTop: 8,
           },
           tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.primaryContainer,
+          tabBarInactiveTintColor: colors.neutralInverse,
         } as BottomTabNavigationOptions
       }
     >

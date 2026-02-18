@@ -5,51 +5,51 @@
 export interface UserProfile {
   // Identifications
   id: string;
-  updated_at: string | null;
-  username: string | null;
-  email: string | null;
-  phone_number: string | null;
+  updated_at: string | undefined;
+  username: string | undefined;
+  email: string | undefined;
+  phone_number: string | undefined;
 
   // Profile Information
-  full_name: string | null;
-  avatar_url: string | null;
-  bio: string | null;
-  website: string | null;
-  gender: string | null;
-  date_of_birth: string | null;
-  location: string | null;
-  birth_place: string | null;
-  family_status: string | null;
-  occupation: string | null;
-  interests: string[] | null;
-  social_links: Record<string, any> | null;
+  full_name: string | undefined;
+  avatar_url: string | undefined;
+  bio: string | undefined;
+  website: string | undefined;
+  gender: string | undefined;
+  date_of_birth: string | undefined;
+  location: string | undefined;
+  birth_place: string | undefined;
+  family_status: string | undefined;
+  occupation: string | undefined;
+  interests: string[] | undefined;
+  social_links: Record<string, any> | undefined;
 
   // Account Settings
-  account_type: string | null;
-  status: string | null;
-  subscription_status: string | null;
-  preferences: Record<string, any> | null;
-  notification_settings: Record<string, any> | null;
-  privacy_settings: Record<string, any> | null;
-  language: string | null;
-  timezone: string | null;
+  account_type: string | undefined;
+  status: string | undefined;
+  subscription_status: string | undefined;
+  preferences: Record<string, any> | undefined;
+  notification_settings: Record<string, any> | undefined;
+  privacy_settings: Record<string, any> | undefined;
+  language: string | undefined;
+  timezone: string | undefined;
   profile_completion: number;
-  referral_code: string | null;
-  referred_by: string | null;
-  custom_fields: Record<string, any> | null;
+  referral_code: string | undefined;
+  referred_by: string | undefined;
+  custom_fields: Record<string, any> | undefined;
 
   // Security
   two_factor_enabled: boolean;
   failed_login_attempts: number;
-  lockout_until: string | null;
-  password_reset_token: string | null;
-  password_reset_expires_at: string | null;
+  lockout_until: string | undefined;
+  password_reset_token: string | undefined;
+  password_reset_expires_at: string | undefined;
 
   // Timestamps
   created_at: string;
   modified_at: string;
-  last_active_at: string | null;
-  last_login_at: string | null;
-  deactivated_at: string | null;
-  deleted_at: string | null;
+  last_active_at: string | undefined;
+  last_login_at: string | undefined;
+  deactivated_at: string | undefined;
+  deleted_at: string | undefined;
 }

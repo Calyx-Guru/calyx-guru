@@ -4,9 +4,9 @@
  */
 
 import {
-    fetchUserProfile,
-    subscribeToProfileChangesV2,
-    updateUserProfile,
+  fetchUserProfile,
+  subscribeToProfileChangesV2,
+  updateUserProfile,
 } from '@/lib/supabase/userProfileService';
 import { useUserProfileStore } from '@/store/userProfileStore';
 import { UserProfile } from '@/types/profile';
@@ -99,5 +99,6 @@ export function useUserProfile() {
     loadProfile,
     updateProfile,
     clearProfile,
+    setProfile,
   };
 }

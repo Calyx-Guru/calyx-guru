@@ -1,13 +1,12 @@
-import { DEFAULT_LANGUAGE } from '@/constants';
+import { DEFAULT_LANGUAGE, STORAGE_LOCALE_STORE_KEY } from '@/constants';
 import {
   initializeI18n,
   mapDeviceLocaleToLanguageKey,
 } from '@/lib/i18n/config';
+import supabase from '@/lib/supabase/client';
 import { ensureFonts } from '@/theme/fonts';
 import { LanguageKey } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const STORAGE_LOCALE_STORE_KEY = 'appearance_locale';
 
 /**
  * Initialize the entire app
@@ -16,7 +15,7 @@ const STORAGE_LOCALE_STORE_KEY = 'appearance_locale';
 export async function initializeApp(): Promise<void> {
   try {
     // Run all initialization tasks in parallel for better performance
-    await Promise.all([initializeLocale()]);
+    await Promise.all([initializeLocale(), initializeSupabaseConnection()]);
   } catch (error) {
     console.error('App initialization error:', error);
     // Continue even if initialization fails - app will still work with defaults
@@ -49,5 +48,42 @@ async function initializeLocale(): Promise<void> {
       ensureFonts(DEFAULT_LANGUAGE),
       initializeI18n(DEFAULT_LANGUAGE),
     ]);
+  }
+}
+
+/**
+ * Initialize and verify Supabase connection
+ */
+async function initializeSupabaseConnection(): Promise<void> {
+  try {
+    // Check if we can connect to Supabase and verify auth status
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.warn('Supabase connection warning:', error.message);
+      return;
+    }
+
+    const session = data?.session;
+
+    // Check if session exists and token is not expired
+    if (session) {
+      const expiresAt = session.expires_at;
+      const now = Math.floor(Date.now() / 1000);
+
+      if (expiresAt && expiresAt < now) {
+        console.warn('Session token expired, attempting refresh');
+        // Try to refresh the session
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.warn('Failed to refresh session:', refreshError.message);
+        }
+      }
+    }
+
+    console.log('Supabase connection initialized successfully');
+  } catch (error) {
+    console.error('Supabase connection error:', error);
+    // Continue even if Supabase check fails
   }
 }

@@ -4,20 +4,20 @@ import { ColorType, SizeType } from '@/types';
 import { PropsWithChildren, useContext } from 'react';
 import { Text } from 'react-native';
 
-type BodyTextProps = {
+type HeadingTextProps = {
   color?: ColorType;
   size?: SizeType;
   translate?: boolean;
   style?: object;
 };
 
-export function BodyText({
+export function HeadingText({
   children,
-  color = 'onPrimary',
-  size = 'md',
+  color = 'primary',
+  size = 'xl',
   translate = true,
   style,
-}: PropsWithChildren<BodyTextProps>) {
+}: PropsWithChildren<HeadingTextProps>) {
   const {
     colors,
     fallbackLocale,
@@ -34,7 +34,7 @@ export function BodyText({
     <Text
       style={[
         {
-          fontFamily: fontRegistryToUse.body,
+          fontFamily: fontRegistryToUse.heading,
           fontSize: fontSize[size],
           color: colors[color],
         },

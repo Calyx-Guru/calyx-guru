@@ -2,6 +2,7 @@ import { AppAppearanceProvider } from '@/contexts/AppAppearanceContext';
 import { MasterDataProvider } from '@/contexts/MasterDataContext';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 import { useMasterData } from '@/hooks/useMasterData';
+import { runOnce } from '@/lib/app/helper';
 import { initializeApp } from '@/lib/app/initialization';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -20,7 +21,10 @@ function AppContent() {
     async function prepare() {
       try {
         // Initialize app (load fonts, i18n, check auth) and master data in parallel
-        await Promise.all([initializeApp(), initializeMasterData()]);
+        await Promise.all([
+          runOnce('initializeApp', initializeApp)(),
+          runOnce('initializeMasterData', initializeMasterData)(),
+        ]);
       } catch (error) {
         console.error('Error during app initialization:', error);
       } finally {
@@ -46,8 +50,10 @@ function AppContent() {
               headerShown: false,
             }}
           >
+            <Stack.Screen name="index" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(modal)" />
           </Stack>
         </View>
       </SafeAreaView>

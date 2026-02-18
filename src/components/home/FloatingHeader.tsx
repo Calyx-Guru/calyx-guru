@@ -14,11 +14,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type FloatingHeaderProps = ViewProps & {
   children: React.ReactNode;
   title?: string;
+  leftButton?: React.ReactNode;
+  rightButton?: React.ReactNode;
 };
 
 export default function FloatingHeader({
   children,
   title,
+  leftButton,
+  rightButton,
   style,
 }: FloatingHeaderProps) {
   const insets = useSafeAreaInsets();
@@ -62,17 +66,24 @@ export default function FloatingHeader({
         style={[
           styles.floatingHeader,
           {
-            paddingTop: insets.top,
             opacity: headerOpacity,
             backgroundColor: colors.primary,
           },
         ]}
       >
-        {title && (
-          <AccentText color="onPrimary" size="md">
-            {title}
-          </AccentText>
-        )}
+        <View style={styles.headerLeft}>
+          {leftButton && <View>{leftButton}</View>}
+        </View>
+        <View style={styles.headerCenter}>
+          {title && (
+            <AccentText color="onPrimary" size="md">
+              {title}
+            </AccentText>
+          )}
+        </View>
+        <View style={styles.headerRight}>
+          {rightButton && <View>{rightButton}</View>}
+        </View>
       </Animated.View>
 
       {/* Scrollable Content */}
@@ -95,6 +106,9 @@ const styles = StyleSheet.create({
   floatingHeader: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     zIndex: 100,
     ...Platform.select({
       ios: {
@@ -110,5 +124,17 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  headerLeft: {
+    width: 50,
+    alignItems: 'flex-start',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerRight: {
+    width: 50,
+    alignItems: 'flex-end',
   },
 });

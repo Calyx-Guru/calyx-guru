@@ -8,13 +8,15 @@ type AccentTextProps = {
   color?: ColorType;
   size?: SizeType;
   translate?: boolean;
+  style?: object;
 };
 
 export function AccentText({
   children,
-  color = 'primary',
+  color = 'onPrimary',
   size = 'md',
   translate = true,
+  style,
 }: PropsWithChildren<AccentTextProps>) {
   const {
     colors,
@@ -30,11 +32,14 @@ export function AccentText({
   // If font is not loaded, use the fallback locale to translate
   return (
     <Text
-      style={{
-        fontFamily: fontRegistryToUse.accent,
-        fontSize: fontSize[size],
-        color: colors[color],
-      }}
+      style={[
+        {
+          fontFamily: fontRegistryToUse.accent,
+          fontSize: fontSize[size],
+          color: colors[color],
+        },
+        style,
+      ]}
     >
       {translate
         ? i18n.t(children as string, {

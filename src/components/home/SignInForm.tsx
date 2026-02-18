@@ -21,24 +21,26 @@ export function SignInForm() {
   const { signIn, signInWithOAuth } = useContext(SupabaseAuthContext);
   const { colors, spacing } = useContext(AppAppearanceContext);
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(
     null,
   );
   const [errors, setErrors] = useState<{
-    email?: string;
+    username?: string;
     password?: string;
   }>({});
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
 
-    if (!email.trim()) {
-      newErrors.email = 'forms.errors.emailRequired';
-    } else if (!email.includes('@')) {
-      newErrors.email = 'forms.errors.emailInvalid';
+    if (!username.trim()) {
+      newErrors.username = 'forms.errors.usernameRequired';
+    } else if (username.length < 3) {
+      newErrors.username = 'forms.errors.usernameTooShort';
+    } else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      newErrors.username = 'forms.errors.usernameInvalid';
     }
 
     if (!password) {
@@ -54,8 +56,10 @@ export function SignInForm() {
 
     setIsSigningIn(true);
     try {
-      await signIn(email, password);
-      router.replace('/');
+      // Generate dummy email from username
+      const dummyEmail = `${username}@nomail.local`;
+      await signIn(dummyEmail, password);
+      router.replace('/(tabs)/home');
     } catch (error: any) {
       Alert.alert(
         'Sign In Failed',
@@ -96,12 +100,9 @@ export function SignInForm() {
     >
       {/* Header */}
       <View style={[styles.header, { paddingTop: spacing.layout.xl }]}>
-        <BodyText size="3xl" color="light" translate={true}>
-          auth.welcome
-        </BodyText>
         <BodyText
           size="md"
-          color="grey"
+          color="onBackground"
           translate={true}
           style={{ marginTop: spacing.layout.md }}
         >
@@ -114,13 +115,12 @@ export function SignInForm() {
         style={[styles.formSection, { paddingHorizontal: spacing.layout.lg }]}
       >
         <TextInput
-          label="forms.labels.email"
-          placeholder="forms.placeholders.email"
-          value={email}
-          onChangeText={setEmail}
-          error={errors.email}
+          label="forms.labels.username"
+          placeholder="forms.placeholders.username"
+          value={username}
+          onChangeText={setUsername}
+          error={errors.username}
           editable={!isSigningIn && !loadingProvider}
-          keyboardType="email-address"
           autoCapitalize="none"
         />
 
@@ -132,13 +132,12 @@ export function SignInForm() {
           error={errors.password}
           editable={!isSigningIn && !loadingProvider}
           secureTextEntry
-          style={{ marginTop: spacing.layout.md }}
         />
 
         <ThemedButton
           onPress={handleEmailSignIn}
           background="primary"
-          labelColor="light"
+          labelColor="onPrimary"
           size="md"
           translate={true}
           style={{
@@ -147,7 +146,7 @@ export function SignInForm() {
           }}
         >
           {isSigningIn ? (
-            <ActivityIndicator color={colors.light} />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
             'auth.signIn'
           )}
@@ -160,21 +159,21 @@ export function SignInForm() {
           styles.divider,
           {
             marginVertical: spacing.layout.lg,
-            borderColor: colors.border,
+            borderColor: colors.outline,
             marginHorizontal: spacing.layout.lg,
           },
         ]}
       >
-        <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+        <View style={{ flex: 1, height: 1, backgroundColor: colors.outline }} />
         <BodyText
-          color="grey"
+          color="onBackground"
           size="sm"
           translate={true}
           style={{ marginHorizontal: spacing.layout.md }}
         >
           auth.orContinueWith
         </BodyText>
-        <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+        <View style={{ flex: 1, height: 1, backgroundColor: colors.outline }} />
       </View>
 
       {/* OAuth Providers */}
@@ -190,7 +189,7 @@ export function SignInForm() {
             (loadingProvider !== null && loadingProvider !== 'google')
           }
         />
-        <OAuthButton
+        {/* <OAuthButton
           provider="apple"
           onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'apple'}
@@ -198,7 +197,7 @@ export function SignInForm() {
             isSigningIn ||
             (loadingProvider !== null && loadingProvider !== 'apple')
           }
-        />
+        /> */}
         <OAuthButton
           provider="facebook"
           onPress={handleOAuthSignIn}
@@ -226,7 +225,7 @@ export function SignInForm() {
             (loadingProvider !== null && loadingProvider !== 'discord')
           }
         />
-        <OAuthButton
+        {/* <OAuthButton
           provider="kakao"
           onPress={handleOAuthSignIn}
           isLoading={loadingProvider === 'kakao'}
@@ -252,33 +251,7 @@ export function SignInForm() {
             isSigningIn ||
             (loadingProvider !== null && loadingProvider !== 'twitch')
           }
-        />
-      </View>
-
-      {/* Sign Up Link */}
-      <View
-        style={[
-          styles.signUpSection,
-          {
-            marginTop: spacing.layout.xl,
-            paddingBottom: spacing.layout.xl,
-          },
-        ]}
-      >
-        <BodyText color="grey" size="md" translate={true}>
-          auth.noAccount
-        </BodyText>
-        <ThemedButton
-          onPress={handleSignUpPress}
-          background="dark"
-          border="primary"
-          labelColor="primary"
-          size="md"
-          translate={true}
-          style={{ marginTop: spacing.layout.md }}
-        >
-          auth.signUp
-        </ThemedButton>
+        /> */}
       </View>
     </ScrollView>
   );

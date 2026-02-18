@@ -391,7 +391,7 @@ const LIGHT_COLOR_SCHEME: ThemeColorType = {
   onSurface: COLOR_SCHEME.text['900'],
   onSurfaceVariant: COLOR_SCHEME.text['600'],
   onSurfaceVariant1: COLOR_SCHEME.text['300'],
-  onBackground: COLOR_SCHEME.text['100'],
+  onBackground: COLOR_SCHEME.text['900'],
   outline: COLOR_SCHEME.divider['500'],
   neutralSurface: '#FFFFFF99',
   onCustom: '#FFFFFF',

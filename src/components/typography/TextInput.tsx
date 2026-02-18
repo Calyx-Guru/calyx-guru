@@ -17,6 +17,7 @@ type ThemedTextInputProps = TextInputProps & {
   labelColor?: ColorType;
   labelSize?: SizeType;
   inputColor?: ColorType;
+  placeHolderColor?: ColorType;
   translateLabel?: boolean;
   translatePlaceholder?: boolean;
   helperText?: string;
@@ -27,9 +28,10 @@ export function TextInput({
   placeholder,
   error,
   helperText,
-  labelColor = 'light',
+  labelColor = 'onBackground',
   labelSize = 'md',
-  inputColor = 'dark',
+  inputColor = 'onSurface',
+  placeHolderColor = 'onSurfaceVariant',
   translateLabel = true,
   translatePlaceholder = true,
   ...props
@@ -76,8 +78,8 @@ export function TextInput({
         style={[
           styles.input,
           {
-            borderColor: error ? colors.danger : colors.border,
-            backgroundColor: colors.input,
+            borderColor: error ? colors.error : colors.outline,
+            backgroundColor: colors.surface,
             color: colors[inputColor],
             fontFamily: fontRegistryToUse.body,
             fontSize: fontSize.md,
@@ -85,7 +87,7 @@ export function TextInput({
             paddingVertical: spacing.layout.sm,
           },
         ]}
-        placeholderTextColor={colors.grey}
+        placeholderTextColor={colors[placeHolderColor]}
         placeholder={translatedPlaceholder}
         {...props}
       />
@@ -94,7 +96,7 @@ export function TextInput({
           style={{
             fontFamily: fontRegistryToUse.body,
             fontSize: fontSize.xs,
-            color: colors.danger,
+            color: colors.error,
             marginTop: spacing.dense.xs,
           }}
         >
@@ -106,7 +108,7 @@ export function TextInput({
           style={{
             fontFamily: fontRegistryToUse.body,
             fontSize: fontSize.xs,
-            color: colors.grey,
+            color: colors.onSurface,
             marginTop: spacing.dense.xs,
           }}
         >
