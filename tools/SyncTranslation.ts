@@ -58,30 +58,25 @@ async function loadManifest(): Promise<MasterDataManifest | null> {
   return null;
 }
 
-async function upload(): Promise<void> {
-  await loginSupabase();
-
+async function versionUpManifest(): Promise<MasterDataManifest | null> {
   // Download the manifest to get the current version number (or use a default version if manifest doesn't exist)
-  let version = 1;
   let manifest = await loadManifest();
-  if (manifest) {
-    version = manifest.localization.version;
+  if (!manifest) {
+    return null;
   }
 
   // Update the manifest version
-  version += 1;
-  console.log(`Updating manifest version to ${version}...`);
+  console.log(`Updating manifest version ...`);
 
-  const updatedManifest: MasterDataManifest = {
-    ...(manifest || ({} as any)),
-    localization: {
-      lastUpdated: new Date().toISOString(),
-      version,
-    },
-  };
+  manifest.localization.version = (manifest?.localization.version || 0) + 1;
+  manifest.localization.lastUpdated = new Date().toISOString();
 
+  return manifest;
+}
+
+async function uploadManifest(updatedManifest: MasterDataManifest) {
   // Upload the updated manifest back to Supabase storage
-  const { error: updateManifestError } = await supabase.storage
+  return supabase.storage
     .from(STORAGE_BUCKET)
     .upload(
       MASTER_DATA_MANIFEST_FILE_NAME,
@@ -91,11 +86,18 @@ async function upload(): Promise<void> {
         upsert: true,
       },
     );
+}
 
-  if (updateManifestError) {
-    console.error('Error uploading manifest:', updateManifestError);
+async function upload(): Promise<void> {
+  await loginSupabase();
+
+  const manifest = await versionUpManifest();
+  if (!manifest) {
+    console.error('Failed to update manifest version. Aborting upload.');
     return;
   }
+
+  const { version } = manifest.localization;
 
   console.log(
     'Uploading translation data to Supabase storage, target:',
@@ -161,8 +163,11 @@ async function upload(): Promise<void> {
     });
 
   if (error) {
-    console.error('Error uploading localization data:', error);
+    throw error;
   }
+
+  await uploadManifest(manifest);
+  console.log('✓ Successfully uploaded localization data and updated manifest');
 }
 
 async function download(): Promise<void> {
@@ -184,7 +189,7 @@ async function download(): Promise<void> {
 
   if (error) {
     console.error('Error downloading localization data:', error);
-    return;
+    throw error;
   }
 
   const localizationText = await data.text();
@@ -215,7 +220,11 @@ async function download(): Promise<void> {
       language,
       'translation.json',
     );
-    await fs.writeFile(languageFilePath, JSON.stringify(languageData, null, 2));
+    await fs.writeFile(
+      languageFilePath,
+      JSON.stringify(languageData, null, 2),
+      'utf-8',
+    );
     console.log(
       `✓ Downloaded translations for ${language} to ${languageFilePath}`,
     );

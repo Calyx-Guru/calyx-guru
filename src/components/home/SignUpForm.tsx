@@ -4,6 +4,7 @@ import { TextInput } from '@/components/typography/TextInput';
 import { ThemedButton } from '@/components/typography/ThemedButton';
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
 import { SupabaseAuthContext } from '@/contexts/SupabaseAuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import supabase from '@/lib/supabase/client';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
@@ -31,6 +32,7 @@ type FormErrors = Partial<SignUpFormData>;
 
 export function SignUpForm() {
   const { signUp } = useContext(SupabaseAuthContext);
+  const { loadProfile } = useUserProfile();
   const {
     colors,
     spacing,
@@ -116,18 +118,8 @@ export function SignUpForm() {
       // Store user profile data if provided
       const user = (await supabase.auth.getUser()).data.user;
 
-      if (user && (formData.dateOfBirth || formData.gender)) {
-        const { error: profileError } = await supabase.from('profiles').insert({
-          id: user.id,
-          username: formData.username,
-          date_of_birth: formData.dateOfBirth || null,
-          gender: formData.gender || null,
-        });
-
-        if (profileError) {
-          console.error('Error saving user profile:', profileError);
-          // Don't fail the signup if profile save fails
-        }
+      if (user) {
+        await loadProfile(user.id);
       }
 
       // Navigate to home or verification screen

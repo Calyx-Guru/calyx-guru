@@ -70,8 +70,8 @@ create index idx_profiles_email on public.profiles (email);
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, created_at, updated_at)
-  values (new.id, new.email, now(), now());
+  insert into public.profiles (id, username, email, created_at, updated_at)
+  values (new.id, split_part(new.email, '@', 1), new.email, now(), now());
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
