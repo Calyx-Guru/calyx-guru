@@ -7,6 +7,7 @@ import supabase from '@/lib/supabase/client';
 import { ensureFonts } from '@/theme/fonts';
 import { LanguageKey } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { runWithTimeout } from './helper';
 
 /**
  * Initialize the entire app
@@ -57,11 +58,14 @@ async function initializeLocale(): Promise<void> {
 async function initializeSupabaseConnection(): Promise<void> {
   try {
     // Check if we can connect to Supabase and verify auth status
-    const { data, error } = await supabase.auth.getSession();
+    const { data, error } = await runWithTimeout(
+      () => supabase.auth.getSession(),
+      3000,
+    );
 
     if (error) {
       console.warn('Supabase connection warning:', error.message);
-      return;
+      throw error;
     }
 
     const session = data?.session;
@@ -74,7 +78,10 @@ async function initializeSupabaseConnection(): Promise<void> {
       if (expiresAt && expiresAt < now) {
         console.warn('Session token expired, attempting refresh');
         // Try to refresh the session
-        const { error: refreshError } = await supabase.auth.refreshSession();
+        const { error: refreshError } = await runWithTimeout(
+          () => supabase.auth.refreshSession(),
+          3000,
+        );
         if (refreshError) {
           console.warn('Failed to refresh session:', refreshError.message);
         }

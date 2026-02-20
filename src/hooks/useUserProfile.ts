@@ -10,6 +10,7 @@ import {
 } from '@/lib/supabase/userProfileService';
 import { useUserProfileStore } from '@/store/userProfileStore';
 import { UserProfile } from '@/types/profile';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect } from 'react';
 
 export function useUserProfile() {
@@ -24,10 +25,41 @@ export function useUserProfile() {
   const setLoading = useUserProfileStore((state) => state.setLoading);
   const setError = useUserProfileStore((state) => state.setError);
 
+  const loadProfileFromLocalStorage = useCallback(async () => {
+    try {
+      const storedProfile = await AsyncStorage.getItem('userProfile');
+      if (storedProfile) {
+        const parsedProfile = JSON.parse(storedProfile);
+        setProfile(parsedProfile);
+      }
+    } catch (err) {
+      console.error('Error parsing stored profile:', err);
+    }
+  }, [setProfile]);
+
+  const updateProfileToLocalStorage = useCallback(
+    async (data: Partial<UserProfile>) => {
+      try {
+        const updatedProfile: any = {
+          ...profile,
+          ...data,
+        };
+        setProfile(updatedProfile);
+        await AsyncStorage.setItem(
+          'userProfile',
+          JSON.stringify(updatedProfile),
+        );
+      } catch (err) {
+        console.error('Error updating local storage:', err);
+      }
+    },
+    [],
+  );
+
   /**
    * Load user profile by ID
    */
-  const loadProfile = useCallback(
+  const loadProfileFromRemote = useCallback(
     async (userId: string) => {
       setLoading(true);
       try {
@@ -51,13 +83,13 @@ export function useUserProfile() {
   /**
    * Update user profile
    */
-  const updateProfile = useCallback(
-    async (updates: Partial<UserProfile>) => {
+  const updateProfileToRemote = useCallback(
+    async (id: string, updates: Partial<UserProfile>) => {
       if (!profile) return;
 
       setLoading(true);
       try {
-        const updatedProfile = await updateUserProfile(profile.id, updates);
+        const updatedProfile = await updateUserProfile(id, updates);
         if (updatedProfile) {
           setProfile(updatedProfile);
         }
@@ -96,8 +128,10 @@ export function useUserProfile() {
     profile,
     isLoading,
     error,
-    loadProfile,
-    updateProfile,
+    loadProfileFromRemote,
+    updateProfileToRemote,
+    loadProfileFromLocalStorage,
+    updateProfileToLocalStorage,
     clearProfile,
     setProfile,
   };

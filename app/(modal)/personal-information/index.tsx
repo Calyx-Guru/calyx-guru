@@ -3,10 +3,11 @@ import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
 import { SupabaseAuthContext } from '@/contexts/SupabaseAuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import supabase from '@/lib/supabase/client';
+import { UserProfile } from '@/types/profile';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -41,7 +42,13 @@ export default function PersonalInformationScreen() {
     fontSize,
   } = useContext(AppAppearanceContext);
   const { user } = useContext(SupabaseAuthContext);
-  const { profile, isLoading, loadProfile, setProfile } = useUserProfile();
+  const {
+    profile,
+    isLoading,
+    loadProfileFromRemote,
+    updateProfileToRemote,
+    updateProfileToLocalStorage,
+  } = useUserProfile();
 
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     profilePictureUrl: profile?.avatar_url || undefined,
@@ -53,12 +60,6 @@ export default function PersonalInformationScreen() {
     address: profile?.location || undefined,
     phoneNumber: profile?.phone_number || undefined,
   });
-
-  useEffect(() => {
-    if (user?.id) {
-      loadProfile(user.id);
-    }
-  }, [user?.id, loadProfile]);
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -74,67 +75,45 @@ export default function PersonalInformationScreen() {
 
   // Auto-save function
   const saveToDatabase = async (dataToSave: PersonalInfo) => {
+    // clone dataToSave and filter out undefined values
+    const filteredData: Record<string, any> = {};
+    Object.keys(dataToSave).forEach((key) => {
+      const value = (dataToSave as any)[key];
+      if (value !== undefined) {
+        filteredData[key] = value;
+      }
+    });
+    const updateData: Partial<UserProfile> = {
+      username: filteredData.nickname || undefined,
+      avatar_url: filteredData.profilePictureUrl || undefined,
+      full_name: filteredData.fullName || undefined,
+      date_of_birth: filteredData.birthDate || undefined,
+      gender: filteredData.gender || undefined,
+      family_status: filteredData.maritalStatus || undefined,
+      location: filteredData.address || undefined,
+      phone_number: filteredData.phoneNumber || undefined,
+    };
+
+    updateProfileToLocalStorage(updateData);
+
     if (!user?.id) return;
     try {
       setIsUpdating(true);
 
-      // clone dataToSave and filter out undefined values
-      const filteredData: Record<string, any> = {};
-      Object.keys(dataToSave).forEach((key) => {
-        const value = (dataToSave as any)[key];
-        if (value !== undefined) {
-          filteredData[key] = value;
-        }
-      });
-
-      const updateData: Record<string, any> = {
-        username: filteredData.nickname || undefined,
-        avatar_url: filteredData.profilePictureUrl || undefined,
-        full_name: filteredData.fullName || undefined,
-        date_of_birth: filteredData.birthDate || undefined,
-        gender: filteredData.gender || undefined,
-        family_status: filteredData.maritalStatus || undefined,
-        location: filteredData.address || undefined,
-        phone_number: filteredData.phoneNumber || undefined,
-      };
-
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', user.id);
-
-      if (error) {
-        if (error.code === '23505') {
-          Alert.alert(
-            'Error',
-            'The nickname is already taken. Please choose a different one.',
-          );
-        } else {
-          Alert.alert('Error', 'Failed to save profile. Please try again.');
-        }
-
-        console.error('Error saving profile:', error);
-        setPersonalInfo({
-          profilePictureUrl: profile?.avatar_url || undefined,
-          nickname: profile?.username || undefined,
-          fullName: profile?.full_name || undefined,
-          birthDate: profile?.date_of_birth || undefined,
-          gender: profile?.gender || undefined,
-          maritalStatus: profile?.family_status || undefined,
-          address: profile?.location || undefined,
-          phoneNumber: profile?.phone_number || undefined,
-        });
-      } else if (profile) {
-        // set data to zustand store
-        setProfile({
-          ...profile,
-          ...updateData,
-        });
-
-        console.log('Profile saved successfully');
-      }
+      await updateProfileToRemote(user.id, updateData);
     } catch (err) {
       console.error('Error saving to database:', err);
+
+      setPersonalInfo({
+        profilePictureUrl: profile?.avatar_url || undefined,
+        nickname: profile?.username || undefined,
+        fullName: profile?.full_name || undefined,
+        birthDate: profile?.date_of_birth || undefined,
+        gender: profile?.gender || undefined,
+        maritalStatus: profile?.family_status || undefined,
+        address: profile?.location || undefined,
+        phoneNumber: profile?.phone_number || undefined,
+      });
     } finally {
       setIsUpdating(false);
     }

@@ -46,8 +46,8 @@ export interface UserProfile {
   password_reset_expires_at: string | undefined;
 
   // Timestamps
-  created_at: string;
-  modified_at: string;
+  created_at: string | undefined;
+  modified_at: string | undefined;
   last_active_at: string | undefined;
   last_login_at: string | undefined;
   deactivated_at: string | undefined;

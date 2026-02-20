@@ -34,3 +34,23 @@ export function runOnce(
 
   return runOnceWrapper;
 }
+
+export function runWithTimeout<T>(
+  fn: () => Promise<T>,
+  timeout: number,
+): Promise<T> {
+  return Promise.race([
+    fn(),
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Operation timed out')), timeout),
+    ),
+  ]);
+}
+
+export function fetchWithTimeout(
+  url: string,
+  timeout: number,
+  options?: RequestInit,
+): Promise<Response> {
+  return runWithTimeout(() => fetch(url, options), timeout);
+}

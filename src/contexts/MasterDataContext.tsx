@@ -11,6 +11,7 @@ import type { FortunePoemContentType } from '@/types/FortunePoems';
 import { createContext, useEffect, useState } from 'react';
 
 // Import built-in JSON files
+import { fetchWithTimeout } from '@/lib/app/helper';
 import fortunePoemsRaw from '@/masterdata/fortune_poems.json';
 import localManifestRaw from '@/masterdata/manifest.json';
 
@@ -57,7 +58,7 @@ export function MasterDataProvider({
         .getPublicUrl(MASTER_DATA_MANIFEST_FILE_NAME);
 
       const url = data.publicUrl;
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url, 3000);
       const json = await res.json();
 
       if (!json) {

@@ -1,8 +1,6 @@
+import { useUserProfile } from '@/hooks/useUserProfile';
 import supabase from '@/lib/supabase/client';
-import {
-  fetchUserProfile
-} from '@/lib/supabase/userProfileService';
-import { useUserProfileStore } from '@/store/userProfileStore';
+import { fetchUserProfile } from '@/lib/supabase/userProfileService';
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 
@@ -47,6 +45,9 @@ export function SupabaseAuthProvider({
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { setProfile, clearProfile, loadProfileFromLocalStorage } =
+    useUserProfile();
+
   // Get initial session on mount and subscribe to changes
   useEffect(() => {
     const getSession = async () => {
@@ -62,7 +63,7 @@ export function SupabaseAuthProvider({
           try {
             const userProfile = await fetchUserProfile(initialSession.user.id);
             if (userProfile) {
-              useUserProfileStore.getState().setProfile(userProfile);
+              setProfile(userProfile);
             }
           } catch (error) {
             console.error('Error loading user profile:', error);
@@ -75,6 +76,7 @@ export function SupabaseAuthProvider({
       }
     };
 
+    loadProfileFromLocalStorage();
     getSession();
 
     // Listen to auth state changes
@@ -90,13 +92,13 @@ export function SupabaseAuthProvider({
         try {
           const userProfile = await fetchUserProfile(newSession.user.id);
           if (userProfile) {
-            useUserProfileStore.getState().setProfile(userProfile);
+            setProfile(userProfile);
           }
         } catch (error) {
           console.error('Error loading user profile:', error);
         }
       } else if (event === 'SIGNED_OUT') {
-        useUserProfileStore.getState().clearProfile();
+        clearProfile();
       }
     });
 

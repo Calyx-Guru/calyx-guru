@@ -32,7 +32,7 @@ type FormErrors = Partial<SignUpFormData>;
 
 export function SignUpForm() {
   const { signUp } = useContext(SupabaseAuthContext);
-  const { loadProfile } = useUserProfile();
+  const { loadProfileFromRemote } = useUserProfile();
   const {
     colors,
     spacing,
@@ -119,7 +119,7 @@ export function SignUpForm() {
       const user = (await supabase.auth.getUser()).data.user;
 
       if (user) {
-        await loadProfile(user.id);
+        await loadProfileFromRemote(user.id);
       }
 
       // Navigate to home or verification screen

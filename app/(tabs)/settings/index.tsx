@@ -1,5 +1,3 @@
-import AuthenticateForm from '@/components/home/AuthenticateForm';
-import { SignInForm } from '@/components/home/SignInForm';
 import { BodyText } from '@/components/typography/BodyText';
 import { ThemedButton } from '@/components/typography/ThemedButton';
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
@@ -16,10 +14,6 @@ export default function SettingsScreen() {
     router.navigate('/(modal)/personal-information' as any);
   };
 
-  if (!user) {
-    return <AuthenticateForm />;
-  }
-
   return (
     <View
       style={{
@@ -27,21 +21,18 @@ export default function SettingsScreen() {
         backgroundColor: colors.background,
       }}
     >
-      {!user && <SignInForm />}
-      {user && (
-        <View
-          style={{
-            padding: 16,
-          }}
-        >
-          <BodyText>Welcome to Settings Screen</BodyText>
-          <ThemedButton onPress={handlePersonalInformationPressed}>
-            Personal Infomation
-          </ThemedButton>
-          <ThemedButton>Language</ThemedButton>
-          <ThemedButton>Account</ThemedButton>
-        </View>
-      )}
+      <View
+        style={{
+          padding: 16,
+        }}
+      >
+        <BodyText>Welcome to Settings Screen</BodyText>
+        <ThemedButton onPress={handlePersonalInformationPressed}>
+          Personal Infomation
+        </ThemedButton>
+        <ThemedButton>Language</ThemedButton>
+        <ThemedButton>Account</ThemedButton>
+      </View>
     </View>
   );
 }
