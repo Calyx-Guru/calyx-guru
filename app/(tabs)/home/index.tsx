@@ -25,9 +25,7 @@ export default function HomeScreen() {
         <ThemedButton onPress={() => console.log('Navigate to Palm Reading')}>
           Go to Palm Reading
         </ThemedButton>
-        <ThemedButton
-          onPress={() => console.log('Navigate to Feng Shui Compass')}
-        >
+        <ThemedButton onPress={() => router.push('/(modal)/feng-shui')}>
           Go to Feng Shui Compass
         </ThemedButton>
       </View>

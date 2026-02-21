@@ -25,6 +25,12 @@ export default function ModalLayout() {
           title: 'Today Tellings',
         }}
       />
+      <Stack.Screen
+        name="feng-shui/index"
+        options={{
+          title: 'Feng Shui Compass',
+        }}
+      />
     </Stack>
   );
 }
