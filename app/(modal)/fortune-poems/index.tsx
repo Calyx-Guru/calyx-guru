@@ -1,10 +1,18 @@
 import FloatingHeader from '@/components/home/FloatingHeader';
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
+import { addFortuneTellingHistoryEntry } from '@/lib/app/fortuneTellingsHistory';
 import { useEventListener } from 'expo';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useContext, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useContext, useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 const INTERESTS = ['Love', 'Career', 'Travel', 'Luck'] as const;
 
@@ -21,6 +29,90 @@ const FORTUNE_RESULTS: Record<Interest, string> = {
 
 const FORTUNE_VIDEO = require('../../../src/assets/videos/Mascot_Fortune_Telling_Video_Generation.mp4');
 
+type FortuneVideoModalProps = {
+  backgroundColor: string;
+  onPlayToEnd: () => void;
+  onRequestClose: () => void;
+};
+
+function FortuneVideoModal({
+  backgroundColor,
+  onPlayToEnd,
+  onRequestClose,
+}: FortuneVideoModalProps) {
+  const player = useVideoPlayer(FORTUNE_VIDEO, (videoPlayer) => {
+    videoPlayer.loop = false;
+  });
+  const fadeOpacity = useRef(new Animated.Value(0)).current;
+  const hasStartedFade = useRef(false);
+
+  useEventListener(player, 'playToEnd', onPlayToEnd);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const duration = Number(player.duration);
+      const currentTime = Number(player.currentTime);
+
+      if (!Number.isFinite(duration) || !Number.isFinite(currentTime)) {
+        return;
+      }
+
+      if (duration <= 0) {
+        return;
+      }
+
+      const remainingSeconds = duration - currentTime;
+      if (remainingSeconds <= 1 && !hasStartedFade.current) {
+        hasStartedFade.current = true;
+        Animated.timing(fadeOpacity, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }).start();
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(intervalId);
+      fadeOpacity.stopAnimation();
+    };
+  }, [fadeOpacity, player]);
+
+  return (
+    <Modal
+      visible
+      animationType="none"
+      presentationStyle="fullScreen"
+      onShow={() => {
+        player.currentTime = 0;
+        player.play();
+      }}
+      onRequestClose={() => {
+        player.pause();
+        onRequestClose();
+      }}
+    >
+      <View style={[styles.videoFullscreenContainer, { backgroundColor }]}>
+        <VideoView
+          player={player}
+          style={styles.videoFullscreen}
+          nativeControls={false}
+          contentFit="cover"
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.videoFadeOverlay,
+            {
+              opacity: fadeOpacity,
+            },
+          ]}
+        />
+      </View>
+    </Modal>
+  );
+}
+
 export default function FortunePoemsScreen() {
   const { colors, fontRegistry, fallbackFontRegistry, fontsLoaded, fontSize } =
     useContext(AppAppearanceContext);
@@ -30,28 +122,28 @@ export default function FortunePoemsScreen() {
     null,
   );
   const [showResultModal, setShowResultModal] = useState(false);
+  const [resultText, setResultText] = useState('');
+  const [videoSessionId, setVideoSessionId] = useState(0);
 
-  const player = useVideoPlayer(FORTUNE_VIDEO, (videoPlayer) => {
-    videoPlayer.loop = false;
-  });
-
-  useEventListener(player, 'playToEnd', () => {
-    setShowResultModal(true);
-  });
-
-  const resultText = useMemo(() => {
-    if (!selectedInterest) {
-      return '';
+  const handleVideoPlayToEnd = () => {
+    if (selectedInterest) {
+      const selectedResult = FORTUNE_RESULTS[selectedInterest];
+      setResultText(selectedResult);
+      void addFortuneTellingHistoryEntry({
+        interest: selectedInterest,
+        resultText: selectedResult,
+      });
     }
 
-    return FORTUNE_RESULTS[selectedInterest];
-  }, [selectedInterest]);
+    setSelectedInterest(null);
+    setShowResultModal(true);
+  };
 
   const handleSelectInterest = (interest: Interest) => {
+    setVideoSessionId((prev) => prev + 1);
     setSelectedInterest(interest);
     setShowResultModal(false);
-    player.currentTime = 0;
-    player.play();
+    setResultText('');
   };
 
   return (
@@ -60,7 +152,6 @@ export default function FortunePoemsScreen() {
       leftButton={
         <Pressable
           onPress={() => {
-            player.pause();
             router.back();
           }}
         >
@@ -72,6 +163,23 @@ export default function FortunePoemsScreen() {
             }}
           >
             Back
+          </Text>
+        </Pressable>
+      }
+      rightButton={
+        <Pressable
+          onPress={() => {
+            router.push('/(modal)/fortune-poems/history' as any);
+          }}
+        >
+          <Text
+            style={{
+              color: colors.onPrimary,
+              fontFamily: fontRegistryToUse.body,
+              fontSize: fontSize.md,
+            }}
+          >
+            Today
           </Text>
         </Pressable>
       }
@@ -125,29 +233,16 @@ export default function FortunePoemsScreen() {
           ))}
         </View>
 
-        <Modal
-          visible={Boolean(selectedInterest)}
-          animationType="fade"
-          presentationStyle="fullScreen"
-          onRequestClose={() => {
-            player.pause();
-            setSelectedInterest(null);
-          }}
-        >
-          <View
-            style={[
-              styles.videoFullscreenContainer,
-              { backgroundColor: colors.background },
-            ]}
-          >
-            <VideoView
-              player={player}
-              style={styles.videoFullscreen}
-              nativeControls
-              contentFit="cover"
-            />
-          </View>
-        </Modal>
+        {selectedInterest ? (
+          <FortuneVideoModal
+            key={`fortune-video-session-${videoSessionId}`}
+            backgroundColor={colors.background}
+            onPlayToEnd={handleVideoPlayToEnd}
+            onRequestClose={() => {
+              setSelectedInterest(null);
+            }}
+          />
+        ) : null}
 
         <Modal
           transparent
@@ -201,8 +296,8 @@ export default function FortunePoemsScreen() {
                 ]}
                 onPress={() => {
                   setShowResultModal(false);
-                  player.pause();
                   setSelectedInterest(null);
+                  setResultText('');
                 }}
               >
                 <Text
@@ -250,6 +345,10 @@ const styles = StyleSheet.create({
   },
   videoFullscreen: {
     flex: 1,
+  },
+  videoFadeOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#FFFFFF',
   },
   modalBackdrop: {
     flex: 1,

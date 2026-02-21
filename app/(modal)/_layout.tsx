@@ -19,6 +19,12 @@ export default function ModalLayout() {
           title: 'Fortune Poems',
         }}
       />
+      <Stack.Screen
+        name="fortune-poems/history"
+        options={{
+          title: 'Today Tellings',
+        }}
+      />
     </Stack>
   );
 }
