@@ -31,6 +31,12 @@ export default function ModalLayout() {
           title: 'Feng Shui Compass',
         }}
       />
+      <Stack.Screen
+        name="palm-reading/index"
+        options={{
+          title: 'Palm Reading',
+        }}
+      />
     </Stack>
   );
 }

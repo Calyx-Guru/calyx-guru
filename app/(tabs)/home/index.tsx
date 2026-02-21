@@ -22,7 +22,7 @@ export default function HomeScreen() {
         <ThemedButton onPress={() => router.push('/(modal)/fortune-poems')}>
           Go to Fortune Poems
         </ThemedButton>
-        <ThemedButton onPress={() => console.log('Navigate to Palm Reading')}>
+        <ThemedButton onPress={() => router.push('/(modal)/palm-reading')}>
           Go to Palm Reading
         </ThemedButton>
         <ThemedButton onPress={() => router.push('/(modal)/feng-shui')}>
