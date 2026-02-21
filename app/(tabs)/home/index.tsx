@@ -2,6 +2,7 @@ import FloatingHeader from '@/components/home/FloatingHeader';
 import { BodyText } from '@/components/typography/BodyText';
 import { ThemedButton } from '@/components/typography/ThemedButton';
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
+import { router } from 'expo-router';
 import { useContext } from 'react';
 import { View } from 'react-native';
 
@@ -18,8 +19,17 @@ export default function HomeScreen() {
         }}
       >
         <BodyText>Welcome to Home Screen</BodyText>
-        <ThemedButton>Go to Child Screen 1</ThemedButton>
-        <ThemedButton>Go to Child Screen 2</ThemedButton>
+        <ThemedButton onPress={() => router.push('/(modal)/fortune-poems')}>
+          Go to Fortune Poems
+        </ThemedButton>
+        <ThemedButton onPress={() => console.log('Navigate to Palm Reading')}>
+          Go to Palm Reading
+        </ThemedButton>
+        <ThemedButton
+          onPress={() => console.log('Navigate to Feng Shui Compass')}
+        >
+          Go to Feng Shui Compass
+        </ThemedButton>
       </View>
     </FloatingHeader>
   );

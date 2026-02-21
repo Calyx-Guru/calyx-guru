@@ -13,6 +13,12 @@ export default function ModalLayout() {
           title: 'Personal Information',
         }}
       />
+      <Stack.Screen
+        name="fortune-poems/index"
+        options={{
+          title: 'Fortune Poems',
+        }}
+      />
     </Stack>
   );
 }
