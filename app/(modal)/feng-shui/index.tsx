@@ -4,16 +4,18 @@ import { router } from 'expo-router';
 import { Magnetometer } from 'expo-sensors';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Pressable,
-    StyleSheet,
-    Text,
-    View
+  Animated,
+  Dimensions,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const COMPASS_SIZE = Math.min(SCREEN_WIDTH - 32, 300);
+const COMPASS_SIZE = SCREEN_WIDTH - 32;
+const NEEDLE_SIZE = COMPASS_SIZE * 0.12;
 
 type CompassError = 'no-gyro' | null;
 
@@ -181,8 +183,6 @@ export default function FengShuiScreen() {
               {
                 width: COMPASS_SIZE,
                 height: COMPASS_SIZE,
-                borderColor: colors.primary,
-                backgroundColor: colors.surface,
               },
               {
                 transform: [
@@ -193,68 +193,25 @@ export default function FengShuiScreen() {
               },
             ]}
           >
-            {/* Cardinal directions */}
-            <View style={[styles.cardinalLabel, styles.north]}>
-              <Text
-                style={{
-                  color: colors.primary,
-                  fontFamily: fontRegistryToUse.heading,
-                  fontSize: fontSize.lg,
-                  fontWeight: 'bold',
-                }}
-              >
-                N
-              </Text>
-            </View>
-            <View style={[styles.cardinalLabel, styles.south]}>
-              <Text
-                style={{
-                  color: colors.onSurface,
-                  fontFamily: fontRegistryToUse.body,
-                  fontSize: fontSize.md,
-                }}
-              >
-                S
-              </Text>
-            </View>
-            <View style={[styles.cardinalLabel, styles.east]}>
-              <Text
-                style={{
-                  color: colors.onSurface,
-                  fontFamily: fontRegistryToUse.body,
-                  fontSize: fontSize.md,
-                }}
-              >
-                E
-              </Text>
-            </View>
-            <View style={[styles.cardinalLabel, styles.west]}>
-              <Text
-                style={{
-                  color: colors.onSurface,
-                  fontFamily: fontRegistryToUse.body,
-                  fontSize: fontSize.md,
-                }}
-              >
-                W
-              </Text>
-            </View>
-
-            {/* Center dot */}
-            <View
-              style={[styles.centerDot, { backgroundColor: colors.primary }]}
+            <Image
+              source={require('@/assets/images/feng-shui/luo_pan_sm.png')}
+              style={styles.compassImage}
+              resizeMode="contain"
             />
           </Animated.View>
 
           {/* Needle pointer (stays fixed, compass rotates underneath) */}
-          <View
-            style={[
-              styles.needle,
-              {
-                borderLeftColor: colors.primary,
-                borderRightColor: colors.primary,
-              },
-            ]}
+          <Image
+            source={require('@/assets/images/feng-shui/needle.png')}
+            style={styles.needleImage}
+            resizeMode="contain"
+          />
+
+          {/* Bubble overlay */}
+          <Image
+            source={require('@/assets/images/feng-shui/bubble.png')}
+            style={styles.bubbleImage}
+            resizeMode="contain"
           />
         </View>
 
@@ -304,45 +261,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   compass: {
-    borderRadius: COMPASS_SIZE / 2,
-    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardinalLabel: {
+  compassImage: {
+    width: COMPASS_SIZE,
+    height: COMPASS_SIZE,
+  },
+  needleImage: {
     position: 'absolute',
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  north: {
-    top: 8,
-  },
-  south: {
-    bottom: 8,
-  },
-  east: {
-    right: 8,
-  },
-  west: {
-    left: 8,
-  },
-  centerDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-  },
-  needle: {
-    position: 'absolute',
-    width: 0,
-    height: COMPASS_SIZE * 0.45,
-    top: COMPASS_SIZE * 0.05,
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderTopColor: 'transparent',
-    borderBottomColor: 'transparent',
+    width: NEEDLE_SIZE,
+    height: NEEDLE_SIZE,
     zIndex: 10,
+  },
+  bubbleImage: {
+    position: 'absolute',
+    width: NEEDLE_SIZE,
+    height: NEEDLE_SIZE,
+    zIndex: 11,
   },
   info: {
     alignItems: 'center',
