@@ -1,28 +1,22 @@
 import HealthBar from '@/components/home/HealthBar';
 import { useAppAppearance } from '@/contexts/AppAppearanceContext';
 import { useUserProfileStore } from '@/store/userProfileStore';
-import { Ionicons } from '@expo/vector-icons';
 import { useEventListener } from 'expo';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-const BACKGROUND_VIDEO = require('../../../src/assets/videos/luckiest.mp4');
-const FORTUNE_VIDEO = require('../../../src/assets/videos/Mascot_Fortune_Telling_Video_Generation.mp4');
-
-/** Total HP across all three real bars (blue + yellow + red). */
-const MAX_TOTAL_HP = 300;
-const HP_STEP = 25;
-
-const BAR_COLORS = {
-   blue: '#3B82F6',
-   yellow: '#FACC15',
-   red: '#EF4444',
-   empty: '#000000',
-};
-
-const SUB_BUTTON_LABELS = ['Family &\nFriends', 'Money', 'Love', 'Career', 'Health'];
+import type { FortunePoem } from './constants';
+import {
+   BACKGROUND_VIDEOS,
+   BAR_COLORS,
+   FORTUNE_POEMS,
+   INIT_HP,
+   MARGIN,
+   MAX_TOTAL_HP,
+   SUB_BUTTON_LABELS,
+} from './constants';
 
 export default function HomeScreen() {
    const { colors } = useAppAppearance();
@@ -33,9 +27,28 @@ export default function HomeScreen() {
    const [isFortuneMode, setIsFortuneMode] = useState(false);
    const [showResultModal, setShowResultModal] = useState(false);
    const [selectedCategory, setSelectedCategory] = useState('');
+   const [drawnPoem, setDrawnPoem] = useState<FortunePoem | null>(null);
    const uiOpacity = useRef(new Animated.Value(1)).current;
+   const whiteFlashOpacity = useRef(new Animated.Value(0)).current;
 
-   const videoSource = isFortuneMode ? FORTUNE_VIDEO : BACKGROUND_VIDEO;
+   // ── Health state (declared early so video source can use it) ──
+   const [totalHp, setTotalHp] = useState(INIT_HP);
+
+   const bars = useMemo(() => {
+      const blue = Math.max(0, Math.min(100, totalHp - 200));
+      const yellow = Math.max(0, Math.min(100, totalHp - 100));
+      const red = Math.max(0, Math.min(100, totalHp));
+      return { blue, yellow, red };
+   }, [totalHp]);
+
+   // Background video based on HP state
+   const backgroundVideo = useMemo(() => {
+      if (totalHp < 100) return BACKGROUND_VIDEOS.unluckiest;
+      if (totalHp > 200) return BACKGROUND_VIDEOS.luckiest;
+      return BACKGROUND_VIDEOS.normal;
+   }, [totalHp]);
+
+   const videoSource = isFortuneMode ? BACKGROUND_VIDEOS.drawing_fortune : backgroundVideo;
 
    const player = useVideoPlayer(videoSource, (p) => {
       if (isFortuneMode) {
@@ -50,33 +63,33 @@ export default function HomeScreen() {
    // Listen for fortune video to finish
    useEventListener(player, 'playToEnd', () => {
       if (isFortuneMode) {
-         // Revert to background video
-         setIsFortuneMode(false);
-         // Fade UI back in
-         Animated.timing(uiOpacity, {
+         // Flash white over the video
+         Animated.timing(whiteFlashOpacity, {
             toValue: 1,
-            duration: 400,
+            duration: 500,
             useNativeDriver: true,
          }).start(() => {
-            // Show result modal
-            setShowResultModal(true);
+            // Apply the drawn poem's HP change
+            if (drawnPoem) {
+               setTotalHp((hp) => Math.max(0, Math.min(MAX_TOTAL_HP, hp + drawnPoem.hp)));
+            }
+            // Revert to background video while screen is white
+            setIsFortuneMode(false);
+            // Fade UI back in behind the white
+            uiOpacity.setValue(1);
+            mainButtonOpacity.setValue(1);
+            // Fade out white to reveal UI
+            Animated.timing(whiteFlashOpacity, {
+               toValue: 0,
+               duration: 2000,
+               useNativeDriver: true,
+            }).start(() => {
+               // Show result modal
+               setShowResultModal(true);
+            });
          });
       }
    });
-
-   // ── Health state ─────────────────────────────────────────
-   const [totalHp, setTotalHp] = useState(MAX_TOTAL_HP);
-
-   const bars = useMemo(() => {
-      // Blue depletes first, then yellow, then red.
-      const blue = Math.max(0, Math.min(100, totalHp - 200));
-      const yellow = Math.max(0, Math.min(100, totalHp - 100));
-      const red = Math.max(0, Math.min(100, totalHp));
-      return { blue, yellow, red };
-   }, [totalHp]);
-
-   const decreaseHp = useCallback(() => setTotalHp((hp) => Math.max(0, hp - HP_STEP)), []);
-   const increaseHp = useCallback(() => setTotalHp((hp) => Math.min(MAX_TOTAL_HP, hp + HP_STEP)), []);
 
    // ── Drawing fan-out state ────────────────────────────────
    const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -149,6 +162,10 @@ export default function HomeScreen() {
    const handleSubButtonPress = useCallback(
       (index: number) => {
          setSelectedCategory(SUB_BUTTON_LABELS[index].replace('\n', ' '));
+         // Draw a random fortune poem
+         const categoryPoems = FORTUNE_POEMS[index] ?? FORTUNE_POEMS[0];
+         const randomPoem = categoryPoems[Math.floor(Math.random() * categoryPoems.length)];
+         setDrawnPoem(randomPoem);
          // Collapse the menu first
          Animated.stagger(
             40,
@@ -161,20 +178,33 @@ export default function HomeScreen() {
             ),
          ).start(() => {
             setIsMenuOpen(false);
-            // Reset main button opacity to 0 (keep it hidden)
-            mainButtonOpacity.setValue(1);
-            // Fade out entire UI
+            // Keep main button hidden (don't restore opacity)
+            mainButtonOpacity.setValue(0);
+            // Fade out UI
             Animated.timing(uiOpacity, {
                toValue: 0,
-               duration: 300,
+               duration: 200,
                useNativeDriver: true,
             }).start(() => {
-               // Switch to fortune video
-               setIsFortuneMode(true);
+               // Flash white over screen
+               Animated.timing(whiteFlashOpacity, {
+                  toValue: 1,
+                  duration: 500,
+                  useNativeDriver: true,
+               }).start(() => {
+                  // Switch to fortune video while screen is white
+                  setIsFortuneMode(true);
+                  // Fade out white to reveal fortune video
+                  Animated.timing(whiteFlashOpacity, {
+                     toValue: 0,
+                     duration: 2000,
+                     useNativeDriver: true,
+                  }).start();
+               });
             });
          });
       },
-      [fanAnims, mainButtonOpacity, uiOpacity],
+      [fanAnims, mainButtonOpacity, uiOpacity, whiteFlashOpacity],
    );
 
    // ── Avatar initials fallback ─────────────────────────────
@@ -221,22 +251,6 @@ export default function HomeScreen() {
                   <View style={styles.healthBarAbsolute}>
                      <HealthBar value={bars.blue} color={BAR_COLORS.blue} />
                   </View>
-               </View>
-
-               {/* Test controls */}
-               <View style={styles.hpControls}>
-                  <Pressable onPress={decreaseHp} style={[styles.hpButton, { backgroundColor: 'rgba(239,68,68,0.8)' }]}>
-                     <Ionicons name="remove" size={20} color="#fff" />
-                  </Pressable>
-                  <Text style={styles.hpLabel}>
-                     {totalHp} / {MAX_TOTAL_HP}
-                  </Text>
-                  <Pressable
-                     onPress={increaseHp}
-                     style={[styles.hpButton, { backgroundColor: 'rgba(59,130,246,0.8)' }]}
-                  >
-                     <Ionicons name="add" size={20} color="#fff" />
-                  </Pressable>
                </View>
             </View>
 
@@ -310,6 +324,9 @@ export default function HomeScreen() {
             </View>
          </Animated.View>
 
+         {/* ── White flash overlay ────────────────────────────── */}
+         <Animated.View style={[styles.whiteFlash, { opacity: whiteFlashOpacity }]} pointerEvents="none" />
+
          {/* ── Fortune result modal ──────────────────────────── */}
          <Modal
             visible={showResultModal}
@@ -320,9 +337,7 @@ export default function HomeScreen() {
             <View style={styles.modalBackdrop}>
                <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
                   <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{selectedCategory}</Text>
-                  <Text style={[styles.modalBody, { color: colors.onSurfaceVariant }]}>
-                     Here&apos;s your fortune teller result
-                  </Text>
+                  <Text style={[styles.modalBody, { color: colors.onSurfaceVariant }]}>{drawnPoem?.poem ?? ''}</Text>
                   <Pressable
                      onPress={() => setShowResultModal(false)}
                      style={[styles.modalButton, { backgroundColor: colors.primary }]}
@@ -335,8 +350,6 @@ export default function HomeScreen() {
       </View>
    );
 }
-
-const MARGIN = 24;
 
 const styles = StyleSheet.create({
    root: {
@@ -387,25 +400,6 @@ const styles = StyleSheet.create({
    },
    healthBarAbsolute: {
       ...StyleSheet.absoluteFillObject,
-   },
-   hpControls: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 12,
-      gap: 16,
-   },
-   hpButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-   },
-   hpLabel: {
-      color: '#fff',
-      fontSize: 14,
-      fontWeight: '600',
    },
 
    /* ── Spacer ──────────────────────────────────────────── */
@@ -474,6 +468,12 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontSize: 20,
       fontWeight: '700',
+   },
+
+   /* ── White flash overlay ────────────────────────────────── */
+   whiteFlash: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: '#fff',
    },
 
    /* ── Result modal ───────────────────────────────────────── */
