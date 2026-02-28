@@ -2,12 +2,14 @@ import HealthBar from '@/components/home/HealthBar';
 import { useAppAppearance } from '@/contexts/AppAppearanceContext';
 import { useUserProfileStore } from '@/store/userProfileStore';
 import { Ionicons } from '@expo/vector-icons';
+import { useEventListener } from 'expo';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Animated, Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 const BACKGROUND_VIDEO = require('../../../src/assets/videos/luckiest.mp4');
+const FORTUNE_VIDEO = require('../../../src/assets/videos/Mascot_Fortune_Telling_Video_Generation.mp4');
 
 /** Total HP across all three real bars (blue + yellow + red). */
 const MAX_TOTAL_HP = 300;
@@ -28,9 +30,38 @@ export default function HomeScreen() {
    const { width: screenWidth } = useWindowDimensions();
 
    // ── Video player ─────────────────────────────────────────
-   const player = useVideoPlayer(BACKGROUND_VIDEO, (p) => {
-      p.loop = true;
-      p.play();
+   const [isFortuneMode, setIsFortuneMode] = useState(false);
+   const [showResultModal, setShowResultModal] = useState(false);
+   const [selectedCategory, setSelectedCategory] = useState('');
+   const uiOpacity = useRef(new Animated.Value(1)).current;
+
+   const videoSource = isFortuneMode ? FORTUNE_VIDEO : BACKGROUND_VIDEO;
+
+   const player = useVideoPlayer(videoSource, (p) => {
+      if (isFortuneMode) {
+         p.loop = false;
+         p.play();
+      } else {
+         p.loop = true;
+         p.play();
+      }
+   });
+
+   // Listen for fortune video to finish
+   useEventListener(player, 'playToEnd', () => {
+      if (isFortuneMode) {
+         // Revert to background video
+         setIsFortuneMode(false);
+         // Fade UI back in
+         Animated.timing(uiOpacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+         }).start(() => {
+            // Show result modal
+            setShowResultModal(true);
+         });
+      }
    });
 
    // ── Health state ─────────────────────────────────────────
@@ -114,6 +145,38 @@ export default function HomeScreen() {
       });
    }, [mainButtonOpacity, fanAnims]);
 
+   // ── Fortune drawing handler ──────────────────────────────
+   const handleSubButtonPress = useCallback(
+      (index: number) => {
+         setSelectedCategory(SUB_BUTTON_LABELS[index].replace('\n', ' '));
+         // Collapse the menu first
+         Animated.stagger(
+            40,
+            [...fanAnims].reverse().map((anim) =>
+               Animated.timing(anim, {
+                  toValue: 0,
+                  duration: 150,
+                  useNativeDriver: true,
+               }),
+            ),
+         ).start(() => {
+            setIsMenuOpen(false);
+            // Reset main button opacity to 0 (keep it hidden)
+            mainButtonOpacity.setValue(1);
+            // Fade out entire UI
+            Animated.timing(uiOpacity, {
+               toValue: 0,
+               duration: 300,
+               useNativeDriver: true,
+            }).start(() => {
+               // Switch to fortune video
+               setIsFortuneMode(true);
+            });
+         });
+      },
+      [fanAnims, mainButtonOpacity, uiOpacity],
+   );
+
    // ── Avatar initials fallback ─────────────────────────────
    const initials = profile?.full_name
       ? profile.full_name
@@ -130,7 +193,10 @@ export default function HomeScreen() {
          <VideoView player={player} style={StyleSheet.absoluteFillObject} nativeControls={false} contentFit="cover" />
 
          {/* ── Content overlay ──────────────────────────────── */}
-         <View style={styles.overlay}>
+         <Animated.View
+            style={[styles.overlay, { opacity: uiOpacity }]}
+            pointerEvents={isFortuneMode ? 'none' : 'auto'}
+         >
             {/* ── Header ─────────────────────────────────────── */}
             <View style={[styles.header, { backgroundColor: colors.primary }]}>
                <View style={styles.headerSpacer} />
@@ -214,9 +280,7 @@ export default function HomeScreen() {
                            ]}
                         >
                            <Pressable
-                              onPress={() => {
-                                 // TODO: handle sub-button press for index i
-                              }}
+                              onPress={() => handleSubButtonPress(i)}
                               style={[styles.subButton, { backgroundColor: colors.secondary }]}
                            >
                               <Text style={[styles.subButtonText, { color: colors.onSecondary }]}>
@@ -244,7 +308,30 @@ export default function HomeScreen() {
                   </Pressable>
                )}
             </View>
-         </View>
+         </Animated.View>
+
+         {/* ── Fortune result modal ──────────────────────────── */}
+         <Modal
+            visible={showResultModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowResultModal(false)}
+         >
+            <View style={styles.modalBackdrop}>
+               <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
+                  <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{selectedCategory}</Text>
+                  <Text style={[styles.modalBody, { color: colors.onSurfaceVariant }]}>
+                     Here&apos;s your fortune teller result
+                  </Text>
+                  <Pressable
+                     onPress={() => setShowResultModal(false)}
+                     style={[styles.modalButton, { backgroundColor: colors.primary }]}
+                  >
+                     <Text style={[styles.modalButtonText, { color: colors.onPrimary }]}>Close</Text>
+                  </Pressable>
+               </View>
+            </View>
+         </Modal>
       </View>
    );
 }
@@ -387,5 +474,45 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontSize: 20,
       fontWeight: '700',
+   },
+
+   /* ── Result modal ───────────────────────────────────────── */
+   modalBackdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: MARGIN,
+   },
+   modalCard: {
+      width: '100%',
+      borderRadius: 20,
+      padding: 32,
+      alignItems: 'center',
+      elevation: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+   },
+   modalTitle: {
+      fontSize: 22,
+      fontWeight: '700',
+      marginBottom: 16,
+   },
+   modalBody: {
+      fontSize: 16,
+      textAlign: 'center',
+      lineHeight: 24,
+      marginBottom: 24,
+   },
+   modalButton: {
+      paddingHorizontal: 32,
+      paddingVertical: 12,
+      borderRadius: 24,
+   },
+   modalButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
    },
 });
