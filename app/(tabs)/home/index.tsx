@@ -30,6 +30,7 @@ export default function HomeScreen() {
    const [drawnPoem, setDrawnPoem] = useState<FortunePoem | null>(null);
    const uiOpacity = useRef(new Animated.Value(1)).current;
    const whiteFlashOpacity = useRef(new Animated.Value(0)).current;
+   const blackFadeOpacity = useRef(new Animated.Value(0)).current;
 
    // ── Health state (declared early so video source can use it) ──
    const [totalHp, setTotalHp] = useState(INIT_HP);
@@ -41,12 +42,17 @@ export default function HomeScreen() {
       return { blue, yellow, red };
    }, [totalHp]);
 
+   // Derive luck state from HP
+   const getLuckState = useCallback((hp: number) => {
+      if (hp < 100) return 'unluckiest';
+      if (hp > 200) return 'luckiest';
+      return 'normal';
+   }, []);
+
    // Background video based on HP state
    const backgroundVideo = useMemo(() => {
-      if (totalHp < 100) return BACKGROUND_VIDEOS.unluckiest;
-      if (totalHp > 200) return BACKGROUND_VIDEOS.luckiest;
-      return BACKGROUND_VIDEOS.normal;
-   }, [totalHp]);
+      return BACKGROUND_VIDEOS[getLuckState(totalHp)];
+   }, [totalHp, getLuckState]);
 
    const videoSource = isFortuneMode ? BACKGROUND_VIDEOS.drawing_fortune : backgroundVideo;
 
@@ -69,27 +75,56 @@ export default function HomeScreen() {
             duration: 500,
             useNativeDriver: true,
          }).start(() => {
-            // Apply the drawn poem's HP change
-            if (drawnPoem) {
-               setTotalHp((hp) => Math.max(0, Math.min(MAX_TOTAL_HP, hp + drawnPoem.hp)));
-            }
-            // Revert to background video while screen is white
+            // Revert to SAME background video (HP unchanged yet)
             setIsFortuneMode(false);
             // Fade UI back in behind the white
             uiOpacity.setValue(1);
             mainButtonOpacity.setValue(1);
-            // Fade out white to reveal UI
+            // Fade out white to reveal UI + show result modal
             Animated.timing(whiteFlashOpacity, {
                toValue: 0,
                duration: 2000,
                useNativeDriver: true,
             }).start(() => {
-               // Show result modal
                setShowResultModal(true);
             });
          });
       }
    });
+
+   // ── Close modal → apply HP → black fade only if luck state changes ──
+   const closeModal = useCallback(() => {
+      setShowResultModal(false);
+      if (!drawnPoem) return;
+      const poemHp = drawnPoem.hp;
+
+      setTotalHp((prevHp) => {
+         const newHp = Math.max(0, Math.min(MAX_TOTAL_HP, prevHp + poemHp));
+         const prevState = getLuckState(prevHp);
+         const nextState = getLuckState(newHp);
+
+         if (prevState !== nextState) {
+            // Fade video to black → switch happens → fade back in
+            Animated.timing(blackFadeOpacity, {
+               toValue: 1,
+               duration: 600,
+               useNativeDriver: true,
+            }).start(() => {
+               // HP is already applied (returned newHp), video source will switch.
+               // Small delay so the new video loads behind the black.
+               setTimeout(() => {
+                  Animated.timing(blackFadeOpacity, {
+                     toValue: 0,
+                     duration: 1000,
+                     useNativeDriver: true,
+                  }).start();
+               }, 400);
+            });
+         }
+
+         return newHp;
+      });
+   }, [drawnPoem, blackFadeOpacity, getLuckState]);
 
    // ── Drawing fan-out state ────────────────────────────────
    const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -222,6 +257,9 @@ export default function HomeScreen() {
          {/* ── Fullscreen background video ──────────────────── */}
          <VideoView player={player} style={StyleSheet.absoluteFillObject} nativeControls={false} contentFit="cover" />
 
+         {/* ── Black fade overlay (over video only, below UI) ── */}
+         <Animated.View style={[styles.blackFade, { opacity: blackFadeOpacity }]} pointerEvents="none" />
+
          {/* ── Content overlay ──────────────────────────────── */}
          <Animated.View
             style={[styles.overlay, { opacity: uiOpacity }]}
@@ -328,20 +366,12 @@ export default function HomeScreen() {
          <Animated.View style={[styles.whiteFlash, { opacity: whiteFlashOpacity }]} pointerEvents="none" />
 
          {/* ── Fortune result modal ──────────────────────────── */}
-         <Modal
-            visible={showResultModal}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setShowResultModal(false)}
-         >
+         <Modal visible={showResultModal} transparent animationType="fade" onRequestClose={closeModal}>
             <View style={styles.modalBackdrop}>
                <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
                   <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{selectedCategory}</Text>
                   <Text style={[styles.modalBody, { color: colors.onSurfaceVariant }]}>{drawnPoem?.poem ?? ''}</Text>
-                  <Pressable
-                     onPress={() => setShowResultModal(false)}
-                     style={[styles.modalButton, { backgroundColor: colors.primary }]}
-                  >
+                  <Pressable onPress={closeModal} style={[styles.modalButton, { backgroundColor: colors.primary }]}>
                      <Text style={[styles.modalButtonText, { color: colors.onPrimary }]}>Close</Text>
                   </Pressable>
                </View>
@@ -474,6 +504,11 @@ const styles = StyleSheet.create({
    whiteFlash: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: '#fff',
+   },
+   /* ── Black fade overlay (luck-state transition) ──────────── */
+   blackFade: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: '#000',
    },
 
    /* ── Result modal ───────────────────────────────────────── */
