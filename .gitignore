@@ -44,3 +44,6 @@ app-example
 /ios
 /android
 /secrets
+
+# mining output
+mining/output/
