@@ -8,11 +8,17 @@
  *   npx tsx mining/index.ts crawl --no-images        # Skip image downloads
  */
 
+import { createClient } from '@supabase/supabase-js';
 import * as cheerio from 'cheerio';
 import { Command } from 'commander';
 import type { AnyNode, Element, Text } from 'domhandler';
+import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+
+// Load environment variables
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), override: true });
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 
@@ -399,6 +405,196 @@ program
       }
 
       await crawlAll({ from, to, delay, downloadImages });
+   });
+
+// ─── Application Key → Category Mapping ─────────────────────────────────────
+
+const STORAGE_BUCKET = 'fortune_data';
+const STORAGE_FOLDER = 'fortune_telling';
+
+type FortuneTellingCategory = 'family_friends' | 'money' | 'love' | 'career' | 'health';
+
+const APPLICATION_CATEGORY_MAP: Record<string, FortuneTellingCategory> = {
+   // family_friends
+   Family: 'family_friends',
+   Network: 'family_friends',
+   'Asking About Others': 'family_friends',
+   'Lost Individual': 'family_friends',
+   'Asking About Things': 'family_friends',
+   // money
+   Wealth: 'money',
+   Business: 'money',
+   Farming: 'money',
+   Employing: 'money',
+   'Lost Items': 'money',
+   House: 'money',
+   Lawsuits: 'money',
+   // love
+   Marriage: 'love',
+   Relationship: 'love',
+   Pregnancy: 'love',
+   'Not pregnant yet': 'love',
+   // career
+   Future: 'career',
+   Career: 'career',
+   'Job Search': 'career',
+   Exam: 'career',
+   Education: 'career',
+   Direction: 'career',
+   Time: 'career',
+   'Changing Name': 'career',
+   Immigration: 'career',
+   // health
+   Health: 'health',
+   Illness: 'health',
+   Traveling: 'health',
+   Grave: 'health',
+};
+
+function categorizeApplications(applications: LotApplications): Record<FortuneTellingCategory, string[]> {
+   const categorized: Record<FortuneTellingCategory, string[]> = {
+      family_friends: [],
+      money: [],
+      love: [],
+      career: [],
+      health: [],
+   };
+
+   for (const [key, value] of Object.entries(applications)) {
+      const category = APPLICATION_CATEGORY_MAP[key];
+      if (category) {
+         categorized[category].push(`${key}: ${value}`);
+      }
+   }
+
+   return categorized;
+}
+
+// ─── Upload to Supabase ──────────────────────────────────────────────────────
+
+async function uploadToSupabase(): Promise<void> {
+   const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+   if (!supabaseUrl || !supabaseServiceRoleKey) {
+      console.error('❌ Missing EXPO_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env');
+      process.exit(1);
+   }
+
+   // Load crawled data
+   if (!fs.existsSync(OUTPUT_FILE)) {
+      console.error('❌ No crawled data found. Run "crawl" first.');
+      process.exit(1);
+   }
+
+   const lots: LotData[] = JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf-8'));
+   console.log(`\n📤 Uploading ${lots.length} lots to Supabase...\n`);
+
+   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+   console.log('🔐 Using service role key (bypasses RLS)\n');
+
+   let successCount = 0;
+   let failCount = 0;
+
+   for (const lot of lots) {
+      console.log(`  📦 Processing lot #${lot.drawNo}...`);
+
+      let illustrationUrl: string | null = null;
+      let hexagramImageUrl: string | null = null;
+
+      // Upload illustration image
+      if (lot.images.illustration) {
+         const localPath = path.join(OUTPUT_DIR, lot.images.illustration);
+         if (fs.existsSync(localPath)) {
+            const fileBuffer = fs.readFileSync(localPath);
+            const ext = path.extname(localPath);
+            const storagePath = `${STORAGE_FOLDER}/lot-${lot.drawNo}-illustration${ext}`;
+            const contentType = ext === '.png' ? 'image/png' : 'image/jpeg';
+
+            const { error } = await supabase.storage
+               .from(STORAGE_BUCKET)
+               .upload(storagePath, fileBuffer, { contentType, upsert: true });
+
+            if (error) {
+               console.warn(`    ⚠ Failed to upload illustration: ${error.message}`);
+            } else {
+               const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
+               illustrationUrl = urlData.publicUrl;
+               console.log(`    ✅ Uploaded illustration`);
+            }
+         }
+      }
+
+      // Upload hexagram image
+      if (lot.images.hexagramImage) {
+         const localPath = path.join(OUTPUT_DIR, lot.images.hexagramImage);
+         if (fs.existsSync(localPath)) {
+            const fileBuffer = fs.readFileSync(localPath);
+            const ext = path.extname(localPath);
+            const storagePath = `${STORAGE_FOLDER}/lot-${lot.drawNo}-hexagram${ext}`;
+            const contentType = ext === '.png' ? 'image/png' : 'image/jpeg';
+
+            const { error } = await supabase.storage
+               .from(STORAGE_BUCKET)
+               .upload(storagePath, fileBuffer, { contentType, upsert: true });
+
+            if (error) {
+               console.warn(`    ⚠ Failed to upload hexagram image: ${error.message}`);
+            } else {
+               const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
+               hexagramImageUrl = urlData.publicUrl;
+               console.log(`    ✅ Uploaded hexagram image`);
+            }
+         }
+      }
+
+      // Categorize applications
+      const categorizedApps = categorizeApplications(lot.applications);
+
+      // Random value -100 - +100
+      const value = Math.floor(Math.random() * 201) - 100;
+
+      // Upsert row
+      const { error: dbError } = await supabase.from('fortune_telling').upsert(
+         {
+            draw_no: lot.drawNo,
+            locale: 'en',
+            value,
+            original_explanation: lot.originalExplanation,
+            updated_explanation: lot.updatedExplanation,
+            hexagram: lot.hexagram,
+            picture_explanation: lot.pictureExplanation,
+            implications: lot.implications,
+            matsus_words: lot.matsusWords,
+            highlights: lot.highlights,
+            applications: categorizedApps,
+            last_reminders: lot.lastReminders,
+            illustration_url: illustrationUrl,
+            hexagram_image_url: hexagramImageUrl,
+         },
+         { onConflict: 'draw_no,locale' },
+      );
+
+      if (dbError) {
+         failCount++;
+         console.error(`    ❌ DB insert failed for lot #${lot.drawNo}: ${dbError.message}`);
+      } else {
+         successCount++;
+         console.log(`    ✅ Lot #${lot.drawNo} inserted (value: ${value})\n`);
+      }
+   }
+
+   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+   console.log(`✅ Upload complete!`);
+   console.log(`   Success: ${successCount} | Failed: ${failCount}`);
+   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+}
+
+program
+   .command('upload')
+   .description('Upload crawled lot data and images to Supabase')
+   .action(async () => {
+      await uploadToSupabase();
    });
 
 program.parse();

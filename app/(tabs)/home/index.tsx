@@ -1,6 +1,8 @@
 import HealthBar from '@/components/home/HealthBar';
 import { useAppAppearance } from '@/contexts/AppAppearanceContext';
+import { useMasterData } from '@/hooks/useMasterData';
 import { useUserProfileStore } from '@/store/userProfileStore';
+import type { FortuneTellingCategory } from '@/types/FortuneTelling';
 import { useEventListener } from 'expo';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
@@ -18,9 +20,12 @@ import {
    SUB_BUTTON_LABELS,
 } from './constants';
 
+const CATEGORY_MAP: FortuneTellingCategory[] = ['family_friends', 'money', 'love', 'career', 'health'];
+
 export default function HomeScreen() {
    const { colors } = useAppAppearance();
    const profile = useUserProfileStore((s) => s.profile);
+   const { fetchRandomFortuneTelling } = useMasterData();
    const { width: screenWidth } = useWindowDimensions();
 
    // ── Video player ─────────────────────────────────────────
@@ -196,11 +201,22 @@ export default function HomeScreen() {
    // ── Fortune drawing handler ──────────────────────────────
    const handleSubButtonPress = useCallback(
       (index: number) => {
-         setSelectedCategory(SUB_BUTTON_LABELS[index].replace('\n', ' '));
-         // Draw a random fortune poem
-         const categoryPoems = FORTUNE_POEMS[index] ?? FORTUNE_POEMS[0];
-         const randomPoem = categoryPoems[Math.floor(Math.random() * categoryPoems.length)];
-         setDrawnPoem(randomPoem);
+         const categoryLabel = SUB_BUTTON_LABELS[index].replace('\n', ' ');
+         setSelectedCategory(categoryLabel);
+
+         // Fetch from Supabase, fall back to local poems
+         const category = CATEGORY_MAP[index];
+         fetchRandomFortuneTelling(category).then((result) => {
+            if (result) {
+               setDrawnPoem({ poem: result.text, hp: result.hp });
+            } else {
+               // Fallback to local hardcoded poems
+               const categoryPoems = FORTUNE_POEMS[index] ?? FORTUNE_POEMS[0];
+               const randomPoem = categoryPoems[Math.floor(Math.random() * categoryPoems.length)];
+               setDrawnPoem(randomPoem);
+            }
+         });
+
          // Collapse the menu first
          Animated.stagger(
             40,
@@ -239,7 +255,7 @@ export default function HomeScreen() {
             });
          });
       },
-      [fanAnims, mainButtonOpacity, uiOpacity, whiteFlashOpacity],
+      [fanAnims, mainButtonOpacity, uiOpacity, whiteFlashOpacity, fetchRandomFortuneTelling],
    );
 
    // ── Avatar initials fallback ─────────────────────────────
