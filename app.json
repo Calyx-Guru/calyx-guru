@@ -7,7 +7,6 @@
     "icon": "./src/assets/images/icon.png",
     "scheme": "calyxguru",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -18,7 +17,6 @@
         "backgroundImage": "./src/assets/images/android-icon-background.png",
         "monochromeImage": "./src/assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.ntchung.CalyxGuru"
     },
@@ -42,7 +40,11 @@
       ],
       "expo-font",
       "@react-native-community/datetimepicker",
-      "expo-video"
+      "expo-video",
+      "expo-image",
+      "expo-localization",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
