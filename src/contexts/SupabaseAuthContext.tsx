@@ -1,4 +1,5 @@
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { runWithTimeout } from '@/lib/app/helper';
 import supabase from '@/lib/supabase/client';
 import { fetchUserProfile } from '@/lib/supabase/userProfileService';
 import { Session, User } from '@supabase/supabase-js';
@@ -19,6 +20,7 @@ type SupabaseAuth = {
   session: Session | null;
   isLoading: boolean;
   isSignedIn: boolean;
+  initializeSupabaseProfile: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -30,6 +32,7 @@ export const SupabaseAuthContext = createContext<SupabaseAuth>({
   session: null,
   isLoading: true,
   isSignedIn: false,
+  initializeSupabaseProfile: async () => {},
   signUp: async () => {},
   signIn: async () => {},
   signOut: async () => {},
@@ -48,36 +51,37 @@ export function SupabaseAuthProvider({
   const { setProfile, clearProfile, loadProfileFromLocalStorage } =
     useUserProfile();
 
+  const initializeSupabaseProfile = async () => {
+    try {
+      const {
+        data: { session: initialSession },
+      } = await runWithTimeout(() => supabase.auth.getSession(), 1000);
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
+
+      // Load user profile if logged in
+      if (initialSession?.user) {
+        const userProfile = await runWithTimeout(
+          () => fetchUserProfile(initialSession.user.id),
+          3000,
+        );
+        if (userProfile) {
+          setProfile(userProfile);
+        }
+      }
+
+      console.log('Initial Supabase session:', initialSession);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    } finally {
+      console.log('Supabase auth loading complete');
+      setIsLoading(false);
+    }
+  };
+
   // Get initial session on mount and subscribe to changes
   useEffect(() => {
-    const getSession = async () => {
-      try {
-        const {
-          data: { session: initialSession },
-        } = await supabase.auth.getSession();
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-
-        // Load user profile if logged in
-        if (initialSession?.user) {
-          try {
-            const userProfile = await fetchUserProfile(initialSession.user.id);
-            if (userProfile) {
-              setProfile(userProfile);
-            }
-          } catch (error) {
-            console.error('Error loading user profile:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error getting session:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadProfileFromLocalStorage();
-    getSession();
 
     // Listen to auth state changes
     const {
@@ -160,6 +164,7 @@ export function SupabaseAuthProvider({
     session,
     isLoading,
     isSignedIn: !!session,
+    initializeSupabaseProfile,
     signUp,
     signIn,
     signOut,
