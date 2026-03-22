@@ -1,0 +1,170 @@
+import * as React from 'react';
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Alert,
+  TouchableHighlight,
+} from 'react-native';
+import Constants from 'expo-constants';
+
+// You can import from local files
+import CustomButton from './components/CustomButton';
+
+// or any pure javascript modules available in npm
+import { Card } from 'react-native-paper';
+
+export default class App extends React.Component {
+  state = {
+    modalVisible: false,
+  };
+
+  setModalVisible(visible) {
+    this.setState({ modalVisible: visible });
+  }
+
+  render() {
+    return (
+      <View style={styles.pentagon}>
+        <CustomButton
+          text="Click Me"
+          onPress={() => {
+            this.setModalVisible(true);
+          }}
+        />
+
+        <Modal
+          animationType="slide"
+          transparent={false}
+          backgroundColor="rgba(0,0,0,0.3)"
+          visible={this.state.modalVisible}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+          }}>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardModal}>
+              <View style={styles.topTriangle} />
+              <Text>Hello World!</Text>
+
+              <CustomButton
+                text="Cancel"
+                onPress={() => {
+                  this.setModalVisible(!this.state.modalVisible);
+                }}
+              />
+              <View style={styles.bottomTriangle} />
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  pentagon: {
+    backgroundColor: 'transparent',
+  },
+  cardContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  cardModal: {
+    width: '80%',
+    height: '40%',
+    padding: 30,
+    backgroundColor: 'white',
+  },
+  topTriangle: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 10,
+    borderLeftWidth: 10,
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: 'rgba(0,0,0,0.3)',
+    borderLeftColor: 'transparent',
+    transform: [{ rotate: '180deg' }],
+  },
+  bottomTriangle: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 10,
+    borderLeftWidth: 10,
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: 'rgba(0,0,0,0.3)',
+    borderLeftColor: 'transparent',
+  },
+});
+
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+
+export default class CustomButton extends React.Component {
+  render() {
+    const { text, onPress } = this.props;
+    return (
+      <TouchableOpacity onPress={() => onPress()}>
+        <View style={styles.rect}>
+          <View style={styles.triangle} />
+          <Text style={styles.textStyle}>{text}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+}
+
+CustomButton.propTypes = {
+  text: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired,
+};
+
+const styles = StyleSheet.create({
+  rect: {
+    height: 45,
+    width: 100,
+    backgroundColor: 'blue',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  triangle: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 10,
+    borderLeftWidth: 10,
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: 'white',
+    borderLeftColor: 'transparent',
+  },
+  textStyle: {
+    color: '#FFF'
+  }
+});

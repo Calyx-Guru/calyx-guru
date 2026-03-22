@@ -136,7 +136,7 @@ export function MasterDataProvider({ children }: { children: React.ReactNode }) 
    };
 
    useEffect(() => {
-      initialize();
+      // initialize();
    }, []);
 
    const value: MasterDataContextType = {

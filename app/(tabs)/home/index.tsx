@@ -1,398 +1,140 @@
-import HealthBar from '@/components/home/HealthBar';
-import { useAppAppearance } from '@/contexts/AppAppearanceContext';
-import { useMasterData } from '@/hooks/useMasterData';
-import { useUserProfileStore } from '@/store/userProfileStore';
-import type { FortuneTellingCategory } from '@/types/FortuneTelling';
-import { useEventListener } from 'expo';
-import { router } from 'expo-router';
-import { useVideoPlayer, VideoView } from 'expo-video';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { VideoView, useVideoPlayer } from 'expo-video';
 
-import type { FortunePoem } from './constants';
-import {
-   BACKGROUND_VIDEOS,
-   BAR_COLORS,
-   FORTUNE_POEMS,
-   INIT_HP,
-   MARGIN,
-   MAX_TOTAL_HP,
-   SUB_BUTTON_LABELS,
-} from './constants';
+import { useMemo, useState } from 'react';
+import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const CATEGORY_MAP: FortuneTellingCategory[] = ['family_friends', 'money', 'love', 'career', 'health'];
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import LinearGradient from 'react-native-linear-gradient';
 
-export default function HomeScreen() {
-   const { colors } = useAppAppearance();
-   const profile = useUserProfileStore((s) => s.profile);
-   const { fetchRandomFortuneTelling } = useMasterData();
-   const { width: screenWidth } = useWindowDimensions();
+import * as elements from '../../../src/assets/images/elements';
 
-   // ── Video player ─────────────────────────────────────────
-   const [isFortuneMode, setIsFortuneMode] = useState(false);
-   const [showResultModal, setShowResultModal] = useState(false);
-   const [selectedCategory, setSelectedCategory] = useState('');
-   const [drawnPoem, setDrawnPoem] = useState<FortunePoem | null>(null);
-   const uiOpacity = useRef(new Animated.Value(1)).current;
-   const whiteFlashOpacity = useRef(new Animated.Value(0)).current;
-   const blackFadeOpacity = useRef(new Animated.Value(0)).current;
-
-   // ── Health state (declared early so video source can use it) ──
-   const [totalHp, setTotalHp] = useState(INIT_HP);
-
-   const bars = useMemo(() => {
-      const blue = Math.max(0, Math.min(100, totalHp - 200));
-      const yellow = Math.max(0, Math.min(100, totalHp - 100));
-      const red = Math.max(0, Math.min(100, totalHp));
-      return { blue, yellow, red };
-   }, [totalHp]);
-
-   // Derive luck state from HP
-   const getLuckState = useCallback((hp: number) => {
-      if (hp < 100) return 'unluckiest';
-      if (hp > 200) return 'luckiest';
-      return 'normal';
-   }, []);
-
-   // Background video based on HP state
-   const backgroundVideo = useMemo(() => {
-      return BACKGROUND_VIDEOS[getLuckState(totalHp)];
-   }, [totalHp, getLuckState]);
-
-   const videoSource = isFortuneMode ? BACKGROUND_VIDEOS.drawing_fortune : backgroundVideo;
-
-   const player = useVideoPlayer(videoSource, (p) => {
-      if (isFortuneMode) {
-         p.loop = false;
-         p.play();
-      } else {
-         p.loop = true;
-         p.play();
-      }
-   });
-
-   // Listen for fortune video to finish
-   useEventListener(player, 'playToEnd', () => {
-      if (isFortuneMode) {
-         // Flash white over the video
-         Animated.timing(whiteFlashOpacity, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-         }).start(() => {
-            // Revert to SAME background video (HP unchanged yet)
-            setIsFortuneMode(false);
-            // Fade UI back in behind the white
-            uiOpacity.setValue(1);
-            mainButtonOpacity.setValue(1);
-            // Fade out white to reveal UI + show result modal
-            Animated.timing(whiteFlashOpacity, {
-               toValue: 0,
-               duration: 2000,
-               useNativeDriver: true,
-            }).start(() => {
-               setShowResultModal(true);
-            });
-         });
-      }
-   });
-
-   // ── Close modal → apply HP → black fade only if luck state changes ──
-   const closeModal = useCallback(() => {
-      setShowResultModal(false);
-      if (!drawnPoem) return;
-      const poemHp = drawnPoem.hp;
-
-      setTotalHp((prevHp) => {
-         const newHp = Math.max(0, Math.min(MAX_TOTAL_HP, prevHp + poemHp));
-         const prevState = getLuckState(prevHp);
-         const nextState = getLuckState(newHp);
-
-         if (prevState !== nextState) {
-            // Fade video to black → switch happens → fade back in
-            Animated.timing(blackFadeOpacity, {
-               toValue: 1,
-               duration: 600,
-               useNativeDriver: true,
-            }).start(() => {
-               // HP is already applied (returned newHp), video source will switch.
-               // Small delay so the new video loads behind the black.
-               setTimeout(() => {
-                  Animated.timing(blackFadeOpacity, {
-                     toValue: 0,
-                     duration: 1000,
-                     useNativeDriver: true,
-                  }).start();
-               }, 400);
-            });
-         }
-
-         return newHp;
-      });
-   }, [drawnPoem, blackFadeOpacity, getLuckState]);
-
-   // ── Drawing fan-out state ────────────────────────────────
-   const [isMenuOpen, setIsMenuOpen] = useState(false);
-   const mainButtonOpacity = useRef(new Animated.Value(1)).current;
-   const fanAnims = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
-
-   /**
-    * Final positions for circles 1-5 relative to center of main button.
-    * They form an elliptical upward arc spanning the screen width (with MARGIN).
-    *   3 = center (closest to main), 1 & 5 = far edges (highest)
-    */
-   const SUB_BUTTON_TARGETS = useMemo(() => {
-      const SUB_SIZE = 56;
-      // Horizontal semi-axis: half the usable width
-      const a = (screenWidth - 2 * MARGIN - SUB_SIZE) / 2;
-      // Gentle elliptical arc with equal horizontal spacing
-      const BASE_Y = 100; // vertical offset at center (button 3)
-      const CURVE_Y = 40; // gentle additional rise at edges
-      // Equal horizontal spacing: -1, -0.5, 0, 0.5, 1
-      return ([-1, -0.5, 0, 0.5, 1] as const).map((t) => ({
-         x: t * a,
-         y: -(BASE_Y + CURVE_Y * t * t),
-      }));
-   }, [screenWidth]);
-
-   const openMenu = useCallback(() => {
-      setIsMenuOpen(true);
-      // Fade out main button first
-      Animated.timing(mainButtonOpacity, {
-         toValue: 0,
-         duration: 200,
-         useNativeDriver: true,
-      }).start(() => {
-         // Then fan out the sub-buttons with stagger
-         Animated.stagger(
-            60,
-            fanAnims.map((anim) =>
-               Animated.spring(anim, {
-                  toValue: 1,
-                  friction: 6,
-                  tension: 80,
-                  useNativeDriver: true,
-               }),
-            ),
-         ).start();
-      });
-   }, [mainButtonOpacity, fanAnims]);
-
-   const closeMenu = useCallback(() => {
-      // Reverse: collapse sub-buttons then show main
-      Animated.stagger(
-         40,
-         [...fanAnims].reverse().map((anim) =>
-            Animated.timing(anim, {
-               toValue: 0,
-               duration: 180,
-               useNativeDriver: true,
-            }),
-         ),
-      ).start(() => {
-         Animated.timing(mainButtonOpacity, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-         }).start(() => setIsMenuOpen(false));
-      });
-   }, [mainButtonOpacity, fanAnims]);
-
-   // ── Fortune drawing handler ──────────────────────────────
-   const handleSubButtonPress = useCallback(
-      (index: number) => {
-         const categoryLabel = SUB_BUTTON_LABELS[index].replace('\n', ' ');
-         setSelectedCategory(categoryLabel);
-
-         // Fetch from Supabase, fall back to local poems
-         const category = CATEGORY_MAP[index];
-         fetchRandomFortuneTelling(category).then((result) => {
-            if (result) {
-               setDrawnPoem({ poem: result.text, hp: result.hp });
-            } else {
-               // Fallback to local hardcoded poems
-               const categoryPoems = FORTUNE_POEMS[index] ?? FORTUNE_POEMS[0];
-               const randomPoem = categoryPoems[Math.floor(Math.random() * categoryPoems.length)];
-               setDrawnPoem(randomPoem);
-            }
-         });
-
-         // Collapse the menu first
-         Animated.stagger(
-            40,
-            [...fanAnims].reverse().map((anim) =>
-               Animated.timing(anim, {
-                  toValue: 0,
-                  duration: 150,
-                  useNativeDriver: true,
-               }),
-            ),
-         ).start(() => {
-            setIsMenuOpen(false);
-            // Keep main button hidden (don't restore opacity)
-            mainButtonOpacity.setValue(0);
-            // Fade out UI
-            Animated.timing(uiOpacity, {
-               toValue: 0,
-               duration: 200,
-               useNativeDriver: true,
-            }).start(() => {
-               // Flash white over screen
-               Animated.timing(whiteFlashOpacity, {
-                  toValue: 1,
-                  duration: 500,
-                  useNativeDriver: true,
-               }).start(() => {
-                  // Switch to fortune video while screen is white
-                  setIsFortuneMode(true);
-                  // Fade out white to reveal fortune video
-                  Animated.timing(whiteFlashOpacity, {
-                     toValue: 0,
-                     duration: 2000,
-                     useNativeDriver: true,
-                  }).start();
-               });
-            });
-         });
+function TabHome() {
+   const theme = {
+      colors: {
+         primary: {
+            main: '#4a38a5',
+            linear: '#6548c3',
+         },
+         secondary: {
+            main: '#226f76',
+            linear: '#3eacb2',
+         },
       },
-      [fanAnims, mainButtonOpacity, uiOpacity, whiteFlashOpacity, fetchRandomFortuneTelling],
-   );
+   };
 
-   // ── Avatar initials fallback ─────────────────────────────
-   const initials = profile?.full_name
-      ? profile.full_name
-           .split(' ')
-           .map((w) => w[0])
-           .join('')
-           .slice(0, 2)
-           .toUpperCase()
-      : '?';
+   const [dateOfBirth, setDateOfBirth] = useState<Date>(new Date('1990-01-01'));
+   const [showDatePicker, setShowDatePicker] = useState(false);
+
+   const player = useVideoPlayer(require('../../../src/assets/videos/mascot/stage-egg.mp4'), (videoPlayer) => {
+      videoPlayer.loop = true;
+      videoPlayer.play();
+   });
+
+   const dateLabel = useMemo(() => {
+      if (!dateOfBirth) {
+         return 'Choose your date of birth';
+      }
+
+      return dateOfBirth.toLocaleDateString('en-GB', {
+         day: '2-digit',
+         month: '2-digit',
+         year: 'numeric',
+      });
+   }, [dateOfBirth]);
+
+   const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+      if (Platform.OS === 'android') {
+         setShowDatePicker(false);
+      }
+
+      if (event.type === 'set' && selectedDate) {
+         setDateOfBirth(selectedDate);
+      }
+   };
 
    return (
       <View style={styles.root}>
-         {/* ── Fullscreen background video ──────────────────── */}
-         <VideoView player={player} style={StyleSheet.absoluteFillObject} nativeControls={false} contentFit="cover" />
+         <VideoView
+            style={styles.backgroundVideo}
+            player={player}
+            contentFit="cover"
+            nativeControls={false}
+            fullscreenOptions={{
+               enable: false,
+            }}
+         />
 
-         {/* ── Black fade overlay (over video only, below UI) ── */}
-         <Animated.View style={[styles.blackFade, { opacity: blackFadeOpacity }]} pointerEvents="none" />
+         <View style={styles.starContainer}>
+            <Image source={elements.water} style={[styles.starElement, styles.elementTop]} />
+            <Image source={elements.fire} style={[styles.starElement, styles.elementLeft]} />
+            <Image source={elements.metal} style={[styles.starElement, styles.elementRight]} />
+            <Image source={elements.earth} style={[styles.starElement, styles.elementBottomLeft]} />
+            <Image source={elements.wood} style={[styles.starElement, styles.elementBottomRight]} />
+         </View>
 
-         {/* ── Content overlay ──────────────────────────────── */}
-         <Animated.View
-            style={[styles.overlay, { opacity: uiOpacity }]}
-            pointerEvents={isFortuneMode ? 'none' : 'auto'}
-         >
-            {/* ── Header ─────────────────────────────────────── */}
-            <View style={[styles.header, { backgroundColor: colors.primary }]}>
-               <View style={styles.headerSpacer} />
-               <Pressable onPress={() => router.push('/(modal)/personal-information')} style={styles.avatarWrapper}>
-                  <View style={[styles.avatar, { backgroundColor: colors.primaryContainer }]}>
-                     <Text style={[styles.avatarText, { color: colors.onPrimary }]}>{initials}</Text>
-                  </View>
+         <SafeAreaView style={styles.foreground}>
+            <LinearGradient
+               colors={[theme.colors.primary.main, theme.colors.primary.linear, theme.colors.primary.main]}
+               start={{ x: 0, y: 0.5 }}
+               end={{ x: 1, y: 0.5 }}
+               locations={[0.1, 0.5, 0.9]}
+               style={styles.header}
+            >
+               <Pressable style={styles.fingerprintButton}>
+                  <MaterialCommunityIcons name="fingerprint" size={26} color="#4e39a9" />
                </Pressable>
-            </View>
+            </LinearGradient>
 
-            {/* ── Health bars ────────────────────────────────── */}
-            <View style={styles.healthSection}>
-               <View style={styles.healthBars}>
-                  {/* Bars stacked bottom-to-top: empty(gray) → red → yellow → blue on top */}
-                  <HealthBar value={100} color={BAR_COLORS.empty} />
-                  <View style={styles.healthBarAbsolute}>
-                     <HealthBar value={bars.red} color={BAR_COLORS.red} />
-                  </View>
-                  <View style={styles.healthBarAbsolute}>
-                     <HealthBar value={bars.yellow} color={BAR_COLORS.yellow} />
-                  </View>
-                  <View style={styles.healthBarAbsolute}>
-                     <HealthBar value={bars.blue} color={BAR_COLORS.blue} />
-                  </View>
-               </View>
-            </View>
+            <View style={styles.card}>
+               <Text style={styles.cardTitle}>Enter your date of birth</Text>
 
-            {/* ── Spacer to push button to bottom ────────────── */}
-            <View style={styles.spacer} />
+               <Pressable style={styles.dateInput} onPress={() => setShowDatePicker(true)}>
+                  <Text style={styles.dateInputText}>{dateLabel}</Text>
+               </Pressable>
 
-            {/* ── Drawing button + fan-out menu ────────────── */}
-            <View style={styles.drawingWrapper}>
-               {/* Sub-buttons (rendered behind main so they appear from center) */}
-               {isMenuOpen &&
-                  SUB_BUTTON_TARGETS.map((target, i) => {
-                     const anim = fanAnims[i];
-                     return (
-                        <Animated.View
-                           key={i}
-                           style={[
-                              styles.subButtonContainer,
-                              {
-                                 opacity: anim,
-                                 transform: [
-                                    {
-                                       translateX: anim.interpolate({
-                                          inputRange: [0, 1],
-                                          outputRange: [0, target.x],
-                                       }),
-                                    },
-                                    {
-                                       translateY: anim.interpolate({
-                                          inputRange: [0, 1],
-                                          outputRange: [0, target.y],
-                                       }),
-                                    },
-                                    {
-                                       scale: anim.interpolate({
-                                          inputRange: [0, 1],
-                                          outputRange: [0.3, 1],
-                                       }),
-                                    },
-                                 ],
-                              },
-                           ]}
-                        >
-                           <Pressable
-                              onPress={() => handleSubButtonPress(i)}
-                              style={[styles.subButton, { backgroundColor: colors.secondary }]}
-                           >
-                              <Text style={[styles.subButtonText, { color: colors.onSecondary }]}>
-                                 {SUB_BUTTON_LABELS[i]}
-                              </Text>
-                           </Pressable>
-                        </Animated.View>
-                     );
-                  })}
-
-               {/* Main Drawing button */}
-               <Animated.View style={{ opacity: mainButtonOpacity }}>
-                  <Pressable
-                     onPress={isMenuOpen ? closeMenu : openMenu}
-                     style={[styles.drawingButton, { backgroundColor: colors.primary }]}
-                  >
-                     <Text style={[styles.drawingText, { color: colors.onPrimary }]}>Drawing</Text>
-                  </Pressable>
-               </Animated.View>
-
-               {/* Invisible tap-target to close menu when it's open */}
-               {isMenuOpen && (
-                  <Pressable onPress={closeMenu} style={styles.closeTarget}>
-                     <Text style={styles.closeTargetText}>✕</Text>
-                  </Pressable>
-               )}
-            </View>
-         </Animated.View>
-
-         {/* ── White flash overlay ────────────────────────────── */}
-         <Animated.View style={[styles.whiteFlash, { opacity: whiteFlashOpacity }]} pointerEvents="none" />
-
-         {/* ── Fortune result modal ──────────────────────────── */}
-         <Modal visible={showResultModal} transparent animationType="fade" onRequestClose={closeModal}>
-            <View style={styles.modalBackdrop}>
-               <View style={[styles.modalCard, { backgroundColor: colors.surface }]}>
-                  <Text style={[styles.modalTitle, { color: colors.onSurface }]}>{selectedCategory}</Text>
-                  <Text style={[styles.modalBody, { color: colors.onSurfaceVariant }]}>{drawnPoem?.poem ?? ''}</Text>
-                  <Pressable onPress={closeModal} style={[styles.modalButton, { backgroundColor: colors.primary }]}>
-                     <Text style={[styles.modalButtonText, { color: colors.onPrimary }]}>Close</Text>
+               <View style={styles.buttonRow}>
+                  <Pressable style={styles.confirmButton}>
+                     <LinearGradient
+                        colors={[
+                           theme.colors.secondary.main,
+                           theme.colors.secondary.linear,
+                           theme.colors.secondary.main,
+                        ]}
+                        start={{ x: 0, y: 0.5 }}
+                        end={{ x: 1, y: 0.5 }}
+                        locations={[0.1, 0.5, 0.9]}
+                        style={styles.confirmGradient}
+                     >
+                        <Text style={styles.confirmText}>OK</Text>
+                     </LinearGradient>
                   </Pressable>
                </View>
             </View>
-         </Modal>
+
+            <Pressable style={styles.selfChooseButton}>
+               <LinearGradient
+                  colors={['#261c23', '#372c31', '#261c23']}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  locations={[0.1, 0.5, 0.9]}
+                  style={styles.selfChooseGradient}
+               >
+                  <Text style={styles.selfChooseText}>I will choose myself</Text>
+               </LinearGradient>
+            </Pressable>
+
+            {showDatePicker && (
+               <DateTimePicker
+                  value={dateOfBirth ?? new Date(2000, 0, 1)}
+                  mode="date"
+                  display="default"
+                  onChange={handleDateChange}
+                  maximumDate={new Date()}
+               />
+            )}
+         </SafeAreaView>
       </View>
    );
 }
@@ -400,170 +142,146 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
    root: {
       flex: 1,
-      backgroundColor: '#000',
    },
-   overlay: {
-      ...StyleSheet.absoluteFillObject,
-      justifyContent: 'flex-start',
+   backgroundVideo: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: -50,
    },
-
-   /* ── Header ──────────────────────────────────────────── */
+   foreground: {
+      flex: 1,
+      justifyContent: 'space-between',
+      rowGap: 16,
+      paddingHorizontal: 16,
+   },
    header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      paddingHorizontal: 8,
-      paddingVertical: 8,
+      padding: 8,
+      borderTopStartRadius: 8,
+      borderTopEndRadius: 8,
+      overflow: 'hidden',
+      elevation: 14,
    },
-   headerSpacer: {
-      flex: 1,
-   },
-   avatarWrapper: {
-      padding: 0,
-   },
-   avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+   fingerprintButton: {
       alignItems: 'center',
       justifyContent: 'center',
+      width: 36,
+      height: 36,
+      backgroundColor: '#1e1e37',
+      borderRadius: 4,
+      elevation: 8,
    },
-   avatarText: {
-      fontSize: 16,
-      fontWeight: '700',
-   },
-
-   /* ── Health bars ─────────────────────────────────────── */
-   healthSection: {
-      marginTop: 24,
-      marginHorizontal: 24,
-   },
-   healthBars: {
+   card: {
       position: 'relative',
-      height: 14,
-      borderRadius: 7,
+      rowGap: 8,
+      padding: 8,
+      backgroundColor: '#161a1e',
+      borderWidth: 1,
+      borderColor: '#63717e',
       overflow: 'hidden',
    },
-   healthBarAbsolute: {
-      ...StyleSheet.absoluteFillObject,
-   },
-
-   /* ── Spacer ──────────────────────────────────────────── */
-   spacer: {
-      flex: 1,
-   },
-
-   /* ── Drawing button ──────────────────────────────────── */
-   drawingWrapper: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: MARGIN,
-      marginHorizontal: MARGIN,
-   },
-   drawingButton: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      alignItems: 'center',
-      justifyContent: 'center',
-      elevation: 6,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.4,
-      shadowRadius: 6,
-   },
-   drawingText: {
+   cardTitle: {
+      color: '#f2f5f8',
       fontSize: 18,
       fontWeight: '700',
-   },
-
-   /* ── Sub-buttons (fan-out) ──────────────────────────────── */
-   subButtonContainer: {
-      position: 'absolute',
-      alignItems: 'center',
-      justifyContent: 'center',
-   },
-   subButton: {
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      alignItems: 'center',
-      justifyContent: 'center',
-      elevation: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      paddingHorizontal: 4,
-   },
-   subButtonText: {
-      fontSize: 10,
-      fontWeight: '700',
       textAlign: 'center',
    },
-   closeTarget: {
-      position: 'absolute',
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      alignItems: 'center',
+   dateInput: {
+      position: 'relative',
       justifyContent: 'center',
-   },
-   closeTargetText: {
-      color: '#fff',
-      fontSize: 20,
-      fontWeight: '700',
-   },
-
-   /* ── White flash overlay ────────────────────────────────── */
-   whiteFlash: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: '#fff',
-   },
-   /* ── Black fade overlay (luck-state transition) ──────────── */
-   blackFade: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: '#000',
-   },
-
-   /* ── Result modal ───────────────────────────────────────── */
-   modalBackdrop: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: MARGIN,
-   },
-   modalCard: {
+      padding: 8,
       width: '100%',
-      borderRadius: 20,
-      padding: 32,
-      alignItems: 'center',
-      elevation: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.6)',
+      borderRadius: 4,
+      overflow: 'hidden',
+      elevation: 6,
    },
-   modalTitle: {
-      fontSize: 22,
-      fontWeight: '700',
-      marginBottom: 16,
-   },
-   modalBody: {
+   dateInputText: {
+      color: '#f6f9ff',
       fontSize: 16,
+      fontWeight: '500',
       textAlign: 'center',
-      lineHeight: 24,
-      marginBottom: 24,
    },
-   modalButton: {
-      paddingHorizontal: 32,
-      paddingVertical: 12,
-      borderRadius: 24,
+   buttonRow: {
+      position: 'relative',
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
    },
-   modalButtonText: {
+   confirmButton: {
+      position: 'relative',
+      width: '40%',
+      overflow: 'hidden',
+   },
+   confirmGradient: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 4,
+   },
+   confirmText: {
+      paddingVertical: 8,
+      color: '#f5feff',
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '700',
+      textTransform: 'uppercase',
+   },
+   selfChooseButton: {
+      position: 'relative',
+      marginTop: 'auto',
+      marginHorizontal: 'auto',
+      width: '60%',
+      overflow: 'hidden',
+   },
+   selfChooseGradient: {
+      justifyContent: 'center',
+      alignItems: 'center',
+   },
+   selfChooseText: {
+      paddingVertical: 18,
+      color: '#ffffff',
+      fontSize: 16,
+      fontWeight: '700',
+   },
+   starContainer: {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      width: 300,
+      height: 300,
+      marginLeft: -150,
+      marginTop: -150,
+   },
+   starElement: {
+      position: 'absolute',
+      width: 100,
+      height: 100,
+   },
+   elementTop: {
+      top: -50,
+      left: '50%',
+      marginLeft: -50,
+   },
+   elementLeft: {
+      top: 50,
+      left: -25,
+   },
+   elementRight: {
+      top: 50,
+      right: -25,
+   },
+   elementBottomRight: {
+      bottom: -50,
+      right: 0,
+   },
+   elementBottomLeft: {
+      bottom: -50,
+      left: 0,
    },
 });
+
+export default TabHome;

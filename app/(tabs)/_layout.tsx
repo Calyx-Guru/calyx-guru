@@ -1,11 +1,9 @@
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
 import { Ionicons } from '@expo/vector-icons';
-import { BottomTabNavigationOptions, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useContext } from 'react';
 
 import HomeScreen from './home';
-import ProfileScreen from './profile';
-import SettingsScreen from './settings';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,17 +12,15 @@ export default function TabsLayout() {
 
    return (
       <Tab.Navigator
-         screenOptions={
-            {
-               headerShown: false,
-               sceneStyle: { backgroundColor: colors.background },
-               tabBarStyle: {
-                  display: 'none',
-               },
-               tabBarActiveTintColor: colors.primary,
-               tabBarInactiveTintColor: colors.neutralInverse,
-            } as BottomTabNavigationOptions
-         }
+         screenOptions={{
+            headerShown: false,
+            sceneStyle: { backgroundColor: colors.background },
+            tabBarStyle: {
+               display: 'none',
+            },
+            tabBarActiveTintColor: colors.primary,
+            tabBarInactiveTintColor: colors.neutralInverse,
+         }}
       >
          <Tab.Screen
             name="home"
@@ -32,22 +28,6 @@ export default function TabsLayout() {
             options={{
                title: 'Home',
                tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
-            }}
-         />
-         <Tab.Screen
-            name="profile"
-            component={ProfileScreen}
-            options={{
-               title: 'Profile',
-               tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
-            }}
-         />
-         <Tab.Screen
-            name="settings"
-            component={SettingsScreen}
-            options={{
-               title: 'Settings',
-               tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} />,
             }}
          />
       </Tab.Navigator>
