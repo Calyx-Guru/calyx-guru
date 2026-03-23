@@ -123,7 +123,7 @@ export function SignUpForm() {
       }
 
       // Navigate to home or verification screen
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)/test');
     } catch (error: any) {
       console.error('Sign up error:', error);
       if (error.message.includes('already registered')) {

@@ -59,7 +59,7 @@ export function SignInForm() {
       // Generate dummy email from username
       const dummyEmail = `${username}@nomail.local`;
       await signIn(dummyEmail, password);
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)/test');
     } catch (error: any) {
       Alert.alert(
         'Sign In Failed',
