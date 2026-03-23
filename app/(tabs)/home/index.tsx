@@ -6,7 +6,7 @@ import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import LinearGradient from 'react-native-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import * as elements from '../../../src/assets/images/elements';
 
