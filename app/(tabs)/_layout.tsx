@@ -23,6 +23,14 @@ export default function TabsLayout() {
             tabBarInactiveTintColor: colors.neutralInverse,
          }}
       >         
+      <Tab.Screen
+         name="test"
+         component={TestScreen}
+         options={{
+            title: 'Test',
+            tabBarIcon: ({ color, size }) => <Ionicons name="flask" size={size} color={color} />,
+         }}
+      />
          <Tab.Screen
             name="home"
             component={HomeScreen}
@@ -31,14 +39,6 @@ export default function TabsLayout() {
                tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
             }}
          />         
-         <Tab.Screen
-            name="test"
-            component={TestScreen}
-            options={{
-               title: 'Test',
-               tabBarIcon: ({ color, size }) => <Ionicons name="flask" size={size} color={color} />,
-            }}
-         />
       </Tab.Navigator>
    );
 }

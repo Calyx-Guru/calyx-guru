@@ -1,9 +1,9 @@
-import { StyleSheet, View } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { StyleSheet, View } from 'react-native';
 
-import { TransparentVideo } from '@/components/video/TransparentVideo';
+import { SpriteAnimation } from '@/components/animation/SpriteAnimation';
+import { ATLAS_REGISTRY } from '@/constants/registries';
 
-const OVERLAY_SOURCE = require('../../../src/assets/videos/mascot/test.webm');
 const BG_SOURCE = require('../../../src/assets/videos/mascot/status-gacha.mp4');
 
 export default function TestScreen() {
@@ -22,8 +22,10 @@ export default function TestScreen() {
             nativeControls={false}
          />
 
-         <TransparentVideo
-            source={OVERLAY_SOURCE}
+         <SpriteAnimation
+            source={ATLAS_REGISTRY.meditating}
+            fps={12}
+            loop
             style={StyleSheet.absoluteFillObject}
          />
       </View>

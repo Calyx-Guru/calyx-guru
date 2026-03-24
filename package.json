@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
+    "@callstack/react-native-basis-universal": "^0.3.0",
     "@expo/vector-icons": "^15.0.3",
     "@fontsource-variable/noto-sans": "^5.2.10",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -32,6 +33,7 @@
     "expo-camera": "~55.0.9",
     "expo-constants": "~55.0.7",
     "expo-font": "~55.0.4",
+    "expo-file-system": "~55.0.11",
     "expo-gl": "~55.0.10",
     "expo-haptics": "~55.0.8",
     "expo-image": "~55.0.6",
