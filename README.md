@@ -35,16 +35,13 @@ npm run reset-project
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-## Learn more
+# Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
+## Video processing
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Export transparent video on chroma-key
+ffmpeg -i input_greenscreen.mp4 -vf "chromakey=0x248C1E:0.06:0.1,format=yuva420p" -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -an output_android.webm
+ffmpeg -i input_greenscreen.mp4 -vf "chromakey=0x248C1E:0.06:0.1" -c:v prores_ks -profile:v 4 -pix_fmt yuva444p10le output_ios.mov
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Export a video into a PNG sequence:
+ffmpeg -c:v libvpx-vp9 -i test.webm -vf "crop=720:1200:0:0,fps=12" -pix_fmt rgba frames/frame_%04d.png

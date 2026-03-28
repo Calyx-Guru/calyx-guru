@@ -27,7 +27,7 @@ function TabHome() {
    const [dateOfBirth, setDateOfBirth] = useState<Date>(new Date('1990-01-01'));
    const [showDatePicker, setShowDatePicker] = useState(false);
 
-   const player = useVideoPlayer(require('../../../src/assets/videos/mascot/stage-egg.mp4'), (videoPlayer) => {
+   const player = useVideoPlayer(require('../../../src/assets/videos/hatching/idle.mp4'), (videoPlayer) => {
       videoPlayer.loop = true;
       videoPlayer.play();
    });

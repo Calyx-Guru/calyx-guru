@@ -1,40 +1,39 @@
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { StyleSheet, View } from 'react-native';
 
-import { SpriteAnimation } from '@/components/animation/SpriteAnimation';
-import { ATLAS_REGISTRY } from '@/constants/registries';
+import { TransparentVideo } from '@/components/video/TransparentVideo';
 
-const BG_SOURCE = require('../../../src/assets/videos/mascot/status-gacha.mp4');
+const OVERLAY_SOURCE = require('../../../src/assets/videos/mascot/normal.webm');
+const BG_SOURCE = require('../../../src/assets/videos/background/metal.mp4');
 
 export default function TestScreen() {
-   const bgPlayer = useVideoPlayer(BG_SOURCE, (p) => {
-      p.loop = true;
-      p.muted = true;
-      p.play();
-   });
+  const bgPlayer = useVideoPlayer(BG_SOURCE, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.play();
+  });
 
-   return (
-      <View style={styles.root}>
-         <VideoView
-            player={bgPlayer}
-            style={StyleSheet.absoluteFillObject}
-            contentFit="cover"
-            nativeControls={false}
-         />
+  return (
+    <View style={styles.root}>
+      <VideoView
+        player={bgPlayer}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        nativeControls={false}
+      />
 
-         <SpriteAnimation
-            source={ATLAS_REGISTRY.meditating}
-            fps={12}
-            loop
-            style={StyleSheet.absoluteFillObject}
-         />
-      </View>
-   );
+      <TransparentVideo
+        source={OVERLAY_SOURCE}
+        style={StyleSheet.absoluteFill}
+        loop={true}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-   root: {
-      flex: 1,
-      backgroundColor: '#000',
-   },
+  root: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
 });
