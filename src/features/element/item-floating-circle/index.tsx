@@ -1,10 +1,10 @@
+import { useEffect, useMemo, useState } from "react";
 import { Animated, Image, Pressable, StyleSheet } from "react-native";
 
-import { useEffect, useMemo, useState } from "react";
 import { ELEMENTS } from "../constants";
 import type * as Types from "./type";
 
-export function ElementFloatingCircle(properties: Types.Properties) {
+export function ElementItemFloatingCircle(properties: Types.Properties) {
   const { style } = properties;
 
   const [selectedElement, setSelectedElement] = useState<ElementName | null>(

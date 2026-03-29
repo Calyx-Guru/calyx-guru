@@ -1,10 +1,11 @@
-import type { StyleProp, ViewStyle } from "react-native";
+import { StyleSheet, type StyleProp, type ViewStyle } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 type Color = "PRIMARY" | "SECONDARY";
 
 interface Properties {
   color: Color;
+  disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   children: React.ReactNode;
 }
@@ -21,7 +22,7 @@ const COLORS: Record<Color, { main: string; linear: string }> = {
 };
 
 export function GradientButton(properties: Properties) {
-  const { color, style, children } = properties;
+  const { color, disabled, style, children } = properties;
 
   const selectedColors = COLORS[color];
 
@@ -31,9 +32,15 @@ export function GradientButton(properties: Properties) {
       start={{ x: 0, y: 0.5 }}
       end={{ x: 1, y: 0.5 }}
       locations={[0.1, 0.5, 0.9]}
-      style={style}
+      style={[style, disabled && styles.disabled]}
     >
       {children}
     </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  disabled: {
+    opacity: 0.5,
+  },
+});

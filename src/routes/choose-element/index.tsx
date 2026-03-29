@@ -1,10 +1,11 @@
+import { router } from "expo-router";
+
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import DateTimePicker from "@react-native-community/datetimepicker";
-
 import { ConfirmOverlay } from "@/features/element/confirm-overlay";
-import { ElementFloatingCircle } from "@/features/element/floating-circle";
+import { ElementItemCarouselFold } from "@/features/element/item-carousel-fold";
 
 import { GradientButton } from "@/components/typography/GradientButton";
 import { NormalVideo } from "@/components/video/NormalVideo";
@@ -54,13 +55,13 @@ export function RouteChooseElement(properties: Types.Properties) {
     if (stage === "hatching-sequence") {
       timeout.current = setTimeout(() => {
         setStage("break-sequence");
-      }, 5000);
+      }, 6000);
     }
 
     if (stage === "break-sequence") {
       timeout.current = setTimeout(() => {
-        setStage("choose-element");
-      }, 6000);
+        router.replace("/(tabs)/main-menu");
+      }, 6500);
     }
 
     return () => {
@@ -70,11 +71,11 @@ export function RouteChooseElement(properties: Types.Properties) {
 
   const renderBackground = () => {
     if (stage === "hatching-sequence") {
-      return <NormalVideo url={VIDEOS.hatching.break} />;
+      return <NormalVideo url={VIDEOS.hatching.break} loop={false} />;
     }
 
     if (stage === "break-sequence") {
-      return <NormalVideo url={VIDEOS.hatching[element!]} />;
+      return <NormalVideo url={VIDEOS.hatching[element!]} loop={false} />;
     }
 
     return <NormalVideo url={VIDEOS.hatching.idle} />;
@@ -118,7 +119,7 @@ export function RouteChooseElement(properties: Types.Properties) {
   );
 
   const renderChooseElement = () => (
-    <ElementFloatingCircle
+    <ElementItemCarouselFold
       onSelectElement={handleSelectElement}
       //
     />
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
   dateConfirmButton: {
     paddingVertical: 8,
     color: "#f5feff",
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
   },
@@ -258,9 +259,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   chooseMyselfButtonTitle: {
-    paddingVertical: 18,
+    paddingVertical: 12,
     color: "#ffffff",
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "700",
   },
 });
