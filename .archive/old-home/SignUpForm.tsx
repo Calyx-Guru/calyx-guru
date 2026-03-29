@@ -5,7 +5,6 @@ import { ThemedButton } from '@/components/typography/ThemedButton';
 import { AppAppearanceContext } from '@/contexts/AppAppearanceContext';
 import { SupabaseAuthContext } from '@/contexts/SupabaseAuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useUserState } from '@/hooks/useUserState';
 import supabase from '@/lib/supabase/client';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
@@ -34,7 +33,6 @@ type FormErrors = Partial<SignUpFormData>;
 export function SignUpForm() {
   const { signUp } = useContext(SupabaseAuthContext);
   const { loadProfileFromRemote } = useUserProfile();
-  const { initializeUserStateForUser } = useUserState();
   const {
     colors,
     spacing,
@@ -121,10 +119,7 @@ export function SignUpForm() {
       const user = (await supabase.auth.getUser()).data.user;
 
       if (user) {
-        await Promise.all([
-          loadProfileFromRemote(user.id),
-          initializeUserStateForUser(user.id),
-        ]);
+        await loadProfileFromRemote(user.id);
       }
 
       // Navigate to home or verification screen

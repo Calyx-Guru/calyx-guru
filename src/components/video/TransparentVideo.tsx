@@ -1,7 +1,7 @@
-import { useAssets } from 'expo-asset';
-import { useMemo } from 'react';
-import { StyleProp, ViewStyle } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { useAssets } from "expo-asset";
+import { useMemo } from "react";
+import { StyleProp, ViewStyle } from "react-native";
+import { WebView } from "react-native-webview";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -17,97 +17,101 @@ import { WebView } from 'react-native-webview';
  *   - `times`: omit or `Infinity` = repeat forever; a finite number = that many passes over the range.
  */
 export type TransparentVideoLoop =
-   | boolean
-   | number
-   | {
-        /** How many times to play the range. `Infinity` = forever. Default: `Infinity` when looping. */
-        times?: number;
-        /** Start time in seconds (default `0`). */
-        start?: number;
-        /** End time in seconds. Omit to use the file duration (full video). */
-        end?: number;
-     };
+  | boolean
+  | number
+  | {
+      /** How many times to play the range. `Infinity` = forever. Default: `Infinity` when looping. */
+      times?: number;
+      /** Start time in seconds (default `0`). */
+      start?: number;
+      /** End time in seconds. Omit to use the file duration (full video). */
+      end?: number;
+    };
 
 export type TransparentVideoProps = {
-   /**
-    * The video asset to play with alpha-channel transparency.
-    *
-    * - Local bundle: `require('./mascot/test.webm')`
-    * - Remote URL:   `'https://example.com/video.webm'`
-    * - Source object: `{ uri: '...' }`
-    *
-    * The video must be a WebM with VP9 alpha. Transparency is rendered
-    * via a WebView whose Chromium engine natively decodes the alpha
-    * channel — something Android's ExoPlayer cannot do.
-    */
-   source: number | string | { uri: string };
+  /**
+   * The video asset to play with alpha-channel transparency.
+   *
+   * - Local bundle: `require('./mascot/test.webm')`
+   * - Remote URL:   `'https://example.com/video.webm'`
+   * - Source object: `{ uri: '...' }`
+   *
+   * The video must be a WebM with VP9 alpha. Transparency is rendered
+   * via a WebView whose Chromium engine natively decodes the alpha
+   * channel — something Android's ExoPlayer cannot do.
+   */
+  source: number | string | { uri: string };
 
-   /** @default true */
-   loop?: TransparentVideoLoop;
+  /** @default true */
+  loop?: TransparentVideoLoop;
 
-   /** @default true */
-   muted?: boolean;
+  /** @default true */
+  muted?: boolean;
 
-   /** @default 'contain' */
-   contentFit?: 'contain' | 'cover' | 'fill';
+  /** @default 'contain' */
+  contentFit?: "contain" | "cover" | "fill";
 
-   style?: StyleProp<ViewStyle>;
+  style?: StyleProp<ViewStyle>;
 };
 
 type LoopRuntimeConfig =
-   | { kind: 'native' }
-   | { kind: 'none' }
-   | {
-        kind: 'js';
-        times: number;
-        start: number | null;
-        end: number | null;
-     };
+  | { kind: "native" }
+  | { kind: "none" }
+  | {
+      kind: "js";
+      times: number;
+      start: number | null;
+      end: number | null;
+    };
 
-function resolveLoop(loop: TransparentVideoLoop | undefined): LoopRuntimeConfig {
-   if (loop === undefined || loop === true) {
-      return { kind: 'native' };
-   }
-   if (loop === false) {
-      return { kind: 'none' };
-   }
-   if (typeof loop === 'number') {
-      if (!Number.isFinite(loop) || loop < 0) {
-         return { kind: 'native' };
-      }
-      if (loop <= 1) {
-         return { kind: 'none' };
-      }
-      return { kind: 'js', times: Math.floor(loop), start: null, end: null };
-   }
+function resolveLoop(
+  loop: TransparentVideoLoop | undefined,
+): LoopRuntimeConfig {
+  if (loop === undefined || loop === true) {
+    return { kind: "native" };
+  }
+  if (loop === false) {
+    return { kind: "none" };
+  }
+  if (typeof loop === "number") {
+    if (!Number.isFinite(loop) || loop < 0) {
+      return { kind: "native" };
+    }
+    if (loop <= 1) {
+      return { kind: "none" };
+    }
+    return { kind: "js", times: Math.floor(loop), start: null, end: null };
+  }
 
-   const times = loop.times ?? Infinity;
-   const hasSegment = loop.start !== undefined || loop.end !== undefined;
+  const times = loop.times ?? Infinity;
+  const hasSegment = loop.start !== undefined || loop.end !== undefined;
 
-   if (!hasSegment) {
-      if (times === Infinity) return { kind: 'native' };
-      if (times <= 1) return { kind: 'none' };
-      return { kind: 'js', times: Math.floor(times), start: null, end: null };
-   }
+  if (!hasSegment) {
+    if (times === Infinity) return { kind: "native" };
+    if (times <= 1) return { kind: "none" };
+    return { kind: "js", times: Math.floor(times), start: null, end: null };
+  }
 
-   const t = Number.isFinite(times) ? Math.max(1, Math.floor(times)) : Infinity;
-   return {
-      kind: 'js',
-      times: t,
-      start: loop.start ?? null,
-      end: loop.end ?? null,
-   };
+  const t = Number.isFinite(times) ? Math.max(1, Math.floor(times)) : Infinity;
+  return {
+    kind: "js",
+    times: t,
+    start: loop.start ?? null,
+    end: loop.end ?? null,
+  };
 }
 
-function buildLoopScript(cfg: Extract<LoopRuntimeConfig, { kind: 'js' }>): string {
-   // JSON.stringify drops Infinity; use a flag so infinite repeats work in the WebView.
-   const payload = JSON.stringify({
-      times: Number.isFinite(cfg.times) ? cfg.times : 0,
-      infiniteRepeat: !Number.isFinite(cfg.times),
-      start: cfg.start,
-      end: cfg.end,
-   });
-   return `(function(){
+function buildLoopScript(
+  cfg: Extract<LoopRuntimeConfig, { kind: "js" }>,
+): string {
+  // JSON.stringify drops Infinity; use a flag so infinite repeats work in the WebView.
+  const payload = JSON.stringify({
+    times: Number.isFinite(cfg.times) ? cfg.times : 0,
+    infiniteRepeat: !Number.isFinite(cfg.times),
+    start: cfg.start,
+    end: cfg.end,
+  });
+  return `(function(){
 var cfg=${payload};
 var v=document.querySelector('video');
 if(!v)return;
@@ -172,22 +176,22 @@ v.addEventListener('ended',onEnd);
  * file and produce a `file://` URI.  For strings and `{ uri }` objects
  * the value is returned directly.
  */
-function useResolvedUri(source: TransparentVideoProps['source']): string {
-   const isAssetId = typeof source === 'number';
-   const [assets] = useAssets(isAssetId ? [source] : []);
+function useResolvedUri(source: TransparentVideoProps["source"]): string {
+  const isAssetId = typeof source === "number";
+  const [assets] = useAssets(isAssetId ? [source] : []);
 
-   return useMemo(() => {
-      if (isAssetId) {
-         return assets?.[0]?.localUri ?? assets?.[0]?.uri ?? '';
-      }
-      if (typeof source === 'string') return source;
-      if (typeof source === 'object' && 'uri' in source) return source.uri ?? '';
-      return '';
-   }, [isAssetId, assets, source]);
+  return useMemo(() => {
+    if (isAssetId) {
+      return assets?.[0]?.localUri ?? assets?.[0]?.uri ?? "";
+    }
+    if (typeof source === "string") return source;
+    if (typeof source === "object" && "uri" in source) return source.uri ?? "";
+    return "";
+  }, [isAssetId, assets, source]);
 }
 
 function escapeHtmlAttrUri(uri: string): string {
-   return uri.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  return uri.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────
@@ -199,23 +203,25 @@ function escapeHtmlAttrUri(uri: string): string {
  * alpha channel that Android's native video stack ignores.
  */
 export function TransparentVideo({
-   source,
-   loop = true,
-   muted = true,
-   contentFit = 'contain',
-   style,
+  source,
+  loop = true,
+  muted = true,
+  contentFit = "contain",
+  style,
 }: TransparentVideoProps) {
-   const uri = useResolvedUri(source);
-   const resolved = useMemo(() => resolveLoop(loop), [loop]);
+  const uri = useResolvedUri(source);
+  const resolved = useMemo(() => resolveLoop(loop), [loop]);
 
-   const html = useMemo(() => {
-      const nativeLoop = resolved.kind === 'native';
-      const loopAttr = nativeLoop ? ' loop' : '';
+  const html = useMemo(() => {
+    const nativeLoop = resolved.kind === "native";
+    const loopAttr = nativeLoop ? " loop" : "";
 
-      const script =
-         resolved.kind === 'js' ? `<script>${buildLoopScript(resolved)}</script>` : '';
+    const script =
+      resolved.kind === "js"
+        ? `<script>${buildLoopScript(resolved)}</script>`
+        : "";
 
-      return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html><head>
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <style>
@@ -224,27 +230,27 @@ html,body{width:100%;height:100%;background:transparent;overflow:hidden}
 video{width:100%;height:100%;object-fit:${contentFit}}
 </style>
 </head><body>
-<video autoplay${loopAttr}${muted ? ' muted' : ''} playsinline src="${escapeHtmlAttrUri(uri)}"></video>
+<video controls="false" autoplay${loopAttr}${muted ? " muted" : ""} playsinline src="${escapeHtmlAttrUri(uri)}"></video>
 ${script}
 </body></html>`;
-   }, [uri, resolved, muted, contentFit]);
+  }, [uri, resolved, muted, contentFit]);
 
-   if (!uri) return null;
+  if (!uri) return null;
 
-   return (
-      <WebView
-         source={{ html }}
-         style={[{ backgroundColor: 'transparent' }, style]}
-         containerStyle={{ backgroundColor: 'transparent' }}
-         androidLayerType="hardware"
-         originWhitelist={['*']}
-         allowFileAccess
-         mediaPlaybackRequiresUserAction={false}
-         javaScriptEnabled={resolved.kind === 'js'}
-         scrollEnabled={false}
-         overScrollMode="never"
-         showsHorizontalScrollIndicator={false}
-         showsVerticalScrollIndicator={false}
-      />
-   );
+  return (
+    <WebView
+      source={{ html }}
+      style={[{ backgroundColor: "transparent" }, style]}
+      containerStyle={{ backgroundColor: "transparent" }}
+      androidLayerType="hardware"
+      originWhitelist={["*"]}
+      allowFileAccess
+      mediaPlaybackRequiresUserAction={false}
+      javaScriptEnabled={resolved.kind === "js"}
+      scrollEnabled={false}
+      overScrollMode="never"
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={false}
+    />
+  );
 }
