@@ -1,37 +1,27 @@
-import { AppAppearanceContext } from "@/contexts/AppAppearanceContext";
-import { Ionicons } from "@expo/vector-icons";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useContext } from "react";
 
-import HomeScreen from "./home";
+import { Tabs } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-const Tab = createBottomTabNavigator();
+import { AppAppearanceContext } from "@/contexts/AppAppearanceContext";
 
 export default function TabsLayout() {
   const { colors } = useContext(AppAppearanceContext);
 
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        sceneStyle: { backgroundColor: colors.background },
-        tabBarStyle: {
-          display: "none",
-        },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.neutralInverse,
-      }}
-    >
-      <Tab.Screen
-        name="home"
-        component={HomeScreen}
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
+    <GestureHandlerRootView>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          sceneStyle: { backgroundColor: colors.background },
+          tabBarStyle: { display: "none" },
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.neutralInverse,
         }}
-      />
-    </Tab.Navigator>
+      >
+        <Tabs.Screen name="main-menu/index" />
+        <Tabs.Screen name="choose-element/index" />
+      </Tabs>
+    </GestureHandlerRootView>
   );
 }

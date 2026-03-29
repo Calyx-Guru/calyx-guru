@@ -1,6 +1,8 @@
 // Type declarations for lunar-javascript
 // Place this file at: src/types/lunar-javascript.d.ts (or any path in your tsconfig includes)
 
+type ElementName = "water" | "fire" | "metal" | "earth" | "wood";
+
 declare module "lunar-javascript" {
   // ─── Shared sub-types ────────────────────────────────────────────────────────
 
