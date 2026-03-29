@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -18,10 +19,60 @@ import { useMemo, useState } from "react";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useVideoPlayer, VideoView } from "expo-video";
-import { CHINESE_ELEMENT_TO_KEY, ELEMENTS, VIDEOS } from "./constants";
+// type ElementKey = "water" | "fire" | "metal" | "earth" | "wood";
 
-import type * as Types from "./type";
+// type ElementConfig = {
+//   key: ElementKey;
+//   label: string;
+//   source: ImageSourcePropType;
+//   positionStyleKey:
+//     | "elementTop"
+//     | "elementLeft"
+//     | "elementRight"
+//     | "elementBottomLeft"
+//     | "elementBottomRight";
+// };
+
+// const ELEMENT_CONFIGS: ElementConfig[] = [
+//   {
+//     key: "water",
+//     label: "Water",
+//     source: elements.water,
+//     positionStyleKey: "elementTop",
+//   },
+//   {
+//     key: "fire",
+//     label: "Fire",
+//     source: elements.fire,
+//     positionStyleKey: "elementLeft",
+//   },
+//   {
+//     key: "metal",
+//     label: "Metal",
+//     source: elements.metal,
+//     positionStyleKey: "elementRight",
+//   },
+//   {
+//     key: "earth",
+//     label: "Earth",
+//     source: elements.earth,
+//     positionStyleKey: "elementBottomLeft",
+//   },
+//   {
+//     key: "wood",
+//     label: "Wood",
+//     source: elements.wood,
+//     positionStyleKey: "elementBottomRight",
+//   },
+// ];
+
+const CHINESE_ELEMENT_TO_KEY: Record<string, ElementKey> = {
+  木: "wood",
+  火: "fire",
+  土: "earth",
+  金: "metal",
+  水: "water",
+};
 
 function TabHome() {
   const theme = {
@@ -39,37 +90,36 @@ function TabHome() {
 
   const [dateOfBirth, setDateOfBirth] = useState<Date>(new Date("1990-01-01"));
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [elementsVisible, setElementsVisible] = useState(false);
-  const [selectionOverlayVisible, setSelectionOverlayVisible] = useState(false);
-
-  const [selectedElement, setSelectedElement] =
-    useState<Types.ElementName | null>(null);
-
-  const [confirmedBirthElement, setConfirmedBirthElement] =
-    useState<Types.ElementName | null>(null);
-
-  const elementEntrance = useMemo(
-    () => ({
-      water: new Animated.Value(0),
-      fire: new Animated.Value(0),
-      metal: new Animated.Value(0),
-      earth: new Animated.Value(0),
-      wood: new Animated.Value(0),
-    }),
-    [],
+  // const [elementsVisible, setElementsVisible] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<ElementKey | null>(
+    null,
   );
+  const [selectionOverlayVisible, setSelectionOverlayVisible] = useState(false);
+  const [confirmedBirthElement, setConfirmedBirthElement] =
+    useState<ElementKey | null>(null);
+
+  // const elementEntrance = useMemo(
+  //   () => ({
+  //     water: new Animated.Value(0),
+  //     fire: new Animated.Value(0),
+  //     metal: new Animated.Value(0),
+  //     earth: new Animated.Value(0),
+  //     wood: new Animated.Value(0),
+  //   }),
+  //   [],
+  // );
 
   const overlayElementScale = useMemo(() => new Animated.Value(0.75), []);
   const overlayBackdropOpacity = useMemo(() => new Animated.Value(0), []);
 
-  const player = useVideoPlayer(VIDEOS.hatching.idle, (videoPlayer) => {
-    videoPlayer.loop = true;
-    videoPlayer.play();
-  });
+  // const player = useVideoPlayer(stageEgg, (videoPlayer) => {
+  //   videoPlayer.loop = true;
+  //   videoPlayer.play();
+  // });
 
   const dateLabel = useMemo(() => {
     if (confirmedBirthElement) {
-      const confirmedLabel = ELEMENTS.find(
+      const confirmedLabel = ELEMENT_CONFIGS.find(
         (element) => element.key === confirmedBirthElement,
       )?.label;
       return confirmedLabel
@@ -97,26 +147,26 @@ function TabHome() {
     }
   };
 
-  const showElements = () => {
-    if (elementsVisible) {
-      return;
-    }
+  // const showElements = () => {
+  //   if (elementsVisible) {
+  //     return;
+  //   }
 
-    setElementsVisible(true);
-    Animated.stagger(
-      90,
-      ELEMENTS.map((element) =>
-        Animated.timing(elementEntrance[element.key], {
-          toValue: 1,
-          duration: 340,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ),
-    ).start();
-  };
+  //   setElementsVisible(true);
+  //   Animated.stagger(
+  //     90,
+  //     ELEMENT_CONFIGS.map((element) =>
+  //       Animated.timing(elementEntrance[element.key], {
+  //         toValue: 1,
+  //         duration: 340,
+  //         easing: Easing.out(Easing.cubic),
+  //         useNativeDriver: true,
+  //       }),
+  //     ),
+  //   ).start();
+  // };
 
-  const resolveElementByBirthDate = (date: Date): Types.ElementName => {
+  const resolveElementByBirthDate = (date: Date): ElementKey => {
     const eightChar = Solar.fromDate(date).getLunar().getEightChar();
     const yearNaYin = eightChar.getYearNaYin();
     const naYinElementChar = yearNaYin.charAt(yearNaYin.length - 1);
@@ -139,7 +189,7 @@ function TabHome() {
 
     Animated.stagger(
       60,
-      [...ELEMENTS].reverse().map((element) =>
+      [...ELEMENT_CONFIGS].reverse().map((element) =>
         Animated.timing(elementEntrance[element.key], {
           toValue: 0,
           duration: 220,
@@ -153,7 +203,7 @@ function TabHome() {
     });
   };
 
-  const openSelectionOverlay = (key: Types.ElementName) => {
+  const openSelectionOverlay = (key: ElementKey) => {
     setSelectedElement(key);
     setSelectionOverlayVisible(true);
     overlayElementScale.setValue(0.75);
@@ -175,7 +225,7 @@ function TabHome() {
     ]).start();
   };
 
-  const handleSelectElement = (key: Types.ElementName) => {
+  const handleSelectElement = (key: ElementKey) => {
     if (!elementsVisible) {
       return;
     }
@@ -230,14 +280,14 @@ function TabHome() {
   };
 
   const selectedElementLabel = selectedElement
-    ? ELEMENTS.find(
+    ? ELEMENT_CONFIGS.find(
         (element) => element.key === selectedElement,
       )?.label.toUpperCase()
     : "";
 
   return (
     <View style={styles.root}>
-      <VideoView
+      {/* <VideoView
         style={styles.backgroundVideo}
         player={player}
         contentFit="cover"
@@ -246,62 +296,77 @@ function TabHome() {
         fullscreenOptions={{
           enable: false,
         }}
-      />
-      {/* <TransparentVideo
-        source={VIDEOS.stage.egg}
-        style={StyleSheet.absoluteFill}
-        loop={true}
       /> */}
 
-      <View
+      {/* <View
         style={styles.starContainer}
         pointerEvents={elementsVisible ? "auto" : "none"}
-      >
-        {ELEMENTS.map((element) => {
-          const isSelected = selectedElement === element.key;
-          const animatedStyle = {
-            opacity: elementEntrance[element.key],
-            transform: [
-              {
-                translateY: elementEntrance[element.key].interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [18, 0],
-                }),
-              },
-              {
-                scale: elementEntrance[element.key].interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.65, 1],
-                }),
-              },
-              {
-                scale: isSelected ? 1.04 : 1,
-              },
-            ],
-          };
-          return (
-            <Animated.View
-              key={element.key}
-              style={[
-                styles.starElement,
-                styles[element.positionStyleKey],
-                animatedStyle,
-                isSelected ? styles.selectedElement : null,
-              ]}
-            >
-              <Pressable
-                onPress={() => handleSelectElement(element.key)}
-                disabled={!elementsVisible}
-                style={styles.elementPressable}
-              >
-                <Image source={element.source} style={styles.elementImage} />
-              </Pressable>
-            </Animated.View>
-          );
-        })}
-      </View>
+      > */}
+        {/* {ELEMENT_CONFIGS.map((element) => { */}
+          // const isSelected = selectedElement === element.key;
+          // const animatedStyle = {
+          //   opacity: elementEntrance[element.key],
+          //   transform: [
+          //     {
+          //       translateY: elementEntrance[element.key].interpolate({
+          //         inputRange: [0, 1],
+          //         outputRange: [18, 0],
+          //       }),
+          //     },
+          //     {
+          //       scale: elementEntrance[element.key].interpolate({
+          //         inputRange: [0, 1],
+          //         outputRange: [0.65, 1],
+          //       }),
+          //     },
+          //     {
+          //       scale: isSelected ? 1.04 : 1,
+          //     },
+          //   ],
+          // };
+          // return (
+          //   <Animated.View
+          //     key={element.key}
+          //     style={[
+          //       styles.starElement,
+          //       styles[element.positionStyleKey],
+          //       animatedStyle,
+          //       isSelected ? styles.selectedElement : null,
+          //     ]}
+          //   >
+          //     <Pressable
+          //       onPress={() => handleSelectElement(element.key)}
+          //       disabled={!elementsVisible}
+          //       style={styles.elementPressable}
+          //     >
+          //       <Image source={element.source} style={styles.elementImage} />
+          //     </Pressable>
+          //   </Animated.View>
+          // );
+        // })}
+      // </View>
 
       <SafeAreaView style={styles.foreground} pointerEvents="box-none">
+        {/* <LinearGradient
+          colors={[
+            theme.colors.primary.main,
+            theme.colors.primary.linear,
+            theme.colors.primary.main,
+          ]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          locations={[0.1, 0.5, 0.9]}
+          style={styles.header}
+        >
+          <Pressable style={styles.fingerprintButton}>
+            <MaterialCommunityIcons
+              name="fingerprint"
+              size={26}
+              color="#4e39a9"
+            />
+          </Pressable>
+        </LinearGradient> */}
+
         {!elementsVisible && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Enter your date of birth</Text>
@@ -414,8 +479,9 @@ function TabHome() {
             {selectedElement && (
               <Image
                 source={
-                  ELEMENTS.find((element) => element.key === selectedElement)
-                    ?.source
+                  ELEMENT_CONFIGS.find(
+                    (element) => element.key === selectedElement,
+                  )?.source
                 }
                 style={styles.selectionPreviewImage}
               />
@@ -441,9 +507,9 @@ function TabHome() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
+  // root: {
+  //   flex: 1,
+  // },
   backgroundVideo: {
     position: "absolute",
     left: 0,
@@ -554,54 +620,54 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
-  starContainer: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    width: 300,
-    height: 300,
-    marginLeft: -150,
-    marginTop: -150,
-  },
-  starElement: {
-    position: "absolute",
-    width: 100,
-    height: 100,
-  },
+  // starContainer: {
+  //   position: "absolute",
+  //   top: "50%",
+  //   left: "50%",
+  //   width: 300,
+  //   height: 300,
+  //   marginLeft: -150,
+  //   marginTop: -150,
+  // },
+  // starElement: {
+  //   position: "absolute",
+  //   width: 100,
+  //   height: 100,
+  // },
   elementPressable: {
     width: "100%",
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
-  elementImage: {
-    width: "100%",
-    height: "100%",
-  },
+  // elementImage: {
+  //   width: "100%",
+  //   height: "100%",
+  // },
   selectedElement: {
     zIndex: 4,
   },
-  elementTop: {
-    top: -50,
-    left: "50%",
-    marginLeft: -50,
-  },
-  elementLeft: {
-    top: 50,
-    left: -25,
-  },
-  elementRight: {
-    top: 50,
-    right: -25,
-  },
-  elementBottomRight: {
-    bottom: -50,
-    right: 0,
-  },
-  elementBottomLeft: {
-    bottom: -50,
-    left: 0,
-  },
+  // elementTop: {
+  //   top: -50,
+  //   left: "50%",
+  //   marginLeft: -50,
+  // },
+  // elementLeft: {
+  //   top: 50,
+  //   left: -25,
+  // },
+  // elementRight: {
+  //   top: 50,
+  //   right: -25,
+  // },
+  // elementBottomRight: {
+  //   bottom: -50,
+  //   right: 0,
+  // },
+  // elementBottomLeft: {
+  //   bottom: -50,
+  //   left: 0,
+  // },
   selectionOverlay: {
     flex: 1,
     alignItems: "center",
