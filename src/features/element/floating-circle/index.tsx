@@ -44,6 +44,27 @@ export function ElementFloatingCircle(properties: Types.Properties) {
   const renderElement = (element: Types.Element) => {
     const isSelected = selectedElement === element.key;
 
+    const animated = {
+      opacity: animation.element[element.key],
+      transform: [
+        {
+          translateY: animation.element[element.key].interpolate({
+            inputRange: [0, 1],
+            outputRange: [18, 0],
+          }),
+        },
+        {
+          scale: animation.element[element.key].interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.65, 1],
+          }),
+        },
+        {
+          scale: isSelected ? 1.1 : 1,
+        },
+      ],
+    };
+
     return (
       <Animated.View
         key={element.key}
@@ -52,26 +73,7 @@ export function ElementFloatingCircle(properties: Types.Properties) {
           styles.elementWrapper,
           styles[element.positionStyleKey],
           isSelected && styles.elementWrapperSelected,
-          {
-            opacity: animation.element[element.key],
-            transform: [
-              {
-                translateY: animation.element[element.key].interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [18, 0],
-                }),
-              },
-              {
-                scale: animation.element[element.key].interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.65, 1],
-                }),
-              },
-              {
-                scale: isSelected ? 1.1 : 1,
-              },
-            ],
-          },
+          animated,
         ]}
       >
         <Pressable

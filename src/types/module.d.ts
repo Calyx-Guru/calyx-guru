@@ -1,3 +1,6 @@
+type VideoModule = any;
+type ImageModule = any;
+
 declare module "*.png" {
   const source: ImageModule;
   export default source;

@@ -1,14 +1,15 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-import { NormalVideo } from "@/components/video/NormalVideo";
+import { ConfirmOverlay } from "@/features/element/confirm-overlay";
+import { ElementFloatingCircle } from "@/features/element/floating-circle";
 
 import { GradientButton } from "@/components/typography/GradientButton";
+import { NormalVideo } from "@/components/video/NormalVideo";
 import { getElementByBirthDate } from "@/utils/element";
 
-import { ElementFloatingCircle } from "@/features/element/floating-circle";
 import { VIDEOS } from "./constants";
 import * as Types from "./type";
 
@@ -18,6 +19,9 @@ export function RouteChooseElement(properties: Types.Properties) {
   const [stage, setStage] = useState<Types.Stage>("choose-element");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const [element, setElement] = useState<ElementName | null>(null);
+
+  const timeout = useRef<NodeJS.Timeout | null>(null);
 
   function onDateChange(event: Types.DateTimePickerEvent, selectedDate?: Date) {
     setShowDatePicker(false);
@@ -27,7 +31,7 @@ export function RouteChooseElement(properties: Types.Properties) {
     }
   }
 
-  const handleSubmitBirthday = () => {
+  function handleSubmitBirthday() {
     if (!dateOfBirth) {
       return;
     }
@@ -37,11 +41,43 @@ export function RouteChooseElement(properties: Types.Properties) {
     setDateOfBirth(null);
     setShowDatePicker(false);
     handleSelectElement(element);
-  };
+  }
 
-  const handleSelectElement = (elementName: ElementName) => {
-    console.log(elementName);
-    // hideElements(() => openSelectionOverlay(element));
+  function handleSelectElement(elementName: ElementName) {
+    setElement(elementName);
+    setStage("confirm-element");
+  }
+
+  useEffect(() => {
+    clearTimeout(timeout.current!);
+
+    if (stage === "hatching-sequence") {
+      timeout.current = setTimeout(() => {
+        setStage("break-sequence");
+      }, 5000);
+    }
+
+    if (stage === "break-sequence") {
+      timeout.current = setTimeout(() => {
+        setStage("choose-element");
+      }, 6000);
+    }
+
+    return () => {
+      clearTimeout(timeout.current!);
+    };
+  }, [stage]);
+
+  const renderBackground = () => {
+    if (stage === "hatching-sequence") {
+      return <NormalVideo url={VIDEOS.hatching.break} />;
+    }
+
+    if (stage === "break-sequence") {
+      return <NormalVideo url={VIDEOS.hatching[element!]} />;
+    }
+
+    return <NormalVideo url={VIDEOS.hatching.idle} />;
   };
 
   const renderChooseBirthday = () => (
@@ -82,10 +118,17 @@ export function RouteChooseElement(properties: Types.Properties) {
   );
 
   const renderChooseElement = () => (
-    <ElementFloatingCircle onSelectElement={handleSelectElement} />
+    <ElementFloatingCircle
+      onSelectElement={handleSelectElement}
+      //
+    />
   );
 
   const renderToggleButton = () => {
+    if (stage !== "choose-birthday" && stage !== "choose-element") {
+      return null;
+    }
+
     return (
       <Pressable
         style={styles.chooseMyselfWrapper}
@@ -116,14 +159,30 @@ export function RouteChooseElement(properties: Types.Properties) {
     );
   };
 
+  const renderConfirmOverlay = () => {
+    if (!element) {
+      return null;
+    }
+
+    return (
+      <ConfirmOverlay
+        element={element}
+        onChooseAgain={() => setStage("choose-element")}
+        onConfirm={() => setStage("hatching-sequence")}
+      />
+    );
+  };
+
   return (
     <View style={styles.root}>
-      <NormalVideo url={VIDEOS.hatching.idle} />
+      {renderBackground()}
 
       <View style={styles.toolWrapper}>
         {stage === "choose-birthday" && renderChooseBirthday()}
         {stage === "choose-element" && renderChooseElement()}
-        {stage !== "confirm-element" && renderToggleButton()}
+        {stage === "confirm-element" && renderConfirmOverlay()}
+
+        {renderToggleButton()}
       </View>
     </View>
   );
