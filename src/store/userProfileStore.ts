@@ -1,51 +1,105 @@
 /**
- * Zustand store for user profile management
- * Handles storing, updating, and clearing user profile data
+ * Zustand store for user profile: remote-first hydrate, local cache, debounced serial remote saves.
  */
 
-import { UserProfile } from '@/types/profile';
+import {
+  fetchUserProfile,
+  updateUserProfile,
+} from '@/lib/supabase/userProfileService';
+import { RemoteSyncedUserDocument } from '@/store/RemoteSyncedUserDocument';
+import { UserProfile } from '@/types/UserProfile';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-interface UserProfileStore {
-  // State
+const STORAGE_KEY = 'userProfile';
+const REMOTE_DEBOUNCE_MS = 400;
+
+function createDefaultProfile(userId: string): UserProfile {
+  return {
+    id: userId,
+    updated_at: undefined,
+    username: undefined,
+    email: undefined,
+    phone_number: undefined,
+    full_name: undefined,
+    avatar_url: undefined,
+    bio: undefined,
+    website: undefined,
+    gender: undefined,
+    date_of_birth: undefined,
+    location: undefined,
+    birth_place: undefined,
+    family_status: undefined,
+    occupation: undefined,
+    interests: undefined,
+    social_links: undefined,
+    account_type: undefined,
+    status: undefined,
+    subscription_status: undefined,
+    preferences: undefined,
+    notification_settings: undefined,
+    privacy_settings: undefined,
+    language: undefined,
+    timezone: undefined,
+    profile_completion: 0,
+    referral_code: undefined,
+    referred_by: undefined,
+    custom_fields: undefined,
+    two_factor_enabled: false,
+    failed_login_attempts: 0,
+    lockout_until: undefined,
+    password_reset_token: undefined,
+    password_reset_expires_at: undefined,
+    created_at: undefined,
+    modified_at: undefined,
+    last_active_at: undefined,
+    last_login_at: undefined,
+    deactivated_at: undefined,
+    deleted_at: undefined,
+  };
+}
+
+export interface UserProfileStore {
   profile: UserProfile | null;
   isLoading: boolean;
   error: string | null;
+  /**
+   * After the first `fetchUserProfile` throws, we treat the DB as unreachable for this signed-in
+   * session: no further profile reads/writes to Supabase until `clearProfile` (e.g. sign-out).
+   */
+  profileRemoteDisabled: boolean;
 
-  // Actions
-  setProfile: (profile: UserProfile) => void;
-  updateProfile: (updates: Partial<UserProfile>) => void;
-  clearProfile: () => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  initializeProfileForUser: (userId: string) => Promise<void>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  clearProfile: () => Promise<void>;
+  applyServerProfile: (profile: UserProfile) => void;
 }
 
 export const useUserProfileStore = create<UserProfileStore>()(
-  devtools(
-    (set) => ({
-      // Initial state
+  devtools((set, get) => {
+    const sync = new RemoteSyncedUserDocument<UserProfile, UserProfileStore>({
+      storageKey: STORAGE_KEY,
+      debounceMs: REMOTE_DEBOUNCE_MS,
+      fetchRemote: (userId) => fetchUserProfile(userId),
+      updateRemote: (userId, updates) => updateUserProfile(userId, updates),
+      createDefault: createDefaultProfile,
+      recordKey: 'profile',
+      remoteDisabledKey: 'profileRemoteDisabled',
+      get,
+      set,
+      label: 'UserProfile',
+    });
+
+    return {
       profile: null,
       isLoading: false,
       error: null,
+      profileRemoteDisabled: false,
 
-      // Actions
-      setProfile: (profile) => set({ profile, error: null }),
-
-      updateProfile: (updates) =>
-        set((state) => ({
-          profile: state.profile ? { ...state.profile, ...updates } : null,
-          error: null,
-        })),
-
-      clearProfile: () => set({ profile: null, error: null }),
-
-      setLoading: (loading) => set({ isLoading: loading }),
-
-      setError: (error) => set({ error }),
-    }),
-    {
-      name: 'UserProfileStore',
-    },
-  ),
+      initializeProfileForUser: sync.initializeForUser,
+      updateProfile: sync.updateRecord,
+      clearProfile: sync.clearRecord,
+      applyServerProfile: sync.applyServerRecord,
+    };
+  }, { name: 'UserProfileStore' }),
 );

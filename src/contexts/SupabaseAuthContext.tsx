@@ -1,7 +1,7 @@
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { runWithTimeout } from '@/lib/app/helper';
 import supabase from '@/lib/supabase/client';
-import { fetchUserProfile } from '@/lib/supabase/userProfileService';
+import { useUserStateStore } from '@/store/userStateStore';
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 
@@ -48,8 +48,11 @@ export function SupabaseAuthProvider({
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { setProfile, clearProfile, loadProfileFromLocalStorage } =
-    useUserProfile();
+  const { clearProfile, initializeProfileForUser } = useUserProfile();
+  const initializeUserStateForUser = useUserStateStore(
+    (s) => s.initializeUserStateForUser,
+  );
+  const clearUserState = useUserStateStore((s) => s.clearUserState);
 
   const initializeSupabaseProfile = async () => {
     try {
@@ -59,31 +62,30 @@ export function SupabaseAuthProvider({
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
 
-      // Load user profile if logged in
       if (initialSession?.user) {
-        const userProfile = await runWithTimeout(
-          () => fetchUserProfile(initialSession.user.id),
-          3000,
+        const uid = initialSession.user.id;
+        await runWithTimeout(
+          () =>
+            Promise.all([
+              initializeProfileForUser(uid),
+              initializeUserStateForUser(uid),
+            ]),
+          8000,
         );
-        if (userProfile) {
-          setProfile(userProfile);
-        }
+      } else {
+        await Promise.all([clearProfile(), clearUserState()]);
       }
 
       console.log('Initial Supabase session:', initialSession);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('Error initializing session / profile:', error);
     } finally {
       console.log('Supabase auth loading complete');
       setIsLoading(false);
     }
   };
 
-  // Get initial session on mount and subscribe to changes
   useEffect(() => {
-    loadProfileFromLocalStorage();
-
-    // Listen to auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
@@ -91,25 +93,30 @@ export function SupabaseAuthProvider({
       setUser(newSession?.user ?? null);
       setIsLoading(false);
 
-      // Load profile on sign in, clear on sign out
       if (event === 'SIGNED_IN' && newSession?.user) {
+        const uid = newSession.user.id;
         try {
-          const userProfile = await fetchUserProfile(newSession.user.id);
-          if (userProfile) {
-            setProfile(userProfile);
-          }
+          await Promise.all([
+            initializeProfileForUser(uid),
+            initializeUserStateForUser(uid),
+          ]);
         } catch (error) {
-          console.error('Error loading user profile:', error);
+          console.error('Error loading user profile / state:', error);
         }
       } else if (event === 'SIGNED_OUT') {
-        clearProfile();
+        await Promise.all([clearProfile(), clearUserState()]);
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, []);
+  }, [
+    initializeProfileForUser,
+    clearProfile,
+    initializeUserStateForUser,
+    clearUserState,
+  ]);
 
   const signUp = useCallback(async (email: string, password: string) => {
     try {
