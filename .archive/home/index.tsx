@@ -1,12 +1,8 @@
 import { router } from "expo-router";
 import { Animated, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // import { VIDEOS } from "./constants";
-import { ElementGrid } from "./element-selection";
 import { ElementSelectionModal } from "./ElementSelectionModal";
-import { SelfChooseButton } from "./SelfChooseButton";
-import { DateCard } from "./tool-overlay";
 // import type * as Types from "./type";
 import { useElementSelection } from "./useElementSelection";
 
@@ -100,15 +96,15 @@ export default function TabHome() {
         onChooseAgain={handleChooseAgain}
       />
 
-      <ElementGrid
+      {/* <ElementGrid
         elementsVisible={elementsVisible}
         selectedElement={selectedElement}
         elementEntrance={elementEntrance}
         uiOpacity={uiOpacity}
         onSelectElement={handleSelectElement}
-      />
+      /> */}
 
-      <SafeAreaView style={styles.foreground} pointerEvents="box-none">
+      {/* <SafeAreaView style={styles.foreground} pointerEvents="box-none">
         <Animated.View style={{ opacity: uiOpacity }}>
           {!elementsVisible && (
             <DateCard
@@ -127,7 +123,7 @@ export default function TabHome() {
             onPress={handleSelfChoosePress}
           />
         </Animated.View>
-      </SafeAreaView>
+      </SafeAreaView> */}
     </View>
   );
 }
@@ -136,10 +132,10 @@ const styles = StyleSheet.create({
   // root: {
   //   flex: 1,
   // },
-  foreground: {
-    flex: 1,
-    justifyContent: "space-between",
-    rowGap: 16,
-    paddingHorizontal: 16,
-  },
+  // foreground: {
+  //   flex: 1,
+  //   justifyContent: "space-between",
+  //   rowGap: 16,
+  //   paddingHorizontal: 16,
+  // },
 });

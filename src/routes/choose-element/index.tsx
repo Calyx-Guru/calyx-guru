@@ -7,17 +7,19 @@ import { NormalVideo } from "@/components/video/NormalVideo";
 
 import { GradientButton } from "@/components/typography/GradientButton";
 import { getElementByBirthDate } from "@/utils/element";
+
+import { ElementFloatingCircle } from "@/features/element/floating-circle";
 import { VIDEOS } from "./constants";
 import * as Types from "./type";
 
 export function RouteChooseElement(properties: Types.Properties) {
   const { dateLabel } = properties;
 
-  const [method, setMethod] = useState<"birthday" | "element">("element");
+  const [stage, setStage] = useState<Types.Stage>("choose-element");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
 
-  function onDateChange(event: Types.DateEvent, selectedDate?: Date) {
+  function onDateChange(event: Types.DateTimePickerEvent, selectedDate?: Date) {
     setShowDatePicker(false);
 
     if (event.type === "set" && selectedDate) {
@@ -25,7 +27,7 @@ export function RouteChooseElement(properties: Types.Properties) {
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmitBirthday = () => {
     if (!dateOfBirth) {
       return;
     }
@@ -34,57 +36,71 @@ export function RouteChooseElement(properties: Types.Properties) {
 
     setDateOfBirth(null);
     setShowDatePicker(false);
+    handleSelectElement(element);
+  };
 
-    console.log(element);
+  const handleSelectElement = (elementName: ElementName) => {
+    console.log(elementName);
     // hideElements(() => openSelectionOverlay(element));
   };
 
-  const renderChooseBirthday = () => {
-    if (method === "element") {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <View style={styles.dateWrapper}>
-          <Text style={styles.dateTitle}>Enter your date of birth</Text>
-          <Pressable
-            style={styles.dateLabelWrapper}
-            onPress={() => setShowDatePicker(true)}
+  const renderChooseBirthday = () => (
+    <Fragment>
+      <View style={styles.dateWrapper}>
+        <Text style={styles.dateTitle}>Enter your date of birth</Text>
+        <Pressable
+          style={styles.dateLabelWrapper}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={styles.dateLabelTitle}>
+            {dateOfBirth ? dateOfBirth.toLocaleDateString() : dateLabel}
+          </Text>
+        </Pressable>
+        <Pressable
+          style={styles.dateConfirmWrapper}
+          onPress={handleSubmitBirthday}
+        >
+          <GradientButton
+            color="SECONDARY"
+            style={styles.dateConfirmButtonWrapper}
           >
-            <Text style={styles.dateLabelTitle}>
-              {dateOfBirth ? dateOfBirth.toLocaleDateString() : dateLabel}
-            </Text>
-          </Pressable>
-          <Pressable style={styles.dateConfirmWrapper} onPress={handleSubmit}>
-            <GradientButton
-              color="SECONDARY"
-              style={styles.dateConfirmButtonWrapper}
-            >
-              <Text style={styles.dateConfirmButton}>Confirm</Text>
-            </GradientButton>
-          </Pressable>
-        </View>
+            <Text style={styles.dateConfirmButton}>Confirm</Text>
+          </GradientButton>
+        </Pressable>
+      </View>
 
-        {showDatePicker && (
-          <DateTimePicker
-            value={new Date()}
-            mode="date"
-            display="default"
-            onChange={onDateChange}
-            maximumDate={new Date()}
-          />
-        )}
-      </Fragment>
-    );
-  };
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+          maximumDate={new Date()}
+        />
+      )}
+    </Fragment>
+  );
+
+  const renderChooseElement = () => (
+    <ElementFloatingCircle onSelectElement={handleSelectElement} />
+  );
 
   const renderToggleButton = () => {
     return (
       <Pressable
         style={styles.chooseMyselfWrapper}
         onPress={() =>
-          setMethod((prev) => (prev === "element" ? "birthday" : "element"))
+          setStage((prev) => {
+            switch (prev) {
+              case "choose-birthday":
+                return "choose-element";
+              case "choose-element":
+                return "choose-birthday";
+
+              default:
+                return prev;
+            }
+          })
         }
       >
         <GradientButton
@@ -92,7 +108,8 @@ export function RouteChooseElement(properties: Types.Properties) {
           style={styles.chooseMyselfButtonWrapper}
         >
           <Text style={styles.chooseMyselfButtonTitle}>
-            {method === "element" ? "Help me choose" : "I will choose myself"}
+            {stage === "choose-birthday" && "I will choose myself"}
+            {stage === "choose-element" && "Help me choose"}
           </Text>
         </GradientButton>
       </Pressable>
@@ -104,8 +121,9 @@ export function RouteChooseElement(properties: Types.Properties) {
       <NormalVideo url={VIDEOS.hatching.idle} />
 
       <View style={styles.toolWrapper}>
-        {renderChooseBirthday()}
-        {renderToggleButton()}
+        {stage === "choose-birthday" && renderChooseBirthday()}
+        {stage === "choose-element" && renderChooseElement()}
+        {stage !== "confirm-element" && renderToggleButton()}
       </View>
     </View>
   );
