@@ -1,5 +1,4 @@
 import { Dashboard } from '@/pages/Dashboard';
-import { FortunePoemsPage } from '@/pages/FortunePoemsPage';
 import { Settings } from '@/pages/Settings';
 import { SignIn } from '@/pages/SignIn';
 import {
@@ -9,6 +8,7 @@ import {
   Routes,
 } from 'react-router-dom';
 import { useSupabaseAuth } from './hooks/useSupabaseAuth';
+import { KaucimStoriesPage } from './pages/KaucimStoriesPage';
 import { LocalizationPage } from './pages/LocalizationPage';
 
 export function App() {
@@ -31,7 +31,8 @@ export function App() {
         {user ? (
           <>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/fortune-poems" element={<FortunePoemsPage />} />
+            {/* <Route path="/fortune-poems" element={<FortunePoemsPage />} /> */}
+            <Route path="/kaucim-stories" element={<KaucimStoriesPage />} />
             <Route path="/localization" element={<LocalizationPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Settings />} />

@@ -1,4 +1,4 @@
-import type { LanguageKey } from './common';
+import type { KAUCIM_CONCERNS, LanguageKey } from './common';
 
 export interface MasterDataManifest {
   localization: {
@@ -8,6 +8,11 @@ export interface MasterDataManifest {
   fortunePoems: {
     lastUpdated: string;
     languages: {
+      [key in LanguageKey]?: number;
+    };
+  };
+  kaucimStories: {
+    [key in KAUCIM_CONCERNS]: {
       [key in LanguageKey]?: number;
     };
   };

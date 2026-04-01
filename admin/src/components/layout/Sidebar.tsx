@@ -1,13 +1,13 @@
 import { cn } from '@/lib/utils';
 import {
   BarChart3,
+  Book,
   BookOpen,
   Calendar,
   Home,
   Languages,
   Settings,
-  Sparkles,
-  type LucideIcon,
+  type LucideIcon
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
@@ -23,10 +23,15 @@ const navItems: NavItem[] = [
     href: '/dashboard',
     icon: Home,
   },
+  // {
+  //   title: 'Fortune Poems',
+  //   href: '/fortune-poems',
+  //   icon: Sparkles,
+  // },
   {
-    title: 'Fortune Poems',
-    href: '/fortune-poems',
-    icon: Sparkles,
+    title: 'Kaucim Stories',
+    href: '/kaucim-stories',
+    icon: Book,
   },
   {
     title: 'Localization',
