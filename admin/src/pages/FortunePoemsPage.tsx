@@ -15,6 +15,10 @@ import {
 } from '@/constants';
 import { MasterDataContext } from '@/contexts/MasterDataContext';
 import { usePageState } from '@/hooks/usePageState';
+import {
+  mergeColumnWidths,
+  textColumnsFromWidths,
+} from '@/lib/handsontableColumnWidths';
 import supabase from '@/lib/supabase/client';
 import { languageKeyToLabel } from '@/lib/utils';
 import type { FortunePoemContentType, LanguageKey } from '@/types';
@@ -38,8 +42,13 @@ import {
 
 const PAGE_STATE_PREFIX = 'fortunePoems';
 
+const FORTUNE_POEMS_DEFAULT_COLUMN_WIDTHS = [
+  80, 240, 160, 160, 160, 480,
+] as const;
+
 interface FortunePoemsPageState {
   selectedLanguage: LanguageKey;
+  columnWidths?: number[];
 }
 
 function makeFilePath(language: LanguageKey, version: number) {
@@ -259,8 +268,14 @@ export function FortunePoemsPage() {
           hotInstanceRef.current.destroy();
         }
 
+        const colWidths = mergeColumnWidths(
+          FORTUNE_POEMS_DEFAULT_COLUMN_WIDTHS,
+          pageState.columnWidths,
+        );
+
         const instance = new Handsontable(container, {
           ...DEFAULT_HANDSON_TABLE_OPTIONS,
+          stretchH: 'none',
           data: [],
           colHeaders: [
             'Draw No',
@@ -270,14 +285,17 @@ export function FortunePoemsPage() {
             'Divine Will',
             'Allusion',
           ],
-          columns: [
-            { type: 'text', width: 80 },
-            { type: 'text', width: 240 },
-            { type: 'text', width: 160 },
-            { type: 'text', width: 160 },
-            { type: 'text', width: 160 },
-            { type: 'text', width: 480 },
-          ],
+          columns: textColumnsFromWidths(colWidths),
+          afterColumnResize: (newSize, column) => {
+            setPageState((prev) => {
+              const merged = mergeColumnWidths(
+                FORTUNE_POEMS_DEFAULT_COLUMN_WIDTHS,
+                prev.columnWidths,
+              );
+              merged[column] = newSize;
+              return { ...prev, columnWidths: merged };
+            });
+          },
           afterChange: handleTableChange,
           afterRemoveRow: handleTableRemoveRow,
         });
@@ -296,7 +314,7 @@ export function FortunePoemsPage() {
         hotInstanceRef.current = null;
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- mount-only init; column widths from persisted pageState on first paint
 
   // Update table data when poems or language changes
   useEffect(() => {

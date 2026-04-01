@@ -13,6 +13,11 @@ import {
   STORAGE_BUCKET
 } from '@/constants';
 import { MasterDataContext } from '@/contexts/MasterDataContext';
+import { usePageState } from '@/hooks/usePageState';
+import {
+  mergeColumnWidths,
+  textColumnsFromWidths,
+} from '@/lib/handsontableColumnWidths';
 import supabase from '@/lib/supabase/client';
 import type { LocalizationTranslationType } from '@/types/Localization';
 import Handsontable from 'handsontable';
@@ -27,6 +32,14 @@ import { useContext, useEffect, useRef, useState } from 'react';
 
 function makeFilePath(version: number) {
   return `${LOCALIZATION_FILE_NAME}-${version}.json`;
+}
+
+const LOCALIZATION_DEFAULT_COLUMN_WIDTHS = [
+  80, 240, 240, 240, 240, 240, 240,
+] as const;
+
+interface LocalizationTableUiState {
+  columnWidths?: number[];
 }
 
 export function LocalizationPage() {
@@ -44,6 +57,11 @@ export function LocalizationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tableUpdateTimestamp, setTableUpdateTimestamp] = useState(0);
+
+  const [tableUi, setTableUi] = usePageState<LocalizationTableUiState>(
+    'localizationTable',
+    {},
+  );
 
   // Load translations when manifest changes
   useEffect(() => {
@@ -249,8 +267,14 @@ export function LocalizationPage() {
 
     const initTable = () => {
       try {
+        const colWidths = mergeColumnWidths(
+          LOCALIZATION_DEFAULT_COLUMN_WIDTHS,
+          tableUi.columnWidths,
+        );
+
         const instance = new Handsontable(container, {
           ...DEFAULT_HANDSON_TABLE_OPTIONS,
+          stretchH: 'none',
           data: [],
           colHeaders: [
             'Key',
@@ -261,15 +285,17 @@ export function LocalizationPage() {
             'Korean',
             'Vietnamese',
           ],
-          columns: [
-            { type: 'text', width: 80 },
-            { type: 'text', width: 240 },
-            { type: 'text', width: 240 },
-            { type: 'text', width: 240 },
-            { type: 'text', width: 240 },
-            { type: 'text', width: 240 },
-            { type: 'text', width: 240 },
-          ],
+          columns: textColumnsFromWidths(colWidths),
+          afterColumnResize: (newSize, column) => {
+            setTableUi((prev) => {
+              const merged = mergeColumnWidths(
+                LOCALIZATION_DEFAULT_COLUMN_WIDTHS,
+                prev.columnWidths,
+              );
+              merged[column] = newSize;
+              return { ...prev, columnWidths: merged };
+            });
+          },
           afterChange: handleTableChange,
           afterRemoveRow: handleTableRemoveRow,
         });
@@ -288,7 +314,7 @@ export function LocalizationPage() {
         hotInstanceRef.current = null;
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- mount-only init; column widths from persisted tableUi on first paint
 
   // Update table data when translations change
   useEffect(() => {
