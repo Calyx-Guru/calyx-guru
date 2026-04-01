@@ -4,7 +4,7 @@
  */
 
 import supabase from '@/lib/supabase/client';
-import { UserProfile } from '@/types/profile';
+import { UserProfile } from '@/types/UserProfile';
 
 /**
  * Fetch user profile by user ID

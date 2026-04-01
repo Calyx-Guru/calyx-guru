@@ -1,4 +1,62 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Application from 'expo-application';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+
 const RUNNING_TASKS: any = {};
+
+const DEVICE_INSTALL_ID_KEY = 'calyx_device_install_id';
+
+function newInstallId(): string {
+  const g = globalThis as { crypto?: Crypto };
+  if (g.crypto?.randomUUID) {
+    return g.crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+async function getOrCreatePersistedInstallId(): Promise<string> {
+  if (Platform.OS === 'web') {
+    const existing = await AsyncStorage.getItem(DEVICE_INSTALL_ID_KEY);
+    if (existing) return existing;
+    const id = newInstallId();
+    await AsyncStorage.setItem(DEVICE_INSTALL_ID_KEY, id);
+    return id;
+  }
+
+  if (await SecureStore.isAvailableAsync()) {
+    try {
+      const stored = await SecureStore.getItemAsync(DEVICE_INSTALL_ID_KEY);
+      if (stored) return stored;
+      const id = newInstallId();
+      await SecureStore.setItemAsync(DEVICE_INSTALL_ID_KEY, id);
+      return id;
+    } catch {
+      /* fall through to AsyncStorage */
+    }
+  }
+
+  const fallback = await AsyncStorage.getItem(DEVICE_INSTALL_ID_KEY);
+  if (fallback) return fallback;
+  const id = newInstallId();
+  await AsyncStorage.setItem(DEVICE_INSTALL_ID_KEY, id);
+  return id;
+}
+
+async function getIosIdForVendorResolved(): Promise<string | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const id = await Application.getIosIdForVendorAsync();
+    if (id) return id;
+    if (attempt < 2) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  }
+  return null;
+}
 
 export function runOnce(
   id: string,
@@ -33,6 +91,40 @@ export function runOnce(
   }
 
   return runOnceWrapper;
+}
+
+const resolveDeviceId = runOnce('calyx-device-id', async (): Promise<string> => {
+  if (Platform.OS === 'android') {
+    try {
+      const androidId = Application.getAndroidId();
+      if (androidId) return androidId;
+    } catch {
+      /* unavailable */
+    }
+    return getOrCreatePersistedInstallId();
+  }
+
+  if (Platform.OS === 'ios') {
+    try {
+      const idfv = await getIosIdForVendorResolved();
+      if (idfv) return idfv;
+    } catch {
+      /* native module unavailable */
+    }
+    return getOrCreatePersistedInstallId();
+  }
+
+  return getOrCreatePersistedInstallId();
+});
+
+/**
+ * Best-effort device / installation identifier.
+ * - Android: `Settings.Secure.ANDROID_ID` (can change on factory reset or signing-key changes).
+ * - iOS: identifier for vendor (resets if all apps from the vendor are removed; rarely null before unlock).
+ * - Web and fallbacks: random UUID persisted in storage for this install.
+ */
+export function getDeviceIdAsync(): Promise<string> {
+  return resolveDeviceId();
 }
 
 export function runWithTimeout<T>(
