@@ -1,16 +1,19 @@
 import { router } from "expo-router";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ConfirmOverlay } from "@/features/element/confirm-overlay";
 import { ElementItemFloatingCircle } from "@/features/element/item-floating-circle";
 
-import { GradientButton } from "@/components/typography/GradientButton";
+import { ButtonGradient } from "@/components/typography/ButtonGradient";
 import { NormalVideo } from "@/components/video/NormalVideo";
 import { getElementByBirthDate } from "@/utils/element";
 
+import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
+import { FramePrimary2 } from "@/components/typography/FramePrimary2";
+import { HeadingPrimary } from "@/components/typography/HeadingPrimary";
 import { VIDEOS } from "./constants";
 import * as Types from "./type";
 
@@ -81,30 +84,37 @@ export function RouteChooseElement(properties: Types.Properties) {
     return <NormalVideo url={VIDEOS.hatching.idle} />;
   };
 
+  const renderTitle = () => {
+    if (stage !== "choose-element") {
+      return null;
+    }
+
+    return <HeadingPrimary>Choose your Element</HeadingPrimary>;
+  };
+
   const renderChooseBirthday = () => (
-    <Fragment>
-      <View style={styles.dateWrapper}>
-        <Text style={styles.dateTitle}>Enter your date of birth</Text>
-        <Pressable
-          style={styles.dateLabelWrapper}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <Text style={styles.dateLabelTitle}>
-            {dateOfBirth ? dateOfBirth.toLocaleDateString() : dateLabel}
-          </Text>
-        </Pressable>
-        <Pressable
-          style={styles.dateConfirmWrapper}
-          onPress={handleSubmitBirthday}
-        >
-          <GradientButton
-            color="SECONDARY"
-            style={styles.dateConfirmButtonWrapper}
+    <View style={styles.dateContainer}>
+      <FramePrimary2>
+        <View style={styles.dateWrapper}>
+          <Text style={styles.dateTitle}>Enter your date of birth</Text>
+          <Pressable
+            style={styles.dateLabelWrapper}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={styles.dateLabelTitle}>
+              {dateOfBirth ? dateOfBirth.toLocaleDateString() : dateLabel}
+            </Text>
+          </Pressable>
+          <ButtonGradient
+            color="PRIMARY"
+            style={styles.dateConfirmWrapper}
+            buttonStyle={styles.dateConfirmButtonWrapper}
+            onPress={handleSubmitBirthday}
           >
             <Text style={styles.dateConfirmButton}>Confirm</Text>
-          </GradientButton>
-        </Pressable>
-      </View>
+          </ButtonGradient>
+        </View>
+      </FramePrimary2>
 
       {showDatePicker && (
         <DateTimePicker
@@ -115,7 +125,7 @@ export function RouteChooseElement(properties: Types.Properties) {
           maximumDate={new Date()}
         />
       )}
-    </Fragment>
+    </View>
   );
 
   const renderChooseElement = () => (
@@ -131,32 +141,26 @@ export function RouteChooseElement(properties: Types.Properties) {
     }
 
     return (
-      <Pressable
-        style={styles.chooseMyselfWrapper}
-        onPress={() =>
-          setStage((prev) => {
-            switch (prev) {
-              case "choose-birthday":
-                return "choose-element";
-              case "choose-element":
-                return "choose-birthday";
+      <View style={{ marginTop: "auto" }}>
+        <ButtonPrimary
+          onPress={() =>
+            setStage((prev) => {
+              switch (prev) {
+                case "choose-birthday":
+                  return "choose-element";
+                case "choose-element":
+                  return "choose-birthday";
 
-              default:
-                return prev;
-            }
-          })
-        }
-      >
-        <GradientButton
-          color="SECONDARY"
-          style={styles.chooseMyselfButtonWrapper}
+                default:
+                  return prev;
+              }
+            })
+          }
         >
-          <Text style={styles.chooseMyselfButtonTitle}>
-            {stage === "choose-birthday" && "I will choose myself"}
-            {stage === "choose-element" && "Help me choose"}
-          </Text>
-        </GradientButton>
-      </Pressable>
+          {stage === "choose-birthday" && "I will choose myself"}
+          {stage === "choose-element" && "Help me choose"}
+        </ButtonPrimary>
+      </View>
     );
   };
 
@@ -179,6 +183,8 @@ export function RouteChooseElement(properties: Types.Properties) {
       {renderBackground()}
 
       <View style={styles.toolWrapper}>
+        {renderTitle()}
+
         {stage === "choose-birthday" && renderChooseBirthday()}
         {stage === "choose-element" && renderChooseElement()}
         {stage === "confirm-element" && renderConfirmOverlay()}
@@ -198,27 +204,24 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 8,
   },
+  dateContainer: {
+    marginTop: 24,
+  },
   dateWrapper: {
     rowGap: 8,
-    padding: 8,
-    backgroundColor: "#161a1e",
-    borderWidth: 1,
-    borderColor: "#63717e",
+    width: "85%",
   },
   dateTitle: {
     color: "#f2f5f8",
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: "700",
     textAlign: "center",
   },
   dateLabelWrapper: {
-    justifyContent: "center",
     padding: 8,
-    width: "100%",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.6)",
     borderRadius: 4,
-    elevation: 6,
   },
   dateLabelTitle: {
     color: "#f6f9ff",
@@ -234,6 +237,7 @@ const styles = StyleSheet.create({
   dateConfirmButtonWrapper: {
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 24,
     width: "40%",
     borderRadius: 4,
     overflow: "hidden",
@@ -244,24 +248,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
-  },
-  chooseMyselfWrapper: {
-    marginTop: "auto",
-    marginHorizontal: "auto",
-    width: "60%",
-    overflow: "hidden",
-  },
-  chooseMyselfWrapperActive: {
-    opacity: 1,
-  },
-  chooseMyselfButtonWrapper: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chooseMyselfButtonTitle: {
-    paddingVertical: 12,
-    color: "#ffffff",
-    fontSize: 12,
-    fontWeight: "700",
   },
 });

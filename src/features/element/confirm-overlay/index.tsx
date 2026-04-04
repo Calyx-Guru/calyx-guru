@@ -11,6 +11,8 @@ import {
 
 import { ELEMENTS } from "../constants";
 
+import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
+import { FramePrimary } from "@/components/typography/FramePrimary";
 import { useEffect, useMemo } from "react";
 import type * as Types from "./type";
 
@@ -23,6 +25,11 @@ export function ConfirmOverlay(properties: Types.Properties) {
       opacity: new Animated.Value(1),
     };
   }, []);
+
+  const getElementColor = () => {
+    const elementObj = ELEMENTS.find((el) => el.key === element);
+    return elementObj?.color || "#f0e68c";
+  };
 
   useEffect(() => {
     animation.scale.setValue(0.75);
@@ -57,24 +64,31 @@ export function ConfirmOverlay(properties: Types.Properties) {
   );
 
   const renderHeader = () => (
-    <View style={styles.headerWrapper}>
-      <Text style={styles.headerTitle}>Confirm Your Element Selection</Text>
-      <Text style={styles.headerDescription}>
-        You have selected the &nbsp;
-        <Text style={styles.headerDescriptionHighlight}>
-          {element.toUpperCase()}
+    <FramePrimary style={styles.frameWrapper}>
+      <View style={styles.headerWrapper}>
+        <Text style={styles.headerTitle}>Confirm Your Element Selection</Text>
+        <Text style={styles.headerDescription}>
+          You have selected the &nbsp;
+          <Text
+            style={[
+              styles.headerDescriptionHighlight,
+              { color: getElementColor() },
+            ]}
+          >
+            {element.toUpperCase()}
+          </Text>
+          .This element determines your unique cosmic connections and luck.
+          <Text style={styles.headerDescriptionBold}>
+            Once confirmed, you cannot change it later
+          </Text>
+          .But you can &nbsp;
+          <Text style={styles.headerDescriptionBold}>
+            reset as another element
+          </Text>
+          &nbsp; from your settings menu to start over.
         </Text>
-        .This element determines your unique cosmic connections and luck.
-        <Text style={styles.headerDescriptionBold}>
-          Once confirmed, you cannot change it later
-        </Text>
-        .But you can &nbsp;
-        <Text style={styles.headerDescriptionBold}>
-          reset as another element
-        </Text>
-        &nbsp; from your settings menu to start over.
-      </Text>
-    </View>
+      </View>
+    </FramePrimary>
   );
 
   const renderImage = () => {
@@ -98,14 +112,9 @@ export function ConfirmOverlay(properties: Types.Properties) {
 
   const renderTool = () => (
     <View style={styles.toolWrapper}>
-      <Pressable
-        style={styles.toolConfirmWrapper}
-        onPress={() => properties.onConfirm?.(element)}
-      >
-        <Text style={styles.toolConfirmTitle}>
-          {`Confirm Element '${element.toUpperCase()}'`}
-        </Text>
-      </Pressable>
+      <ButtonPrimary onPress={() => properties.onConfirm?.(element)}>
+        {`Confirm Element "${element.toUpperCase()}"`}
+      </ButtonPrimary>
       <Pressable onPress={properties.onChooseAgain}>
         <Text style={styles.toolChooseAgainTitle}>Choose Again</Text>
       </Pressable>
@@ -140,31 +149,28 @@ const styles = StyleSheet.create({
   backdropWrapper: {
     backgroundColor: "#ffffff",
   },
+  frameWrapper: {
+    marginTop: 28,
+  },
   headerWrapper: {
-    alignItems: "center",
-    rowGap: 16,
-    paddingVertical: 24,
+    paddingVertical: 16,
     paddingHorizontal: 24,
-    marginTop: 48,
-    backgroundColor: "#000000",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ced4da",
-    zIndex: 2,
   },
   headerTitle: {
-    marginBottom: 4,
     color: "#ffffff",
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: "700",
+    textAlign: "center",
   },
   headerDescription: {
     color: "#b0b8c0",
     fontSize: 14,
     fontWeight: "400",
+    textAlign: "center",
   },
   headerDescriptionHighlight: {
     color: "#f0e68c",
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "800",
   },
   headerDescriptionBold: {
@@ -182,24 +188,21 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "50%",
     left: "50%",
-    marginLeft: -100,
-    marginTop: -150,
-    width: 200,
-    height: 200,
+    marginLeft: -110,
+    marginTop: -145,
+    width: 220,
+    height: 220,
   },
   toolWrapper: {
     alignItems: "center",
     rowGap: 12,
-    marginBottom: 48,
+    marginBottom: 35,
     width: "100%",
     zIndex: 1,
   },
   toolConfirmWrapper: {
     alignItems: "center",
-    paddingVertical: 16,
-    width: "80%",
-    borderRadius: 8,
-    backgroundColor: "#262b33",
+    width: "100%",
   },
   toolConfirmTitle: {
     color: "#ffffff",

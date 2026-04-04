@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { CarouselFold } from "@/components/carousel/FoldCarousel";
-import { GradientButton } from "@/components/typography/GradientButton";
+import { ButtonGradient } from "@/components/typography/ButtonGradient";
 
 import { ELEMENTS } from "../constants";
 import type * as Types from "./type";
@@ -49,13 +49,13 @@ export function ElementItemCarouselFold(properties: Types.Properties) {
         }}
       />
       <Pressable onPress={() => onSelectElement()}>
-        <GradientButton
+        <ButtonGradient
           color="SECONDARY"
           disabled={disabled}
           style={styles.confirmButtonWrapper}
         >
           <Text style={styles.confirmButton}>Choose this Element</Text>
-        </GradientButton>
+        </ButtonGradient>
       </Pressable>
     </View>
   );
