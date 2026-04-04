@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   dateContainer: {
-    marginTop: 24,
+    //
   },
   dateWrapper: {
     rowGap: 8,
