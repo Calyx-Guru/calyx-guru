@@ -5,7 +5,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ConfirmOverlay } from "@/features/element/confirm-overlay";
-import { ElementItemCarouselFold } from "@/features/element/item-carousel-fold";
+import { ElementItemFloatingCircle } from "@/features/element/item-floating-circle";
 
 import { GradientButton } from "@/components/typography/GradientButton";
 import { NormalVideo } from "@/components/video/NormalVideo";
@@ -119,7 +119,7 @@ export function RouteChooseElement(properties: Types.Properties) {
   );
 
   const renderChooseElement = () => (
-    <ElementItemCarouselFold
+    <ElementItemFloatingCircle
       onSelectElement={handleSelectElement}
       //
     />

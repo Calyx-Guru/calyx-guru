@@ -103,12 +103,8 @@ export function ElementItemFloatingCircle(properties: Types.Properties) {
 const styles = StyleSheet.create({
   root: {
     position: "absolute",
-    top: "50%",
-    left: "50%",
-    width: 300,
-    height: 300,
-    marginLeft: -150,
-    marginTop: -150,
+    top: "51%",
+    left: "52%",
   },
   elementWrapper: {
     position: "absolute",
@@ -119,25 +115,24 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   elementTop: {
-    top: -50,
-    left: "50%",
-    marginLeft: -50,
+    top: -200,
+    left: -50,
   },
   elementLeft: {
-    top: 50,
-    left: -25,
+    top: -100,
+    left: 75,
   },
   elementRight: {
-    top: 50,
-    right: -25,
+    top: -100,
+    right: 75,
   },
   elementBottomRight: {
-    bottom: -50,
-    right: 0,
+    bottom: -175,
+    right: 25,
   },
   elementBottomLeft: {
-    bottom: -50,
-    left: 0,
+    bottom: -175,
+    left: 25,
   },
   elementImageWrapper: {
     alignItems: "center",
