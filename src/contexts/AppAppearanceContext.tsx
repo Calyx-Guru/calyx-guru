@@ -68,7 +68,7 @@ export function AppAppearanceProvider({
   const [locale, setLocaleState] = useState<LanguageKey>(DEFAULT_LANGUAGE);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  const systemTheme = Appearance.getColorScheme() ?? 'dark';
+  const systemTheme = Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
 
   useEffect(() => {
     AsyncStorage.multiGet([

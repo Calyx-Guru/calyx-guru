@@ -1,23 +1,17 @@
 'use client';
 
-import {
-  MASTER_DATA_MANIFEST_FILE_NAME,
-  STORAGE_BUCKET,
-  SUPPORTED_LANGUAGES,
-} from '@/constants';
-import { supabase } from '@/lib/supabase/client';
 import type { LanguageKey, MasterDataManifest } from '@/types';
 import type { FortunePoemContentType } from '@/types/FortunePoems';
-import type {
-  FortuneTellingCategory,
-  FortuneTellingRow,
-} from '@/types/FortuneTelling';
 import { createContext, useEffect, useState } from 'react';
 
 // Import built-in JSON files
-import { fetchWithTimeout, runOnce } from '@/lib/app/helper';
+import { DEFAULT_LANGUAGE } from '@/constants';
+import { runOnce } from '@/lib/app/helper';
 import fortunePoemsRaw from '@/masterdata/fortune_poems.json';
+import kaucimStoriesRaw from '@/masterdata/kaucim_stories.json';
 import localManifestRaw from '@/masterdata/manifest.json';
+import { KaucimStoriesPackType, KaucimStoryLineType } from '@/types/KaucimStories';
+import { KAUCIM_CONCERNS } from '@/types/UserState';
 
 // Type the localManifest - it may only have partial language versions
 const localManifest = localManifestRaw as unknown as MasterDataManifest;
@@ -30,10 +24,8 @@ type MasterDataContextType = {
   isLoading: boolean;
   error: string | null;
   updateAvailable: boolean;
-  initialize: () => Promise<void>;
-  fetchRandomFortuneTelling: (
-    category: FortuneTellingCategory,
-  ) => Promise<{ row: FortuneTellingRow; text: string; hp: number } | null>;
+  initialize: () => Promise<void>;  
+  getKaucimStoryBundle: (concern: KAUCIM_CONCERNS, language: LanguageKey, stickNumber: number) => KaucimStoryLineType[];
 };
 
 export const MasterDataContext = createContext<
@@ -43,6 +35,9 @@ export const MasterDataContext = createContext<
 const LOCAL_POEMS_MAP: Record<LanguageKey, FortunePoemContentType[]> =
   fortunePoemsRaw as unknown as Record<LanguageKey, FortunePoemContentType[]>;
 
+const LOCAL_KAUCIM_STORIES_MAP: KaucimStoriesPackType =
+  kaucimStoriesRaw as unknown as KaucimStoriesPackType;
+
 export function MasterDataProvider({
   children,
 }: {
@@ -51,114 +46,90 @@ export function MasterDataProvider({
   const [manifest, setManifest] = useState<MasterDataManifest | null>(null);
   const [fortunePoems] =
     useState<Record<LanguageKey, FortunePoemContentType[]>>(LOCAL_POEMS_MAP);
+  const [kaucimStories] = useState<KaucimStoriesPackType>(LOCAL_KAUCIM_STORIES_MAP);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   const initialize = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+    // try {
+    //   setIsLoading(true);
+    //   setError(null);
 
-      // Load manifest from Supabase storage
-      const { data } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(MASTER_DATA_MANIFEST_FILE_NAME);
+    //   // Load manifest from Supabase storage
+    //   const { data } = await supabase.storage
+    //     .from(STORAGE_BUCKET)
+    //     .getPublicUrl(MASTER_DATA_MANIFEST_FILE_NAME);
 
-      const url = data.publicUrl;
-      const res = await fetchWithTimeout(url, 3000);
-      const json = await res.json();
+    //   const url = data.publicUrl;
+    //   const res = await fetchWithTimeout(url, 3000);
+    //   const json = await res.json();
 
-      if (!json) {
-        throw new Error(`Failed to download manifest: No data returned`);
-      }
+    //   if (!json) {
+    //     throw new Error(`Failed to download manifest: No data returned`);
+    //   }
 
-      const remoteManifest: MasterDataManifest = json;
-      setManifest(remoteManifest);
+    //   const remoteManifest: MasterDataManifest = json;
+    //   setManifest(remoteManifest);
 
-      // Check for version updates
-      checkForUpdates(remoteManifest);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-      console.error('Error loading master data manifest:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    //   // Check for version updates
+    //   checkForUpdates(remoteManifest);
+    // } catch (err) {
+    //   const errorMessage =
+    //     err instanceof Error ? err.message : 'Unknown error occurred';
+    //   setError(errorMessage);
+    //   console.error('Error loading master data manifest:', err);
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   const checkForUpdates = (remoteManifest: MasterDataManifest) => {
-    const localVersions = localManifest.fortunePoems.languages as Record<
-      string,
-      number
-    >;
-    const remoteVersions = remoteManifest.fortunePoems.languages;
+    // const localVersions = localManifest.fortunePoems.languages as Record<
+    //   string,
+    //   number
+    // >;
+    // const remoteVersions = remoteManifest.fortunePoems.languages;
 
-    let hasUpdates = false;
+    // let hasUpdates = false;
 
-    for (const language of SUPPORTED_LANGUAGES) {
-      const localVersion =
-        localVersions[language as keyof typeof localVersions];
-      const remoteVersion = remoteVersions[language];
+    // for (const language of SUPPORTED_LANGUAGES) {
+    //   const localVersion =
+    //     localVersions[language as keyof typeof localVersions];
+    //   const remoteVersion = remoteVersions[language];
 
-      if (remoteVersion && localVersion && remoteVersion > localVersion) {
-        hasUpdates = true;
-        console.log(
-          `Update available for ${language}: v${localVersion} → v${remoteVersion}`,
-        );
-      }
-    }
+    //   if (remoteVersion && localVersion && remoteVersion > localVersion) {
+    //     hasUpdates = true;
+    //     console.log(
+    //       `Update available for ${language}: v${localVersion} → v${remoteVersion}`,
+    //     );
+    //   }
+    // }
 
-    setUpdateAvailable(hasUpdates);
+    // setUpdateAvailable(hasUpdates);
   };
 
-  const fetchRandomFortuneTelling = async (
-    category: FortuneTellingCategory,
-  ): Promise<{ row: FortuneTellingRow; text: string; hp: number } | null> => {
-    try {
-      // Get total count for random offset
-      const { count, error: countError } = await supabase
-        .from('fortune_telling')
-        .select('*', { count: 'exact', head: true })
-        .eq('locale', 'en');
-
-      if (countError || !count || count === 0) {
-        console.error('Error fetching fortune_telling count:', countError);
-        return null;
-      }
-
-      const randomOffset = Math.floor(Math.random() * count);
-
-      const { data, error: fetchError } = await supabase
-        .from('fortune_telling')
-        .select('*')
-        .eq('locale', 'en')
-        .range(randomOffset, randomOffset)
-        .single();
-
-      if (fetchError || !data) {
-        console.error('Error fetching fortune_telling:', fetchError);
-        return null;
-      }
-
-      const row = data as FortuneTellingRow;
-      const apps = row.applications[category] || [];
-      const text =
-        apps.length > 0
-          ? apps[Math.floor(Math.random() * apps.length)]
-          : row.original_explanation;
-
-      // Map value (0-100) to HP range (-30 to +35)
-      const hp = Math.round((row.value / 100) * 65 - 30);
-
-      return { row, text, hp };
-    } catch (err) {
-      console.error('Error in fetchRandomFortuneTelling:', err);
-      return null;
+  const getKaucimStoryBundle = (concern: KAUCIM_CONCERNS, language: LanguageKey, stickNumber: number) => {
+    const concerns = kaucimStories[concern];
+    if (!concerns) {
+      return [];
     }
+    let languages = concerns[language];
+    if (!languages) {
+      languages = concerns[DEFAULT_LANGUAGE];
+      if (!languages) {
+        return [];
+      }
+    }
+    const result = languages.filter(story => story.stickNumber === stickNumber);
+    if (result.length === 0) {
+      const random = result[Math.floor(Math.random() * result.length)];
+      const fallbackStickNumber = random.stickNumber;
+      return languages.filter(story => story.stickNumber === fallbackStickNumber);
+    }
+    return result;
   };
-
+  
   useEffect(() => {
     runOnce('masterdata_initialize', () => initialize());
   }, []);
@@ -166,13 +137,13 @@ export function MasterDataProvider({
   const value: MasterDataContextType = {
     manifest,
     localManifest,
-    fortunePoems,
+    fortunePoems,    
     fortuneTellings: null,
     isLoading,
     error,
     updateAvailable,
     initialize,
-    fetchRandomFortuneTelling,
+    getKaucimStoryBundle
   };
 
   return (

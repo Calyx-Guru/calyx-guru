@@ -161,12 +161,12 @@ export function getDailyRandomIntSync(
   return lo + (h % span);
 }
 
-export async function getRandomInt(
+export function getRandomInt(
+  deviceId: string,
   index: number,
   utcTime: Date | number,
   min: number,
   max: number,
-): Promise<number> {
-  const deviceId = await getDeviceIdAsync();
+): number {
   return getDailyRandomIntSync(deviceId, index, utcTime, min, max);
 }

@@ -27,6 +27,7 @@ function createDefaultProfile(userId: string): UserProfile {
     website: undefined,
     gender: undefined,
     date_of_birth: undefined,
+    element: undefined,
     location: undefined,
     birth_place: undefined,
     family_status: undefined,

@@ -1,3 +1,11 @@
+export enum FIVE_ELEMENTS {
+  WOOD = 'wood',
+  FIRE = 'fire',
+  EARTH = 'earth',
+  METAL = 'metal',
+  WATER = 'water',
+}
+
 export enum KAUCIM_CONCERNS {
   CAREER = 'career',
   WEALTH = 'wealth',
@@ -13,16 +21,21 @@ export enum KAUCIM_CONCERNS {
 }
 
 export interface KaucimResult {
-  stickNumber: number;  
-
+  concern: KAUCIM_CONCERNS;
+  stickNumber: number; 
+  element: FIVE_ELEMENTS;
+  currentPower: number;
+  powerChange: number;
+  timestamp: number;
 }
 
 export interface KaucimState {
-  timestamp: number;
-  results: Record<KAUCIM_CONCERNS, KaucimResult>;
+  startOfDayTimestamp: number;
+  results: { [key in KAUCIM_CONCERNS]?: KaucimResult };
 }
 
 export interface UserState {
   id: string;
+  petPower: number;
   kaucimHistory: KaucimState[];
 }

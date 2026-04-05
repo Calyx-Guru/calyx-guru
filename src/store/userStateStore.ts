@@ -12,7 +12,7 @@ import {
   updateUserState,
 } from '@/lib/supabase/userStateService';
 import { RemoteSyncedUserDocument } from '@/store/RemoteSyncedUserDocument';
-import type { UserState } from '@/types/UserState';
+import type { KaucimResult, KaucimState, UserState } from '@/types/UserState';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
@@ -22,6 +22,7 @@ const REMOTE_DEBOUNCE_MS = 400;
 function createDefaultUserState(userId: string): UserState {
   return {
     id: userId,
+    petPower: 0,
     kaucimHistory: [],
   };
 }
@@ -71,7 +72,7 @@ export const useUserStateStore = create<UserStateStore>()(
 
       updateUserState: async (updates: Partial<UserState>) => {
         const prev = get().userState;
-        if (!prev) return;
+        if (!prev) return;        
         const merged = clampUserState({ ...prev, ...updates });
         await sync.updateRecord({
           ...updates,
@@ -83,6 +84,35 @@ export const useUserStateStore = create<UserStateStore>()(
 
       applyServerUserState: (record: UserState) => {
         sync.applyServerRecord(clampUserState(record));
+      },
+
+      updatePetPower: async (power: number) => {
+        const prev = get().userState;
+        if (!prev) return;
+        await sync.updateRecord({
+          petPower: power,
+        });
+      },
+
+      pushKaucimHistory: async (result: KaucimResult): Promise<KaucimState[]> => {
+        const prev = get().userState;
+        if (!prev) return [];
+        const history = prev.kaucimHistory.slice(0);
+        const startOfDayTimestamp = Math.floor(result.timestamp / 86400000) * 86400000;
+        const existing = history.find((it) => it.startOfDayTimestamp === startOfDayTimestamp);
+        if (existing) {
+          existing.results[result.concern] = result;
+        } else {
+          history.push({
+            startOfDayTimestamp,
+            results: { [result.concern]: result },
+          });
+        }
+        const merged = clampUserState({ ...prev, kaucimHistory: history });
+        await sync.updateRecord({
+          kaucimHistory: merged.kaucimHistory,
+        });
+        return merged.kaucimHistory;
       },
     };
   }, { name: 'UserStateStore' }),

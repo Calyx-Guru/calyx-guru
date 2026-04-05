@@ -2,6 +2,8 @@
  * User profile types for Zustand store
  */
 
+import { FIVE_ELEMENTS } from "./UserState";
+
 export interface UserProfile {
   // Identifications
   id: string;
@@ -17,6 +19,7 @@ export interface UserProfile {
   website: string | undefined;
   gender: string | undefined;
   date_of_birth: string | undefined;
+  element: FIVE_ELEMENTS | undefined;
   location: string | undefined;
   birth_place: string | undefined;
   family_status: string | undefined;
