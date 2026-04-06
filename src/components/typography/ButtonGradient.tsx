@@ -1,11 +1,10 @@
+import { LinearGradient } from "expo-linear-gradient";
 import {
   GestureResponderEvent,
   Pressable,
-  StyleSheet,
   type StyleProp,
-  type ViewStyle,
+  type ViewStyle
 } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
 
 type Color = "PRIMARY" | "SECONDARY";
 
@@ -37,24 +36,14 @@ export function ButtonGradient(properties: Properties) {
   return (
     <Pressable style={style} onPress={onPress}>
       <LinearGradient
-        colors={[
-          selectedColors.main,
-          selectedColors.linear,
-          selectedColors.main,
-        ]}
+        colors={[selectedColors.linear, selectedColors.main]}
+        style={buttonStyle}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
         locations={[0.1, 0.5, 0.9]}
-        style={[disabled && styles.disabled, buttonStyle]}
       >
         {children}
       </LinearGradient>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  disabled: {
-    opacity: 0.5,
-  },
-});
