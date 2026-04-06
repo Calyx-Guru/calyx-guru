@@ -7,7 +7,7 @@ export default function Index() {
   const { colors } = useContext(AppAppearanceContext);
 
   useEffect(() => {
-    router.replace("/(tabs)/choose-element");
+    router.replace("/(tabs)/main-menu");
   }, []);
 
   return (

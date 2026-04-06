@@ -216,23 +216,22 @@ export function TransparentVideo({
     const nativeLoop = resolved.kind === "native";
     const loopAttr = nativeLoop ? " loop" : "";
 
-    const script =
-      resolved.kind === "js"
-        ? `<script>${buildLoopScript(resolved)}</script>`
-        : "";
-
-    return `<!DOCTYPE html>
-<html><head>
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<style>
-*{margin:0;padding:0}
-html,body{width:100%;height:100%;background:transparent;overflow:hidden}
-video{width:100%;height:100%;object-fit:${contentFit}}
-</style>
-</head><body>
-<video controls="false" autoplay${loopAttr}${muted ? " muted" : ""} playsinline src="${escapeHtmlAttrUri(uri)}"></video>
-${script}
-</body></html>`;
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+          <style>
+            *{margin:0;padding:0}
+            html,body{width:100%;height:100%;background:transparent;overflow:hidden}
+            video{width:100%;height:100%;object-fit:${contentFit};pointer-events:none;user-select:none}
+          </style>
+        </head>
+        <body>
+          <video autoplay${loopAttr}${muted ? " muted" : ""} playsinline src="${escapeHtmlAttrUri(uri)}"></video>
+          ${resolved.kind === "js" ? `<script>${buildLoopScript(resolved)}</script>` : ""}
+        </body>
+      </html>`;
   }, [uri, resolved, muted, contentFit]);
 
   if (!uri) return null;

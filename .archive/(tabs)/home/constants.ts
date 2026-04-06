@@ -1,22 +1,28 @@
-export const BACKGROUND_VIDEOS = {
-   luckiest: require('../../../src/assets/videos/luckiest.mp4'),
-   normal: require('../../../src/assets/videos/normal.mp4'),
-   unluckiest: require('../../../src/assets/videos/unluckiest.mp4'),
-   drawing_fortune: require('../../../src/assets/videos/Mascot_Fortune_Telling_Video_Generation.mp4'),
-};
+// export const BACKGROUND_VIDEOS = {
+//    luckiest: require('../../../src/assets/videos/luckiest.mp4'),
+//    normal: require('../../../src/assets/videos/normal.mp4'),
+//    unluckiest: require('../../../src/assets/videos/unluckiest.mp4'),
+//    drawing_fortune: require('../../../src/assets/videos/Mascot_Fortune_Telling_Video_Generation.mp4'),
+// };
 
 /** Total HP across all three real bars (blue + yellow + red). */
 export const INIT_HP = 100;
 export const MAX_TOTAL_HP = 300;
 
 export const BAR_COLORS = {
-   blue: '#3B82F6',
-   yellow: '#FACC15',
-   red: '#EF4444',
-   empty: '#000000',
+  blue: "#3B82F6",
+  yellow: "#FACC15",
+  red: "#EF4444",
+  empty: "#000000",
 };
 
-export const SUB_BUTTON_LABELS = ['Family &\nFriends', 'Money', 'Love', 'Career', 'Health'];
+export const SUB_BUTTON_LABELS = [
+  "Family &\nFriends",
+  "Money",
+  "Love",
+  "Career",
+  "Health",
+];
 
 export const MARGIN = 24;
 
@@ -24,171 +30,591 @@ export const MARGIN = 24;
 export type FortunePoem = { poem: string; hp: number };
 
 export const FORTUNE_POEMS: Record<number, FortunePoem[]> = {
-   // 0 — Family & Friends
-   0: [
-      { poem: 'A reunion with a long-lost friend brings warmth to your soul.', hp: 30 },
-      { poem: 'Your family bonds grow stronger through a shared celebration.', hp: 25 },
-      { poem: 'A childhood friend reaches out — this reconnection will be meaningful.', hp: 20 },
-      { poem: 'Your kindness toward a neighbor returns tenfold in unexpected ways.', hp: 25 },
-      { poem: 'A family gathering reveals hidden support you never knew existed.', hp: 20 },
-      { poem: 'Laughter shared with loved ones heals old wounds tonight.', hp: 15 },
-      { poem: 'A sibling offers wisdom that changes your perspective entirely.', hp: 15 },
-      { poem: 'Your parents\u2019 silent prayers have been heard. Blessings approach.', hp: 30 },
-      { poem: 'A friend in need appears — helping them lifts your own spirit.', hp: 10 },
-      { poem: 'The bond between you and your closest friend deepens this week.', hp: 10 },
-      { poem: 'A family tradition brings comfort during uncertain times.', hp: 5 },
-      { poem: 'An old photo surfaces, reminding you of simpler, happier days.', hp: 5 },
-      { poem: 'Your circle of trust remains steady, even in changing tides.', hp: 0 },
-      { poem: 'A friend\u2019s honest words sting, but they speak from love.', hp: 0 },
-      { poem: 'Distance grows between you and someone dear. Reach out before it\u2019s too late.', hp: -5 },
-      { poem: 'A misunderstanding with family clouds an otherwise peaceful week.', hp: -10 },
-      { poem: 'An old friend\u2019s silence speaks louder than words. Patience is needed.', hp: -10 },
-      { poem: 'A family obligation weighs heavily on your shoulders this month.', hp: -15 },
-      { poem: 'Jealousy from a close companion may test your generosity.', hp: -15 },
-      { poem: 'A betrayal from someone trusted shakes your foundation. Stay grounded.', hp: -25 },
-      { poem: 'Your absence has been noticed. Those who love you feel the gap.', hp: -10 },
-      { poem: 'A family disagreement over old matters resurfaces unexpectedly.', hp: -20 },
-      { poem: 'Someone you helped forgets your kindness. Let it go gracefully.', hp: -5 },
-      { poem: 'A friend\u2019s envy casts a small shadow. Rise above it with grace.', hp: -10 },
-      { poem: 'An elder\u2019s health concerns bring worry to the household.', hp: -20 },
-      { poem: 'Words spoken in anger to a loved one linger longer than expected.', hp: -25 },
-      { poem: 'A gathering you looked forward to is postponed. Patience brings reward.', hp: -5 },
-      { poem: 'Trust broken within your circle takes time to mend. Begin today.', hp: -30 },
-      { poem: 'A family secret comes to light, shifting relationships around you.', hp: -15 },
-      { poem: 'Your loyalty is tested by conflicting demands from those you love.', hp: -10 },
-   ],
-   // 1 — Money
-   1: [
-      { poem: 'An unexpected windfall arrives — use it wisely and share generously.', hp: 35 },
-      { poem: 'A long-awaited payment clears, lifting a weight from your mind.', hp: 30 },
-      { poem: 'Your careful saving pays off with a golden opportunity ahead.', hp: 25 },
-      { poem: 'A wise investment made in the past begins to show returns.', hp: 25 },
-      { poem: 'Fortune smiles on your finances. A lucky number guides your way.', hp: 20 },
-      { poem: 'A generous tip or bonus brightens an ordinary day.', hp: 15 },
-      { poem: 'Your reputation for honesty attracts a prosperous partnership.', hp: 20 },
-      { poem: 'A side venture you considered will prove more fruitful than expected.', hp: 15 },
-      { poem: 'Small savings accumulate into something meaningful. Keep going.', hp: 10 },
-      { poem: 'A debt you forgot about is forgiven by a kind soul.', hp: 10 },
-      { poem: 'Financial stability is within reach. Stay disciplined a bit longer.', hp: 5 },
-      { poem: 'A modest gain teaches you the value of steady progress.', hp: 5 },
-      { poem: 'Money flows in and out like the tide. Today\u2019s balance holds.', hp: 0 },
-      { poem: 'A purchase you\u2019ve been eyeing is neither wise nor foolish. Trust your gut.', hp: 0 },
-      { poem: 'An impulse buy brings brief joy but lingering regret.', hp: -5 },
-      { poem: 'A financial promise from another may not materialize on time.', hp: -10 },
-      { poem: 'Hidden fees or unexpected costs chip away at your reserves.', hp: -10 },
-      { poem: 'A deal that looks too good to be true carries a catch. Read the fine print.', hp: -15 },
-      { poem: 'Lending money to a friend risks both the funds and the friendship.', hp: -20 },
-      { poem: 'A risky gamble does not favor you this season. Play it safe.', hp: -25 },
-      { poem: 'Your wallet feels lighter than your spirit. Rebalance both.', hp: -15 },
-      { poem: 'An overdue bill arrives at the worst possible moment. Face it head-on.', hp: -20 },
-      { poem: 'A colleague\u2019s financial advice leads you astray. Trust your own judgment.', hp: -10 },
-      { poem: 'Greed whispers in your ear — resist, for contentment is richer.', hp: -5 },
-      { poem: 'A scam lurks in an attractive offer. Verify before you commit.', hp: -30 },
-      { poem: 'Material desires cloud your better judgment this week.', hp: -10 },
-      { poem: 'An investment turns sour. Cut losses early and learn the lesson.', hp: -25 },
-      { poem: 'Money troubles test your patience, but clarity comes after the storm.', hp: -15 },
-      { poem: 'A financial setback is only a detour, not a dead end.', hp: -5 },
-      { poem: 'The cost of comfort rises. Simplify to find true abundance.', hp: -10 },
-   ],
-   // 2 — Love
-   2: [
-      { poem: 'A spark ignites with someone who sees the real you. Embrace it.', hp: 35 },
-      { poem: 'Your heart opens to a love that has been quietly waiting for you.', hp: 30 },
-      { poem: 'A romantic gesture from your partner deepens your connection beautifully.', hp: 25 },
-      { poem: 'Love blooms in an unexpected place. Keep your heart open.', hp: 25 },
-      { poem: 'A meaningful conversation tonight brings two souls closer together.', hp: 20 },
-      { poem: 'Your vulnerability becomes your greatest strength in love.', hp: 20 },
-      { poem: 'A letter, a message, or a song carries a heartfelt confession.', hp: 15 },
-      { poem: 'An old flame rekindles — but this time, the fire warms without burning.', hp: 15 },
-      { poem: 'Compassion you show a stranger ripples into romantic fortune.', hp: 10 },
-      { poem: 'A small act of love today creates a cherished memory forever.', hp: 10 },
-      { poem: 'Your patience in love is rewarded with quiet, lasting happiness.', hp: 5 },
-      { poem: 'A compliment from an admirer boosts your confidence at the right moment.', hp: 5 },
-      { poem: 'Love is present but silent today. Listen with your heart, not your ears.', hp: 0 },
-      { poem: 'The one you seek also seeks you, but timing must align.', hp: 0 },
-      { poem: 'A minor disagreement tests your bond. Choose understanding over pride.', hp: -5 },
-      { poem: 'Unspoken expectations create distance between two hearts.', hp: -10 },
-      { poem: 'A past heartbreak resurfaces in your dreams. Acknowledge it and release.', hp: -10 },
-      { poem: 'Jealousy creeps in uninvited. Guard your trust before it fractures.', hp: -15 },
-      { poem: 'A love interest\u2019s mixed signals leave you uncertain. Seek clarity.', hp: -15 },
-      { poem: 'Your fear of rejection holds you back from something beautiful.', hp: -10 },
-      { poem: 'A harsh word spoken in the heat of passion leaves a mark.', hp: -20 },
-      { poem: 'Loneliness echoes louder tonight. Reach out to those who care.', hp: -5 },
-      { poem: 'A romantic plan falls apart. The right moment will come again.', hp: -10 },
-      { poem: 'Someone you trust with your heart is not being entirely honest.', hp: -25 },
-      { poem: 'Love demands sacrifice this season. Ask yourself what truly matters.', hp: -15 },
-      { poem: 'A triangle of affection complicates what should be simple.', hp: -20 },
-      { poem: 'Your heart aches for what was. Let the past rest so the future can arrive.', hp: -10 },
-      { poem: 'A breakup, though painful now, opens space for someone truer.', hp: -25 },
-      { poem: 'Attachment disguised as love keeps you tethered. Distinguish the two.', hp: -15 },
-      { poem: 'A cold silence between lovers speaks volumes. Break it gently.', hp: -20 },
-   ],
-   // 3 — Career
-   3: [
-      { poem: 'A promotion or recognition is heading your way. Your effort shines.', hp: 35 },
-      { poem: 'A mentor appears at the perfect time to guide your next big step.', hp: 30 },
-      { poem: 'Your bold idea catches the attention of someone influential.', hp: 25 },
-      { poem: 'A new project ignites your passion and showcases your talent.', hp: 25 },
-      { poem: 'Collaboration with a trusted colleague leads to breakthrough results.', hp: 20 },
-      { poem: 'Your persistence through challenging days is about to be rewarded.', hp: 20 },
-      { poem: 'A door you thought was closed reopens with better terms.', hp: 15 },
-      { poem: 'Your unique skills attract a once-in-a-lifetime opportunity.', hp: 15 },
-      { poem: 'A small victory at work today builds momentum for bigger wins.', hp: 10 },
-      { poem: 'Your professional network expands in a meaningful direction.', hp: 10 },
-      { poem: 'Steady progress is still progress. Keep your head down and deliver.', hp: 5 },
-      { poem: 'A training or course you complete opens an unexpected path.', hp: 5 },
-      { poem: 'Work feels routine today, but stability has its own quiet reward.', hp: 0 },
-      { poem: 'A crossroads in your career demands reflection, not haste.', hp: 0 },
-      { poem: 'A colleague takes credit for your work. Document everything.', hp: -10 },
-      { poem: 'Burnout whispers at your door. Rest before it becomes a shout.', hp: -10 },
-      { poem: 'A missed deadline creates tension, but recovery is possible.', hp: -5 },
-      { poem: 'Office politics complicate an otherwise straightforward task.', hp: -15 },
-      { poem: 'A rejection letter stings, but it redirects you toward something better.', hp: -10 },
-      { poem: 'Your workload doubles without matching recognition. Speak up.', hp: -15 },
-      { poem: 'A promising lead falls through at the last minute.', hp: -20 },
-      { poem: 'Imposter syndrome clouds your judgment. You belong where you are.', hp: -5 },
-      { poem: 'A supervisor\u2019s criticism, though harsh, contains a grain of truth.', hp: -10 },
-      { poem: 'Your ambition outpaces your preparation. Slow down to speed up.', hp: -15 },
-      { poem: 'A business decision made in haste costs more than expected.', hp: -25 },
-      { poem: 'The competitive landscape shifts against you. Adapt or fall behind.', hp: -20 },
-      { poem: 'A contract dispute drains your energy. Seek expert counsel.', hp: -20 },
-      { poem: 'Your dream role slips away to another candidate. Your time will come.', hp: -25 },
-      { poem: 'A career pivot feels terrifying, but stagnation is worse.', hp: -5 },
-      { poem: 'Micromanagement suffocates your creativity. Find breathing room.', hp: -15 },
-   ],
-   // 4 — Health
-   4: [
-      { poem: 'Your body radiates vitality. A period of excellent health begins.', hp: 35 },
-      { poem: 'A new wellness routine transforms your energy and mood.', hp: 30 },
-      { poem: 'Deep, restful sleep returns, restoring balance to mind and body.', hp: 25 },
-      { poem: 'A health concern you worried about turns out to be nothing serious.', hp: 25 },
-      { poem: 'Morning sunlight and fresh air bring healing you didn\u2019t know you needed.', hp: 20 },
-      { poem: 'Your discipline in diet and exercise pays dividends of strength.', hp: 20 },
-      { poem: 'An ancient remedy or natural cure works wonders for a lingering issue.', hp: 15 },
-      { poem: 'Meditation or stillness unlocks clarity and reduces your stress.', hp: 15 },
-      { poem: 'A walk in nature recharges your spirit more than any medicine.', hp: 10 },
-      { poem: 'Your immune system stands strong through a season of illness.', hp: 10 },
-      { poem: 'Small healthy choices today compound into lasting vitality.', hp: 5 },
-      { poem: 'A stretch or movement practice eases tension you\u2019ve been carrying.', hp: 5 },
-      { poem: 'Your health holds steady. Maintain what you\u2019re doing and stay mindful.', hp: 0 },
-      { poem: 'Neither illness nor vigor marks this day. Balance is its own gift.', hp: 0 },
-      { poem: 'A late night disrupts your rhythm. Prioritize rest tonight.', hp: -5 },
-      { poem: 'Stress manifests as headaches or tension. Address the root cause.', hp: -10 },
-      { poem: 'An allergy or sensitivity flares up unexpectedly. Be cautious.', hp: -10 },
-      { poem: 'Skipping meals catches up with you. Nourish your body consistently.', hp: -15 },
-      { poem: 'A nagging pain demands attention. Don\u2019t ignore your body\u2019s signals.', hp: -15 },
-      { poem: 'Overthinking exhausts your mind more than any physical task.', hp: -10 },
-      { poem: 'A sedentary week leaves you sluggish. Movement is medicine.', hp: -5 },
-      { poem: 'Anxiety tightens its grip. Breathe deeply and ground yourself.', hp: -20 },
-      { poem: 'Emotional turmoil takes a physical toll. Seek support.', hp: -15 },
-      { poem: 'A bad habit you thought you\u2019d broken returns. Forgive yourself and try again.', hp: -10 },
-      { poem: 'Your energy dips to a low point. Rest is not laziness — it\u2019s recovery.', hp: -20 },
-      { poem: 'A minor illness interrupts your plans. Heal fully before pushing forward.', hp: -25 },
-      { poem: 'Neglecting checkups invites unwelcome surprises. Schedule one soon.', hp: -10 },
-      { poem: 'Burnout drains your reserves. The candle burns at both ends.', hp: -25 },
-      { poem: 'A dietary indulgence leaves you feeling worse than before.', hp: -5 },
-      { poem: 'Sleep eludes you for days. Restore your nightly ritual with care.', hp: -15 },
-   ],
+  // 0 — Family & Friends
+  0: [
+    {
+      poem: "A reunion with a long-lost friend brings warmth to your soul.",
+      hp: 30,
+    },
+    {
+      poem: "Your family bonds grow stronger through a shared celebration.",
+      hp: 25,
+    },
+    {
+      poem: "A childhood friend reaches out — this reconnection will be meaningful.",
+      hp: 20,
+    },
+    {
+      poem: "Your kindness toward a neighbor returns tenfold in unexpected ways.",
+      hp: 25,
+    },
+    {
+      poem: "A family gathering reveals hidden support you never knew existed.",
+      hp: 20,
+    },
+    {
+      poem: "Laughter shared with loved ones heals old wounds tonight.",
+      hp: 15,
+    },
+    {
+      poem: "A sibling offers wisdom that changes your perspective entirely.",
+      hp: 15,
+    },
+    {
+      poem: "Your parents\u2019 silent prayers have been heard. Blessings approach.",
+      hp: 30,
+    },
+    {
+      poem: "A friend in need appears — helping them lifts your own spirit.",
+      hp: 10,
+    },
+    {
+      poem: "The bond between you and your closest friend deepens this week.",
+      hp: 10,
+    },
+    {
+      poem: "A family tradition brings comfort during uncertain times.",
+      hp: 5,
+    },
+    {
+      poem: "An old photo surfaces, reminding you of simpler, happier days.",
+      hp: 5,
+    },
+    {
+      poem: "Your circle of trust remains steady, even in changing tides.",
+      hp: 0,
+    },
+    {
+      poem: "A friend\u2019s honest words sting, but they speak from love.",
+      hp: 0,
+    },
+    {
+      poem: "Distance grows between you and someone dear. Reach out before it\u2019s too late.",
+      hp: -5,
+    },
+    {
+      poem: "A misunderstanding with family clouds an otherwise peaceful week.",
+      hp: -10,
+    },
+    {
+      poem: "An old friend\u2019s silence speaks louder than words. Patience is needed.",
+      hp: -10,
+    },
+    {
+      poem: "A family obligation weighs heavily on your shoulders this month.",
+      hp: -15,
+    },
+    {
+      poem: "Jealousy from a close companion may test your generosity.",
+      hp: -15,
+    },
+    {
+      poem: "A betrayal from someone trusted shakes your foundation. Stay grounded.",
+      hp: -25,
+    },
+    {
+      poem: "Your absence has been noticed. Those who love you feel the gap.",
+      hp: -10,
+    },
+    {
+      poem: "A family disagreement over old matters resurfaces unexpectedly.",
+      hp: -20,
+    },
+    {
+      poem: "Someone you helped forgets your kindness. Let it go gracefully.",
+      hp: -5,
+    },
+    {
+      poem: "A friend\u2019s envy casts a small shadow. Rise above it with grace.",
+      hp: -10,
+    },
+    {
+      poem: "An elder\u2019s health concerns bring worry to the household.",
+      hp: -20,
+    },
+    {
+      poem: "Words spoken in anger to a loved one linger longer than expected.",
+      hp: -25,
+    },
+    {
+      poem: "A gathering you looked forward to is postponed. Patience brings reward.",
+      hp: -5,
+    },
+    {
+      poem: "Trust broken within your circle takes time to mend. Begin today.",
+      hp: -30,
+    },
+    {
+      poem: "A family secret comes to light, shifting relationships around you.",
+      hp: -15,
+    },
+    {
+      poem: "Your loyalty is tested by conflicting demands from those you love.",
+      hp: -10,
+    },
+  ],
+  // 1 — Money
+  1: [
+    {
+      poem: "An unexpected windfall arrives — use it wisely and share generously.",
+      hp: 35,
+    },
+    {
+      poem: "A long-awaited payment clears, lifting a weight from your mind.",
+      hp: 30,
+    },
+    {
+      poem: "Your careful saving pays off with a golden opportunity ahead.",
+      hp: 25,
+    },
+    {
+      poem: "A wise investment made in the past begins to show returns.",
+      hp: 25,
+    },
+    {
+      poem: "Fortune smiles on your finances. A lucky number guides your way.",
+      hp: 20,
+    },
+    { poem: "A generous tip or bonus brightens an ordinary day.", hp: 15 },
+    {
+      poem: "Your reputation for honesty attracts a prosperous partnership.",
+      hp: 20,
+    },
+    {
+      poem: "A side venture you considered will prove more fruitful than expected.",
+      hp: 15,
+    },
+    {
+      poem: "Small savings accumulate into something meaningful. Keep going.",
+      hp: 10,
+    },
+    { poem: "A debt you forgot about is forgiven by a kind soul.", hp: 10 },
+    {
+      poem: "Financial stability is within reach. Stay disciplined a bit longer.",
+      hp: 5,
+    },
+    { poem: "A modest gain teaches you the value of steady progress.", hp: 5 },
+    {
+      poem: "Money flows in and out like the tide. Today\u2019s balance holds.",
+      hp: 0,
+    },
+    {
+      poem: "A purchase you\u2019ve been eyeing is neither wise nor foolish. Trust your gut.",
+      hp: 0,
+    },
+    { poem: "An impulse buy brings brief joy but lingering regret.", hp: -5 },
+    {
+      poem: "A financial promise from another may not materialize on time.",
+      hp: -10,
+    },
+    {
+      poem: "Hidden fees or unexpected costs chip away at your reserves.",
+      hp: -10,
+    },
+    {
+      poem: "A deal that looks too good to be true carries a catch. Read the fine print.",
+      hp: -15,
+    },
+    {
+      poem: "Lending money to a friend risks both the funds and the friendship.",
+      hp: -20,
+    },
+    {
+      poem: "A risky gamble does not favor you this season. Play it safe.",
+      hp: -25,
+    },
+    {
+      poem: "Your wallet feels lighter than your spirit. Rebalance both.",
+      hp: -15,
+    },
+    {
+      poem: "An overdue bill arrives at the worst possible moment. Face it head-on.",
+      hp: -20,
+    },
+    {
+      poem: "A colleague\u2019s financial advice leads you astray. Trust your own judgment.",
+      hp: -10,
+    },
+    {
+      poem: "Greed whispers in your ear — resist, for contentment is richer.",
+      hp: -5,
+    },
+    {
+      poem: "A scam lurks in an attractive offer. Verify before you commit.",
+      hp: -30,
+    },
+    { poem: "Material desires cloud your better judgment this week.", hp: -10 },
+    {
+      poem: "An investment turns sour. Cut losses early and learn the lesson.",
+      hp: -25,
+    },
+    {
+      poem: "Money troubles test your patience, but clarity comes after the storm.",
+      hp: -15,
+    },
+    { poem: "A financial setback is only a detour, not a dead end.", hp: -5 },
+    {
+      poem: "The cost of comfort rises. Simplify to find true abundance.",
+      hp: -10,
+    },
+  ],
+  // 2 — Love
+  2: [
+    {
+      poem: "A spark ignites with someone who sees the real you. Embrace it.",
+      hp: 35,
+    },
+    {
+      poem: "Your heart opens to a love that has been quietly waiting for you.",
+      hp: 30,
+    },
+    {
+      poem: "A romantic gesture from your partner deepens your connection beautifully.",
+      hp: 25,
+    },
+    {
+      poem: "Love blooms in an unexpected place. Keep your heart open.",
+      hp: 25,
+    },
+    {
+      poem: "A meaningful conversation tonight brings two souls closer together.",
+      hp: 20,
+    },
+    {
+      poem: "Your vulnerability becomes your greatest strength in love.",
+      hp: 20,
+    },
+    {
+      poem: "A letter, a message, or a song carries a heartfelt confession.",
+      hp: 15,
+    },
+    {
+      poem: "An old flame rekindles — but this time, the fire warms without burning.",
+      hp: 15,
+    },
+    {
+      poem: "Compassion you show a stranger ripples into romantic fortune.",
+      hp: 10,
+    },
+    {
+      poem: "A small act of love today creates a cherished memory forever.",
+      hp: 10,
+    },
+    {
+      poem: "Your patience in love is rewarded with quiet, lasting happiness.",
+      hp: 5,
+    },
+    {
+      poem: "A compliment from an admirer boosts your confidence at the right moment.",
+      hp: 5,
+    },
+    {
+      poem: "Love is present but silent today. Listen with your heart, not your ears.",
+      hp: 0,
+    },
+    { poem: "The one you seek also seeks you, but timing must align.", hp: 0 },
+    {
+      poem: "A minor disagreement tests your bond. Choose understanding over pride.",
+      hp: -5,
+    },
+    {
+      poem: "Unspoken expectations create distance between two hearts.",
+      hp: -10,
+    },
+    {
+      poem: "A past heartbreak resurfaces in your dreams. Acknowledge it and release.",
+      hp: -10,
+    },
+    {
+      poem: "Jealousy creeps in uninvited. Guard your trust before it fractures.",
+      hp: -15,
+    },
+    {
+      poem: "A love interest\u2019s mixed signals leave you uncertain. Seek clarity.",
+      hp: -15,
+    },
+    {
+      poem: "Your fear of rejection holds you back from something beautiful.",
+      hp: -10,
+    },
+    {
+      poem: "A harsh word spoken in the heat of passion leaves a mark.",
+      hp: -20,
+    },
+    {
+      poem: "Loneliness echoes louder tonight. Reach out to those who care.",
+      hp: -5,
+    },
+    {
+      poem: "A romantic plan falls apart. The right moment will come again.",
+      hp: -10,
+    },
+    {
+      poem: "Someone you trust with your heart is not being entirely honest.",
+      hp: -25,
+    },
+    {
+      poem: "Love demands sacrifice this season. Ask yourself what truly matters.",
+      hp: -15,
+    },
+    {
+      poem: "A triangle of affection complicates what should be simple.",
+      hp: -20,
+    },
+    {
+      poem: "Your heart aches for what was. Let the past rest so the future can arrive.",
+      hp: -10,
+    },
+    {
+      poem: "A breakup, though painful now, opens space for someone truer.",
+      hp: -25,
+    },
+    {
+      poem: "Attachment disguised as love keeps you tethered. Distinguish the two.",
+      hp: -15,
+    },
+    {
+      poem: "A cold silence between lovers speaks volumes. Break it gently.",
+      hp: -20,
+    },
+  ],
+  // 3 — Career
+  3: [
+    {
+      poem: "A promotion or recognition is heading your way. Your effort shines.",
+      hp: 35,
+    },
+    {
+      poem: "A mentor appears at the perfect time to guide your next big step.",
+      hp: 30,
+    },
+    {
+      poem: "Your bold idea catches the attention of someone influential.",
+      hp: 25,
+    },
+    {
+      poem: "A new project ignites your passion and showcases your talent.",
+      hp: 25,
+    },
+    {
+      poem: "Collaboration with a trusted colleague leads to breakthrough results.",
+      hp: 20,
+    },
+    {
+      poem: "Your persistence through challenging days is about to be rewarded.",
+      hp: 20,
+    },
+    {
+      poem: "A door you thought was closed reopens with better terms.",
+      hp: 15,
+    },
+    {
+      poem: "Your unique skills attract a once-in-a-lifetime opportunity.",
+      hp: 15,
+    },
+    {
+      poem: "A small victory at work today builds momentum for bigger wins.",
+      hp: 10,
+    },
+    {
+      poem: "Your professional network expands in a meaningful direction.",
+      hp: 10,
+    },
+    {
+      poem: "Steady progress is still progress. Keep your head down and deliver.",
+      hp: 5,
+    },
+    {
+      poem: "A training or course you complete opens an unexpected path.",
+      hp: 5,
+    },
+    {
+      poem: "Work feels routine today, but stability has its own quiet reward.",
+      hp: 0,
+    },
+    {
+      poem: "A crossroads in your career demands reflection, not haste.",
+      hp: 0,
+    },
+    {
+      poem: "A colleague takes credit for your work. Document everything.",
+      hp: -10,
+    },
+    {
+      poem: "Burnout whispers at your door. Rest before it becomes a shout.",
+      hp: -10,
+    },
+    {
+      poem: "A missed deadline creates tension, but recovery is possible.",
+      hp: -5,
+    },
+    {
+      poem: "Office politics complicate an otherwise straightforward task.",
+      hp: -15,
+    },
+    {
+      poem: "A rejection letter stings, but it redirects you toward something better.",
+      hp: -10,
+    },
+    {
+      poem: "Your workload doubles without matching recognition. Speak up.",
+      hp: -15,
+    },
+    { poem: "A promising lead falls through at the last minute.", hp: -20 },
+    {
+      poem: "Imposter syndrome clouds your judgment. You belong where you are.",
+      hp: -5,
+    },
+    {
+      poem: "A supervisor\u2019s criticism, though harsh, contains a grain of truth.",
+      hp: -10,
+    },
+    {
+      poem: "Your ambition outpaces your preparation. Slow down to speed up.",
+      hp: -15,
+    },
+    {
+      poem: "A business decision made in haste costs more than expected.",
+      hp: -25,
+    },
+    {
+      poem: "The competitive landscape shifts against you. Adapt or fall behind.",
+      hp: -20,
+    },
+    {
+      poem: "A contract dispute drains your energy. Seek expert counsel.",
+      hp: -20,
+    },
+    {
+      poem: "Your dream role slips away to another candidate. Your time will come.",
+      hp: -25,
+    },
+    {
+      poem: "A career pivot feels terrifying, but stagnation is worse.",
+      hp: -5,
+    },
+    {
+      poem: "Micromanagement suffocates your creativity. Find breathing room.",
+      hp: -15,
+    },
+  ],
+  // 4 — Health
+  4: [
+    {
+      poem: "Your body radiates vitality. A period of excellent health begins.",
+      hp: 35,
+    },
+    { poem: "A new wellness routine transforms your energy and mood.", hp: 30 },
+    {
+      poem: "Deep, restful sleep returns, restoring balance to mind and body.",
+      hp: 25,
+    },
+    {
+      poem: "A health concern you worried about turns out to be nothing serious.",
+      hp: 25,
+    },
+    {
+      poem: "Morning sunlight and fresh air bring healing you didn\u2019t know you needed.",
+      hp: 20,
+    },
+    {
+      poem: "Your discipline in diet and exercise pays dividends of strength.",
+      hp: 20,
+    },
+    {
+      poem: "An ancient remedy or natural cure works wonders for a lingering issue.",
+      hp: 15,
+    },
+    {
+      poem: "Meditation or stillness unlocks clarity and reduces your stress.",
+      hp: 15,
+    },
+    {
+      poem: "A walk in nature recharges your spirit more than any medicine.",
+      hp: 10,
+    },
+    {
+      poem: "Your immune system stands strong through a season of illness.",
+      hp: 10,
+    },
+    {
+      poem: "Small healthy choices today compound into lasting vitality.",
+      hp: 5,
+    },
+    {
+      poem: "A stretch or movement practice eases tension you\u2019ve been carrying.",
+      hp: 5,
+    },
+    {
+      poem: "Your health holds steady. Maintain what you\u2019re doing and stay mindful.",
+      hp: 0,
+    },
+    {
+      poem: "Neither illness nor vigor marks this day. Balance is its own gift.",
+      hp: 0,
+    },
+    {
+      poem: "A late night disrupts your rhythm. Prioritize rest tonight.",
+      hp: -5,
+    },
+    {
+      poem: "Stress manifests as headaches or tension. Address the root cause.",
+      hp: -10,
+    },
+    {
+      poem: "An allergy or sensitivity flares up unexpectedly. Be cautious.",
+      hp: -10,
+    },
+    {
+      poem: "Skipping meals catches up with you. Nourish your body consistently.",
+      hp: -15,
+    },
+    {
+      poem: "A nagging pain demands attention. Don\u2019t ignore your body\u2019s signals.",
+      hp: -15,
+    },
+    {
+      poem: "Overthinking exhausts your mind more than any physical task.",
+      hp: -10,
+    },
+    {
+      poem: "A sedentary week leaves you sluggish. Movement is medicine.",
+      hp: -5,
+    },
+    {
+      poem: "Anxiety tightens its grip. Breathe deeply and ground yourself.",
+      hp: -20,
+    },
+    { poem: "Emotional turmoil takes a physical toll. Seek support.", hp: -15 },
+    {
+      poem: "A bad habit you thought you\u2019d broken returns. Forgive yourself and try again.",
+      hp: -10,
+    },
+    {
+      poem: "Your energy dips to a low point. Rest is not laziness — it\u2019s recovery.",
+      hp: -20,
+    },
+    {
+      poem: "A minor illness interrupts your plans. Heal fully before pushing forward.",
+      hp: -25,
+    },
+    {
+      poem: "Neglecting checkups invites unwelcome surprises. Schedule one soon.",
+      hp: -10,
+    },
+    {
+      poem: "Burnout drains your reserves. The candle burns at both ends.",
+      hp: -25,
+    },
+    {
+      poem: "A dietary indulgence leaves you feeling worse than before.",
+      hp: -5,
+    },
+    {
+      poem: "Sleep eludes you for days. Restore your nightly ritual with care.",
+      hp: -15,
+    },
+  ],
 };
 
 export default {};
