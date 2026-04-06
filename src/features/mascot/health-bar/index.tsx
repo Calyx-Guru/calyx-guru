@@ -1,16 +1,21 @@
+import { useEffect, useMemo, useRef } from "react";
 import { Animated, ImageBackground, StyleSheet } from "react-native";
 
 import {
   energyBorder1,
   energyEmpty1,
+  energyEmptyOverlay1,
   energyValue1,
 } from "@/assets/images/mascot";
-import { useEffect, useMemo, useRef } from "react";
+
 import type * as Types from "./type";
 
 export const HealthBar = (properties: Types.Properties) => {
   const { totalValue = 100, value = 100, colors = ["red"], style } = properties;
-  const animatedValue = useRef(new Animated.Value(100)).current;
+
+  const initialPercent =
+    (Math.max(0, Math.min(value, totalValue)) / totalValue) * 100;
+  const animatedValue = useRef(new Animated.Value(initialPercent)).current;
 
   const bars = useMemo(() => {
     const currentValue = Math.max(0, Math.min(value, totalValue));
@@ -32,7 +37,7 @@ export const HealthBar = (properties: Types.Properties) => {
       duration: 300,
       useNativeDriver: false,
     }).start();
-  }, [bars.value, animatedValue]);
+  }, [bars.value]);
 
   return (
     <ImageBackground
@@ -40,14 +45,19 @@ export const HealthBar = (properties: Types.Properties) => {
       style={[styles.empty, style]}
       resizeMode="cover"
     >
-      <Animated.Image
+      <ImageBackground
         source={energyValue1}
+        style={[styles.value]}
+        resizeMode="cover"
+      />
+      <Animated.Image
+        source={energyEmptyOverlay1}
         style={[
-          styles.value,
+          styles.emptyOverlay,
           {
             width: animatedValue.interpolate({
               inputRange: [0, 100],
-              outputRange: ["0%", "100%"],
+              outputRange: ["100%", "0%"],
             }),
           },
         ]}
@@ -65,6 +75,7 @@ export const HealthBar = (properties: Types.Properties) => {
 const styles = StyleSheet.create({
   empty: {
     width: "100%",
+    borderRadius: 16,
     aspectRatio: "12/1",
     overflow: "hidden",
   },
@@ -72,6 +83,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
+    bottom: 0,
+    right: 0,
+    height: "100%",
+  },
+  emptyOverlay: {
+    position: "absolute",
+    top: 0,
+    right: 0,
     bottom: 0,
     height: "100%",
   },
