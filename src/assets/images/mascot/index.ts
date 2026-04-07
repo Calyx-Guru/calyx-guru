@@ -3,5 +3,6 @@ export { default as energyBorder } from "./energy-bar-border.png";
 export { default as energyEmpty1 } from "./energy-bar-empty-1.png";
 export { default as energyEmptyOverlay1 } from "./energy-bar-empty-overlay-1.png";
 export { default as energyEmpty } from "./energy-bar-empty.png";
+export { default as energyIcon } from "./energy-bar-icon.png";
 export { default as energyValue1 } from "./energy-bar-value-1.png";
 export { default as energyValue } from "./energy-bar-value.png";

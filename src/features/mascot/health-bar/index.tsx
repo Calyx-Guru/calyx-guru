@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
-import { Animated, ImageBackground, StyleSheet } from "react-native";
+import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 
 import {
   energyBorder1,
   energyEmpty1,
   energyEmptyOverlay1,
+  energyIcon,
   energyValue1,
 } from "@/assets/images/mascot";
 
@@ -40,35 +41,46 @@ export const HealthBar = (properties: Types.Properties) => {
   }, [bars.value]);
 
   return (
-    <ImageBackground
-      source={energyEmpty1}
-      style={[styles.empty, style]}
-      resizeMode="cover"
+    <View
+      style={{
+        width: "100%",
+      }}
     >
       <ImageBackground
-        source={energyValue1}
-        style={[styles.value]}
+        source={energyEmpty1}
+        style={[styles.empty, style]}
         resizeMode="cover"
-      />
-      <Animated.Image
-        source={energyEmptyOverlay1}
-        style={[
-          styles.emptyOverlay,
-          {
-            width: animatedValue.interpolate({
-              inputRange: [0, 100],
-              outputRange: ["100%", "0%"],
-            }),
-          },
-        ]}
-        resizeMode="stretch"
-      />
+      >
+        <ImageBackground
+          source={energyValue1}
+          style={[styles.value]}
+          resizeMode="cover"
+        />
+        <Animated.Image
+          source={energyEmptyOverlay1}
+          style={[
+            styles.emptyOverlay,
+            {
+              width: animatedValue.interpolate({
+                inputRange: [0, 100],
+                outputRange: ["100%", "0%"],
+              }),
+            },
+          ]}
+          resizeMode="stretch"
+        />
+        <ImageBackground
+          source={energyBorder1}
+          style={styles.border}
+          resizeMode="cover"
+        />
+      </ImageBackground>
       <ImageBackground
-        source={energyBorder1}
-        style={styles.border}
+        source={energyIcon}
+        style={[styles.icon]}
         resizeMode="cover"
       />
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -97,5 +109,13 @@ const styles = StyleSheet.create({
   border: {
     width: "100%",
     aspectRatio: "12/1",
+  },
+  icon: {
+    position: "absolute",
+    top: -5,
+    left: -10,
+    width: 30,
+    height: 42,
+    aspectRatio: "5/7",
   },
 });
