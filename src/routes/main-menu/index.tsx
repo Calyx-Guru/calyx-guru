@@ -3,6 +3,8 @@ import { StyleSheet, View } from "react-native";
 import { NormalVideo } from "@/components/video/NormalVideo";
 import { TransparentVideo } from "@/components/video/TransparentVideo";
 
+import { CalendarEastern } from "@/features/calendar/eastern";
+import { CalendarWestern } from "@/features/calendar/western";
 import { HealthBar } from "@/features/mascot/health-bar";
 import { StatusMessage } from "@/features/mascot/status-message";
 import { VIDEOS } from "./constants";
@@ -22,6 +24,11 @@ export function RouteMainMenu() {
         style={StyleSheet.absoluteFill}
         loop={true}
       />
+
+      <View style={styles.bottomWrapper}>
+        <CalendarEastern calendarStyle={styles.calendar} />
+        <CalendarWestern style={styles.calendar} />
+      </View>
     </View>
   );
 }
@@ -40,5 +47,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "auto",
+  },
+  bottomWrapper: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    left: 10,
+  },
+  calendar: {
+    width: 80,
   },
 });

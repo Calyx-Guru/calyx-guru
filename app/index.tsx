@@ -17,6 +17,6 @@ export default function Index() {
         padding: 16,
         backgroundColor: colors.background,
       }}
-    ></View>
+    />
   );
 }
