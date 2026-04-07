@@ -5,6 +5,7 @@ import { TransparentVideo } from "@/components/video/TransparentVideo";
 
 import { CalendarEastern } from "@/features/calendar/eastern";
 import { CalendarWestern } from "@/features/calendar/western";
+import { CaucimOrb } from "@/features/caucim/orb";
 import { HealthBar } from "@/features/mascot/health-bar";
 import { StatusMessage } from "@/features/mascot/status-message";
 import { VIDEOS } from "./constants";
@@ -24,6 +25,10 @@ export function RouteMainMenu() {
         style={StyleSheet.absoluteFill}
         loop={true}
       />
+
+      <View style={styles.bodyWrapper}>
+        <CaucimOrb />
+      </View>
 
       <View style={styles.bottomWrapper}>
         <CalendarEastern calendarStyle={styles.calendar} />
@@ -48,14 +53,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "auto",
   },
+  bodyWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: "20%",
+  },
   bottomWrapper: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
     position: "absolute",
     bottom: 10,
     right: 10,
     left: 10,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
   },
   calendar: {
     width: 80,
