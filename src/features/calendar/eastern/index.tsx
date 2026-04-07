@@ -6,28 +6,28 @@ import { calendarBook, calendarNote } from "@/assets/images/calendars";
 import type * as Types from "./type";
 
 export function CalendarEastern(properties: Types.Properties) {
-  const { currentDate = new Date(), calendarStyle } = properties;
+  const { date = new Date(), width = 60 } = properties;
 
   return (
     <View style={styles.root}>
       <ImageBackground
         source={calendarBook}
-        style={[styles.calendarWrapper, calendarStyle]}
+        style={[styles.calendarWrapper, { width }]}
         resizeMode="cover"
       >
-        <Text style={styles.animalText}>
-          {getZodiac(currentDate.getTime())}
+        <Text style={[styles.animalText, { fontSize: width / 7 }]}>
+          {getZodiac(date.getTime())}
         </Text>
-        <Text style={styles.dayNumber}>
-          {currentDate.getMonth() + 1} 月 {currentDate.getDate()}
+        <Text style={[styles.dayNumber, { fontSize: width / 5 }]}>
+          {date.getMonth() + 1} 月 {date.getDate()}
         </Text>
       </ImageBackground>
       <ImageBackground
         source={calendarNote}
-        style={[styles.noteWrapper, calendarStyle]}
+        style={[styles.noteWrapper, { width }]}
         resizeMode="cover"
       >
-        <Text style={styles.statusText}>CHAOS</Text>
+        <Text style={[styles.statusText, { fontSize: width / 6 }]}>CHAOS</Text>
       </ImageBackground>
     </View>
   );
@@ -46,13 +46,11 @@ const styles = StyleSheet.create({
   animalText: {
     marginTop: "12.5%",
     color: "#ffffff",
-    fontSize: 12,
     textTransform: "uppercase",
   },
   dayNumber: {
     marginTop: "25%",
     color: "#b20606",
-    fontSize: 20,
     fontWeight: "bold",
   },
   noteWrapper: {
@@ -65,7 +63,6 @@ const styles = StyleSheet.create({
     marginTop: "25%",
     marginLeft: "5%",
     color: "#b20606",
-    fontSize: 14,
     fontWeight: "bold",
   },
 });

@@ -1,6 +1,7 @@
 import { StyleProp, ViewStyle } from "react-native";
 
 export interface Properties {
-  currentDate?: Date;
+  date?: Date;
+  width?: number;
   calendarStyle?: StyleProp<ViewStyle>;
 }

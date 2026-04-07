@@ -31,8 +31,8 @@ export function RouteMainMenu() {
       </View>
 
       <View style={styles.bottomWrapper}>
-        <CalendarEastern calendarStyle={styles.calendar} />
-        <CalendarWestern style={styles.calendar} />
+        <CalendarEastern />
+        <CalendarWestern />
       </View>
     </View>
   );
@@ -69,8 +69,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
-  },
-  calendar: {
-    width: 80,
   },
 });

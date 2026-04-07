@@ -3,20 +3,22 @@ import { ImageBackground, StyleSheet, Text } from "react-native";
 import type * as Types from "./type";
 
 export function CalendarWestern(properties: Types.Properties) {
-  const { currentDate = new Date(), style } = properties;
+  const { date = new Date(), width = 60 } = properties;
 
-  const year = currentDate.getFullYear();
-  const monthName = new Date().toLocaleDateString("en", { month: "short" });
-  const dayNumber = currentDate.getDate();
+  const year = date.getFullYear();
+  const monthName = date.toLocaleDateString("en", { month: "short" });
+  const dayNumber = date.getDate();
 
   return (
     <ImageBackground
       source={calendarBook}
-      style={[styles.calendarWrapper, style]}
+      style={[styles.calendarWrapper, { width }]}
       resizeMode="cover"
     >
-      <Text style={styles.monthText}>{year}</Text>
-      <Text style={styles.dayNumber}>{`${dayNumber} ${monthName}`}</Text>
+      <Text style={[styles.monthText, { fontSize: width / 7 }]}>{year}</Text>
+      <Text
+        style={[styles.dayNumber, { fontSize: width / 5 }]}
+      >{`${dayNumber} ${monthName}`}</Text>
     </ImageBackground>
   );
 }
@@ -30,13 +32,11 @@ const styles = StyleSheet.create({
   monthText: {
     marginTop: "12.5%",
     color: "#ffffff",
-    fontSize: 12,
     textTransform: "uppercase",
   },
   dayNumber: {
     marginTop: "25%",
     color: "#b20606",
-    fontSize: 20,
     fontWeight: "bold",
   },
 });
