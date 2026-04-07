@@ -1,4 +1,4 @@
-import { framePrimary2 } from "@/assets/images/typography";
+import { framePrimary3 } from "@/assets/images/typography";
 import React from "react";
 import {
   ImageBackground,
@@ -14,13 +14,13 @@ interface FramePrimaryProps {
   textStyle?: TextStyle;
 }
 
-export const FramePrimary2: React.FC<FramePrimaryProps> = ({
+export const FramePrimary3: React.FC<FramePrimaryProps> = ({
   children,
   style,
 }) => {
   return (
     <ImageBackground
-      source={framePrimary2}
+      source={framePrimary3}
       style={[styles.frame, style]}
       resizeMode="cover"
     >
