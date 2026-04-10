@@ -44,5 +44,13 @@ ffmpeg -i input_greenscreen.mp4 -vf "chromakey=0x248C1E:0.06:0.1,format=yuva420p
 ffmpeg -i input_greenscreen.mp4 -vf "chromakey=0x248C1E:0.06:0.1" -c:v prores_ks -profile:v 4 -pix_fmt yuva444p10le output_ios.mov
 ffmpeg -i bad.mp4 -vf "chromakey=0x3E902B:0.06:0.1,format=yuva420p" -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -an bad.webm
 
+ffmpeg -i very_good_small.mp4 -vf "chromakey=0x369631:0.04:0.1,format=yuva420p" -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -an very_good_out.webm
+ffmpeg -i good_small.mp4 -vf "chromakey=0x4F9F3A:0.09:0.08,format=yuva420p" -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -an good.webm
+ffmpeg -i normal_small.mp4 -vf "chromakey=0x2A9D11:0.09:0.08,format=yuva420p" -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -an normal.webm
+ffmpeg -i bad_small.mp4 -vf "chromakey=0x388828:0.08:0.06,format=yuva420p" -c:v libvpx-vp9 -pix_fmt yuva420p -auto-alt-ref 0 -an bad.webm
+
 Export a video into a PNG sequence:
 ffmpeg -c:v libvpx-vp9 -i test.webm -vf "crop=720:1200:0:0,fps=12" -pix_fmt rgba frames/frame_%04d.png
+
+Optimize a video
+ffmpeg -i "metal.mp4" -vf "scale=-2:720,fps=24" -c:v libx264 -preset veryslow -crf 30 -profile:v high -level 4.0 -pix_fmt yuv420p -movflags +faststart -an "metal_small.mp4"
