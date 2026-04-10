@@ -1,6 +1,7 @@
 import { LanguageKey, SizeType } from '@/types';
 
 import { loadAsync } from 'expo-font';
+import { Platform } from 'react-native';
 
 export type FontRegistryType = {
   body: string;
@@ -65,6 +66,15 @@ export const fontSizes: Record<LanguageKey, Record<SizeType, number>> = {
   },
 };
 
+const zhCNBody = Platform.select({ ios: 'PingFang SC', android: 'sans-serif', default: 'sans-serif' });
+const zhCNHeading = Platform.select({ ios: 'PingFang SC', android: 'sans-serif-medium', default: 'sans-serif' });
+const zhTWBody = Platform.select({ ios: 'PingFang TC', android: 'sans-serif', default: 'sans-serif' });
+const zhTWHeading = Platform.select({ ios: 'PingFang TC', android: 'sans-serif-medium', default: 'sans-serif' });
+const koBody = Platform.select({ ios: 'NotoSansKR-Regular', android: 'sans-serif', default: 'sans-serif' });
+const koHeading = Platform.select({ ios: 'NotoSansKR-Bold', android: 'sans-serif-medium', default: 'sans-serif' });
+const jaBody = Platform.select({ ios: 'NotoSansJP-Regular', android: 'sans-serif', default: 'sans-serif' });
+const jaHeading = Platform.select({ ios: 'NotoSansJP-Bold', android: 'sans-serif-medium', default: 'sans-serif' });
+
 export const fontRegistry: Record<LanguageKey, FontRegistryType> = {
   en: {
     body: 'Roboto-Regular',
@@ -72,14 +82,14 @@ export const fontRegistry: Record<LanguageKey, FontRegistryType> = {
     heading: 'Roboto-Bold',
   },
   'zh-CN': {
-    body: 'NotoSansSC-Regular',
+    body: zhCNBody,
     accent: 'ZCOOLXiaoWei-Regular',
-    heading: 'NotoSansSC-Bold',
+    heading: zhCNHeading,
   },
   'zh-TW': {
-    body: 'NotoSansTC-Regular',
+    body: zhTWBody,
     accent: 'UoqMunThenKhung-Regular',
-    heading: 'NotoSansTC-Bold',
+    heading: zhTWHeading,
   },
   vi: {
     body: 'Roboto-Regular',
@@ -87,14 +97,14 @@ export const fontRegistry: Record<LanguageKey, FontRegistryType> = {
     heading: 'Roboto-Bold',
   },
   ko: {
-    body: 'NotoSansKR-Regular',
-    accent: 'NotoSansKR-Bold',
-    heading: 'NotoSansKR-Bold',
+    body: koBody,
+    accent: koHeading,
+    heading: koHeading,
   },
   ja: {
-    body: 'NotoSansJP-Regular',
-    accent: 'NotoSansJP-Bold',
-    heading: 'NotoSansJP-Bold',
+    body: jaBody,
+    accent: jaHeading,
+    heading: jaHeading,
   },
 };
 
@@ -103,17 +113,7 @@ const fontMap: Record<string, number> = {
   'Roboto-Medium': require('@/assets/fonts/roboto-latin/Roboto-Medium.ttf'),
   'Roboto-Bold': require('@/assets/fonts/roboto-latin/Roboto-Bold.ttf'),
   'CormorantSC-Bold': require('@/assets/fonts/cormorant-sc-latin/CormorantSC-Bold.ttf'),
-  'UoqMunThenKhung-Regular': require('@/assets/fonts/uoq-mun-then-khung-traditional-chinese/UoqMunThenKhung-Regular.ttf'),
-  'NotoSansSC-Regular': require('@/assets/fonts/noto-sans-simplified-chinese/NotoSansSC-Regular.ttf'),
-  'NotoSansTC-Regular': require('@/assets/fonts/noto-sans-traditional-chinese/NotoSansTC-Regular.ttf'),
-  'NotoSansTC-Medium': require('@/assets/fonts/noto-sans-traditional-chinese/NotoSansTC-Medium.ttf'),
-  'NotoSansTC-Bold': require('@/assets/fonts/noto-sans-traditional-chinese/NotoSansTC-Bold.ttf'),
-  'NotoSansKR-Regular': require('@/assets/fonts/noto-sans-korean/NotoSansKR-Regular.ttf'),
-  'NotoSansKR-Medium': require('@/assets/fonts/noto-sans-korean/NotoSansKR-Medium.ttf'),
-  'NotoSansKR-Bold': require('@/assets/fonts/noto-sans-korean/NotoSansKR-Bold.ttf'),
-  'NotoSansJP-Regular': require('@/assets/fonts/noto-sans-japanese/NotoSansJP-Regular.ttf'),
-  'NotoSansJP-Medium': require('@/assets/fonts/noto-sans-japanese/NotoSansJP-Medium.ttf'),
-  'NotoSansJP-Bold': require('@/assets/fonts/noto-sans-japanese/NotoSansJP-Bold.ttf'),
+  'UoqMunThenKhung-Regular': require('@/assets/fonts/uoq-mun-then-khung-traditional-chinese/UoqMunThenKhung-Regular.ttf'),  
   'JetBrainsMono-Thin': require('@/assets/fonts/jetbrains-mono-numeral/JetBrainsMono-Thin.ttf'),
   'JetBrainsMono-Light': require('@/assets/fonts/jetbrains-mono-numeral/JetBrainsMono-Light.ttf'),
   'JetBrainsMono-Regular': require('@/assets/fonts/jetbrains-mono-numeral/JetBrainsMono-Regular.ttf'),
