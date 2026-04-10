@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { Appearance, Platform } from 'react-native';
 
@@ -7,6 +6,7 @@ import {
   STORAGE_LOCALE_STORE_KEY,
   STORAGE_THEME_STORE_KEY,
 } from '@/constants';
+import { storage } from '@/lib/storage';
 import {
   initializeI18n,
   mapDeviceLocaleToLanguageKey,
@@ -71,7 +71,7 @@ export function AppAppearanceProvider({
   const systemTheme = Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
 
   useEffect(() => {
-    AsyncStorage.multiGet([
+    storage.multiGet([
       STORAGE_THEME_STORE_KEY,
       STORAGE_LOCALE_STORE_KEY,
     ]).then((entries) => {
@@ -125,12 +125,12 @@ export function AppAppearanceProvider({
 
       setThemeMode: async (mode) => {
         setThemeModeState(mode);
-        await AsyncStorage.setItem(STORAGE_THEME_STORE_KEY, mode);
+        await storage.setItem(STORAGE_THEME_STORE_KEY, mode);
       },
 
       setLocale: async (loc) => {
         setLocaleState(loc);
-        await AsyncStorage.setItem(STORAGE_LOCALE_STORE_KEY, loc);
+        await storage.setItem(STORAGE_LOCALE_STORE_KEY, loc);
         await initializeI18n(loc);
       },
     }),

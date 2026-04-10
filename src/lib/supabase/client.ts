@@ -1,7 +1,6 @@
 import { USE_MOCK_DATA } from '@/constants/common';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/lib/storage';
 import createMockSupabaseClient from './mockClient';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -14,62 +13,25 @@ if (!USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
   );
 }
 
-/**
- * Custom storage adapter that uses SecureStore for sensitive data (tokens)
- * and AsyncStorage for non-sensitive data
- */
 const customStorage = {
   getItem: async (key: string) => {
-    // Use browser localStorage if available (for web builds)
-    if (typeof localStorage !== 'undefined') {
-      return localStorage.getItem(key);
-    }
-
     try {
-      // Use SecureStore for auth tokens
-      if (key.includes('token') || key.includes('supabase')) {
-        const value = await SecureStore.getItemAsync(key);
-        return value || null;
-      }
-      // Use AsyncStorage for other data
-      return await AsyncStorage.getItem(key);
+      return await storage.getItem(key);
     } catch (error) {
       console.error(`Error retrieving ${key}:`, error);
       return null;
     }
   },
   setItem: async (key: string, value: string) => {
-    // Use browser localStorage if available (for web builds)
-    if (typeof localStorage !== 'undefined') {
-      return localStorage.setItem(key, value);
-    }
-
     try {
-      // Use SecureStore for auth tokens
-      if (key.includes('token') || key.includes('supabase')) {
-        await SecureStore.setItemAsync(key, value);
-      } else {
-        // Use AsyncStorage for other data
-        await AsyncStorage.setItem(key, value);
-      }
+      await storage.setItem(key, value);
     } catch (error) {
       console.error(`Error setting ${key}:`, error);
     }
   },
   removeItem: async (key: string) => {
-    // Use browser localStorage if available (for web builds)
-    if (typeof localStorage !== 'undefined') {
-      return localStorage.removeItem(key);
-    }
-
     try {
-      // Try removing from SecureStore first (for tokens)
-      if (key.includes('token') || key.includes('supabase')) {
-        await SecureStore.deleteItemAsync(key);
-      } else {
-        // Remove from AsyncStorage
-        await AsyncStorage.removeItem(key);
-      }
+      await storage.removeItem(key);
     } catch (error) {
       console.error(`Error removing ${key}:`, error);
     }

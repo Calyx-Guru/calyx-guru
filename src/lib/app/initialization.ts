@@ -5,7 +5,7 @@ import {
 } from '@/lib/i18n/config';
 import { ensureFonts } from '@/theme/fonts';
 import { LanguageKey } from '@/types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from '@/lib/storage';
 
 /**
  * Initialize the entire app
@@ -27,7 +27,7 @@ export async function initializeApp(): Promise<void> {
 async function initializeLocale(): Promise<void> {
   try {
     // Get saved locale or auto-detect device language
-    const savedLocale = await AsyncStorage.getItem(STORAGE_LOCALE_STORE_KEY);
+    const savedLocale = await storage.getItem(STORAGE_LOCALE_STORE_KEY);
     const locale: LanguageKey =
       (savedLocale as LanguageKey) ||
       mapDeviceLocaleToLanguageKey() ||

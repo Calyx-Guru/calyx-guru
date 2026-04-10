@@ -1,7 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Application from 'expo-application';
-import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { storage } from '@/lib/storage';
 
 const RUNNING_TASKS: any = {};
 
@@ -20,30 +19,11 @@ function newInstallId(): string {
 }
 
 async function getOrCreatePersistedInstallId(): Promise<string> {
-  if (Platform.OS === 'web') {
-    const existing = await AsyncStorage.getItem(DEVICE_INSTALL_ID_KEY);
-    if (existing) return existing;
-    const id = newInstallId();
-    await AsyncStorage.setItem(DEVICE_INSTALL_ID_KEY, id);
-    return id;
-  }
+  const existing = await storage.getItem(DEVICE_INSTALL_ID_KEY);
+  if (existing) return existing;
 
-  if (await SecureStore.isAvailableAsync()) {
-    try {
-      const stored = await SecureStore.getItemAsync(DEVICE_INSTALL_ID_KEY);
-      if (stored) return stored;
-      const id = newInstallId();
-      await SecureStore.setItemAsync(DEVICE_INSTALL_ID_KEY, id);
-      return id;
-    } catch {
-      /* fall through to AsyncStorage */
-    }
-  }
-
-  const fallback = await AsyncStorage.getItem(DEVICE_INSTALL_ID_KEY);
-  if (fallback) return fallback;
   const id = newInstallId();
-  await AsyncStorage.setItem(DEVICE_INSTALL_ID_KEY, id);
+  await storage.setItem(DEVICE_INSTALL_ID_KEY, id);
   return id;
 }
 

@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from '@/lib/storage';
 
 export type FortuneTellingHistoryEntry = {
   id: string;
@@ -21,7 +21,7 @@ export async function addFortuneTellingHistoryEntry(
   entry: Omit<FortuneTellingHistoryEntry, 'id' | 'toldAt'>,
 ) {
   try {
-    const existingRaw = await AsyncStorage.getItem(
+    const existingRaw = await storage.getItem(
       FORTUNE_TELLINGS_HISTORY_KEY,
     );
     const existingEntries: FortuneTellingHistoryEntry[] = existingRaw
@@ -35,7 +35,7 @@ export async function addFortuneTellingHistoryEntry(
     };
 
     const nextEntries = [newEntry, ...existingEntries].slice(0, 200);
-    await AsyncStorage.setItem(
+    await storage.setItem(
       FORTUNE_TELLINGS_HISTORY_KEY,
       JSON.stringify(nextEntries),
     );
@@ -46,7 +46,7 @@ export async function addFortuneTellingHistoryEntry(
 
 export async function getTodayFortuneTellingHistoryEntries() {
   try {
-    const existingRaw = await AsyncStorage.getItem(
+    const existingRaw = await storage.getItem(
       FORTUNE_TELLINGS_HISTORY_KEY,
     );
     const allEntries: FortuneTellingHistoryEntry[] = existingRaw

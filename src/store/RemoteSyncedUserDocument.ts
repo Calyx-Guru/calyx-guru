@@ -1,8 +1,8 @@
 /**
- * Shared remote-first + AsyncStorage + debounced serial sync for per-user documents (profile, user state, …).
+ * Shared remote-first + persisted local storage + debounced serial sync for per-user documents (profile, user state, …).
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from '@/lib/storage';
 
 export function entityToRemoteUpdates<T extends { id: string }>(
   entity: T,
@@ -64,7 +64,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
             [this.cfg.remoteDisabledKey]: false,
           });
           try {
-            await AsyncStorage.setItem(
+            await storage.setItem(
               this.cfg.storageKey,
               JSON.stringify(remote),
             );
@@ -87,7 +87,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     }
 
     try {
-      const raw = await AsyncStorage.getItem(this.cfg.storageKey);
+      const raw = await storage.getItem(this.cfg.storageKey);
       if (loadEpoch !== this.remoteFlushEpoch) return;
       if (raw) {
         const parsed = JSON.parse(raw) as T;
@@ -112,7 +112,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
       error: null,
     });
     try {
-      await AsyncStorage.setItem(this.cfg.storageKey, JSON.stringify(def));
+      await storage.setItem(this.cfg.storageKey, JSON.stringify(def));
     } catch (e) {
       console.error(`[${this.cfg.label}] Error saving default record locally:`, e);
     }
@@ -126,7 +126,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     this.patch({ [this.cfg.recordKey]: merged, error: null });
 
     try {
-      await AsyncStorage.setItem(this.cfg.storageKey, JSON.stringify(merged));
+      await storage.setItem(this.cfg.storageKey, JSON.stringify(merged));
     } catch (e) {
       console.error(`[${this.cfg.label}] Error saving record to local storage:`, e);
     }
@@ -139,7 +139,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     this.cancelDebounce();
     this.needsAnotherRemoteWrite = false;
     try {
-      await AsyncStorage.removeItem(this.cfg.storageKey);
+      await storage.removeItem(this.cfg.storageKey);
     } catch (e) {
       console.error(`[${this.cfg.label}] Error clearing local record:`, e);
     }
@@ -153,7 +153,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
   applyServerRecord = (record: T): void => {
     this.patch({ [this.cfg.recordKey]: record, error: null });
-    void AsyncStorage.setItem(this.cfg.storageKey, JSON.stringify(record)).catch(
+    void storage.setItem(this.cfg.storageKey, JSON.stringify(record)).catch(
       (e) =>
         console.error(
           `[${this.cfg.label}] Error persisting server record locally:`,
@@ -220,7 +220,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
           if (updated && this.getRecord()?.id === record.id) {
             this.patch({ [this.cfg.recordKey]: updated, error: null });
             try {
-              await AsyncStorage.setItem(
+              await storage.setItem(
                 this.cfg.storageKey,
                 JSON.stringify(updated),
               );
