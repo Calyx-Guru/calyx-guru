@@ -1,20 +1,19 @@
 import { router } from "expo-router";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ConfirmOverlay } from "@/features/element/confirm-overlay";
 import { ElementItemFloatingCircle } from "@/features/element/item-floating-circle";
 
 import { ButtonGradient } from "@/components/typography/ButtonGradient";
-import { NormalVideo } from "@/components/video/NormalVideo";
 import { getElementByBirthDate } from "@/utils/element";
 
 import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
 import { FramePrimary2 } from "@/components/typography/FramePrimary2";
 import { HeadingPrimary } from "@/components/typography/HeadingPrimary";
-import { VIDEOS } from "./constants";
+import { ChooseElementBackgroundVideo } from "./ChooseElementBackgroundVideo";
 import * as Types from "./type";
 
 export function RouteChooseElement(properties: Types.Properties) {
@@ -24,8 +23,6 @@ export function RouteChooseElement(properties: Types.Properties) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [element, setElement] = useState<ElementName | null>(null);
-
-  const timeout = useRef<NodeJS.Timeout | null>(null);
 
   function onDateChange(event: Types.DateTimePickerEvent, selectedDate?: Date) {
     setShowDatePicker(false);
@@ -47,43 +44,16 @@ export function RouteChooseElement(properties: Types.Properties) {
     handleSelectElement(element);
   }
 
+  function getRandomElement() : ElementName {
+    const todayElement = getElementByBirthDate(new Date());
+    return todayElement;
+  }
+
   function handleSelectElement(elementName: ElementName) {
     setElement(elementName);
     setStage("confirm-element");
   }
-
-  useEffect(() => {
-    clearTimeout(timeout.current!);
-
-    if (stage === "hatching-sequence") {
-      timeout.current = setTimeout(() => {
-        setStage("break-sequence");
-      }, 6000);
-    }
-
-    if (stage === "break-sequence") {
-      timeout.current = setTimeout(() => {
-        router.replace("/(tabs)/main-menu");
-      }, 6500);
-    }
-
-    return () => {
-      clearTimeout(timeout.current!);
-    };
-  }, [stage]);
-
-  const renderBackground = () => {
-    if (stage === "hatching-sequence") {
-      return <NormalVideo url={VIDEOS.hatching.break} loop={false} />;
-    }
-
-    if (stage === "break-sequence") {
-      return <NormalVideo url={VIDEOS.hatching[element!]} loop={false} />;
-    }
-
-    return <NormalVideo url={VIDEOS.hatching.idle} />;
-  };
-
+  
   const renderTitle = () => {
     if (stage !== "choose-element") {
       return null;
@@ -164,6 +134,21 @@ export function RouteChooseElement(properties: Types.Properties) {
     );
   };
 
+  const RandomElementButton = () => {
+    return (
+      <View style={{ marginTop: "auto" }}>
+        <ButtonPrimary
+          onPress={() => {
+            const element = getRandomElement();
+            handleSelectElement(element);
+          }}
+        >
+          Help me choose
+        </ButtonPrimary>
+      </View>
+    );
+  };
+
   const renderConfirmOverlay = () => {
     if (!element) {
       return null;
@@ -180,7 +165,7 @@ export function RouteChooseElement(properties: Types.Properties) {
 
   return (
     <View style={styles.root}>
-      {renderBackground()}
+      <ChooseElementBackgroundVideo isIdle={stage === "choose-element" || stage === "confirm-element"} element={element} onHatchingEnd={() => router.replace("/main-menu")} />
 
       <View style={styles.toolWrapper}>
         {renderTitle()}
@@ -189,7 +174,7 @@ export function RouteChooseElement(properties: Types.Properties) {
         {stage === "choose-element" && renderChooseElement()}
         {stage === "confirm-element" && renderConfirmOverlay()}
 
-        {renderToggleButton()}
+        {stage === "choose-element" && <RandomElementButton />}
       </View>
     </View>
   );
