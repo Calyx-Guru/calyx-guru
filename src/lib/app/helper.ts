@@ -1,6 +1,6 @@
+import { storage } from '@/lib/storage';
 import * as Application from 'expo-application';
 import { Platform } from 'react-native';
-import { storage } from '@/lib/storage';
 
 const RUNNING_TASKS: any = {};
 
@@ -117,6 +117,17 @@ export function runWithTimeout<T>(
       setTimeout(() => reject(new Error('Operation timed out')), timeout),
     ),
   ]);
+}
+
+export function waitFor(condition: () => boolean): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const interval = setInterval(() => {
+      if (condition()) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100);
+  });
 }
 
 export function fetchWithTimeout(

@@ -2,7 +2,8 @@ import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { useMasterData } from "@/hooks/useMasterData";
-import { runOnce } from "@/lib/app/helper";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { runOnce, waitFor } from "@/lib/app/helper";
 import { initializeApp } from "@/lib/app/initialization";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -18,6 +19,7 @@ function AppContent() {
   const { initialize: initializeMasterData } = useMasterData();
   const { initializeSupabaseProfile } = useSupabaseAuth();
   const [isReady, setIsReady] = useState(false);
+  const { isLoading: isLoadingProfile } = useUserProfile();
 
   useEffect(() => {
     async function prepare() {
@@ -29,6 +31,8 @@ function AppContent() {
           runOnce("initializeMasterData", initializeMasterData)(),
           runOnce("initializeSupabaseProfile", initializeSupabaseProfile)(),
         ]);
+
+        await waitFor(() => !isLoadingProfile);
       } catch (error) {
         console.error("Error during app initialization:", error);
       } finally {

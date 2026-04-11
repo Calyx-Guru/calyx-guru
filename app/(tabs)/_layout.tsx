@@ -19,8 +19,6 @@ export default function TabsLayout() {
           tabBarInactiveTintColor: colors.neutralInverse,
         }}
       >
-        <Tabs.Screen name="main-menu/index" />
-        <Tabs.Screen name="choose-element/index" />
       </Tabs>
     </GestureHandlerRootView>
   );
