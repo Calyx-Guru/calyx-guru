@@ -1,7 +1,7 @@
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserState } from '@/hooks/useUserState';
 import { runWithTimeout } from '@/lib/app/helper';
 import supabase from '@/lib/supabase/client';
-import { useUserStateStore } from '@/store/userStateStore';
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 
@@ -49,10 +49,7 @@ export function SupabaseAuthProvider({
   const [isLoading, setIsLoading] = useState(true);
 
   const { clearProfile, initializeProfileForUser } = useUserProfile();
-  const initializeUserStateForUser = useUserStateStore(
-    (s) => s.initializeUserStateForUser,
-  );
-  const clearUserState = useUserStateStore((s) => s.clearUserState);
+  const { clearUserState, initializeUserStateForUser } = useUserState();
 
   const initializeSupabaseProfile = async () => {
     try {
@@ -73,7 +70,10 @@ export function SupabaseAuthProvider({
           8000,
         );
       } else {
-        await Promise.all([clearProfile(), clearUserState()]);
+        await Promise.all([
+          initializeProfileForUser(null),
+          initializeUserStateForUser(null),
+        ])
       }
 
       console.log('Initial Supabase session:', initialSession);

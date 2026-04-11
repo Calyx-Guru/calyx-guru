@@ -1,12 +1,11 @@
 import { useUserStateStore } from '@/store/userStateStore';
 
 export function useUserState() {
+  const getState = useUserStateStore.getState;
   const userState = useUserStateStore((s) => s.userState);
   const isLoading = useUserStateStore((s) => s.isLoading);
   const error = useUserStateStore((s) => s.error);
-  const userStateRemoteDisabled = useUserStateStore(
-    (s) => s.userStateRemoteDisabled,
-  );
+ 
   const initializeUserStateForUser = useUserStateStore(
     (s) => s.initializeUserStateForUser,
   );
@@ -17,10 +16,10 @@ export function useUserState() {
   );
 
   return {
+    getState,
     userState,
     isLoading,
     error,
-    userStateRemoteDisabled,
     initializeUserStateForUser,
     updateUserState,
     clearUserState,

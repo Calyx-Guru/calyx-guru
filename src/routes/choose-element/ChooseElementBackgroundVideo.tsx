@@ -8,7 +8,7 @@ import { VIDEOS } from "./constants";
 const BREAK_NEAR_END_SECONDS = 0.32;
 const QUICK_FLASH_MS = 150;
 const SLOW_FADE_OUT_MS = 1000;
-const ELEMENT_END_FLASH_MS = 180;
+const ELEMENT_END_FLASH_MS = 360;
 const ELEMENT_END_FLASH_HOLD_MS = 120;
 
 interface ChooseElementBackgroundVideoProps {

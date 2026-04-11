@@ -17,7 +17,6 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 const STORAGE_KEY = 'userState';
-const REMOTE_DEBOUNCE_MS = 400;
 
 function createDefaultUserState(userId: string): UserState {
   return {
@@ -31,9 +30,9 @@ export interface UserStateStore {
   userState: UserState | null;
   isLoading: boolean;
   error: string | null;
-  userStateRemoteDisabled: boolean;
+  remoteDisabledKey: boolean;
 
-  initializeUserStateForUser: (userId: string) => Promise<void>;
+  initializeUserStateForUser: (userId: string | null) => Promise<void>;
   updateUserState: (updates: Partial<UserState>) => Promise<void>;
   clearUserState: () => Promise<void>;
   applyServerUserState: (record: UserState) => void;
@@ -42,23 +41,20 @@ export interface UserStateStore {
 export const useUserStateStore = create<UserStateStore>()(
   devtools((set, get) => {
     const sync = new RemoteSyncedUserDocument<UserState, UserStateStore>({
-      storageKey: STORAGE_KEY,
-      debounceMs: REMOTE_DEBOUNCE_MS,
+      storageKey: STORAGE_KEY,      
       fetchRemote: (userId) => fetchUserState(userId),
       updateRemote: (userId, updates) => updateUserState(userId, updates),
       createDefault: createDefaultUserState,
       recordKey: 'userState',
-      remoteDisabledKey: 'userStateRemoteDisabled',
       get,
-      set,
-      label: 'UserState',
+      set
     });
 
     return {
       userState: null,
-      isLoading: false,
+      isLoading: true,
       error: null,
-      userStateRemoteDisabled: false,
+      remoteDisabledKey: false,
 
       initializeUserStateForUser: async (userId: string) => {
         await sync.initializeForUser(userId);

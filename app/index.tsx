@@ -1,22 +1,23 @@
 import { AppAppearanceContext } from "@/contexts/AppAppearanceContext";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserProfileStore } from "@/store/userProfileStore";
 import { router } from "expo-router";
 import { useContext, useEffect } from "react";
 import { View } from "react-native";
 
 export default function Index() {
   const { colors } = useContext(AppAppearanceContext);
-  const { profile, isLoading: isLoadingProfile } = useUserProfile();
+  const isLoadingProfile = useUserProfileStore((state) => state.isLoading);
+  const profile = useUserProfileStore((state) => state.profile);
 
   useEffect(() => {
-    if (!isLoadingProfile) {
+    if (!isLoadingProfile && profile) {
       if (profile?.element) {
         router.replace("/main-menu");        
       } else {        
         router.replace("/choose-element");
       }
     }
-  }, [isLoadingProfile]);
+  }, [isLoadingProfile, profile]);
 
   return (
     <View

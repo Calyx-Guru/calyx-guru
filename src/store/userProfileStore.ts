@@ -12,7 +12,6 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 const STORAGE_KEY = 'userProfile';
-const REMOTE_DEBOUNCE_MS = 400;
 
 function createDefaultProfile(userId: string): UserProfile {
   return {
@@ -68,9 +67,9 @@ export interface UserProfileStore {
    * After the first `fetchUserProfile` throws, we treat the DB as unreachable for this signed-in
    * session: no further profile reads/writes to Supabase until `clearProfile` (e.g. sign-out).
    */
-  profileRemoteDisabled: boolean;
+  remoteDisabledKey: boolean;
 
-  initializeProfileForUser: (userId: string) => Promise<void>;
+  initializeProfileForUser: (userId: string | null) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   clearProfile: () => Promise<void>;
   applyServerProfile: (profile: UserProfile) => void;
@@ -80,22 +79,19 @@ export const useUserProfileStore = create<UserProfileStore>()(
   devtools((set, get) => {
     const sync = new RemoteSyncedUserDocument<UserProfile, UserProfileStore>({
       storageKey: STORAGE_KEY,
-      debounceMs: REMOTE_DEBOUNCE_MS,
       fetchRemote: (userId) => fetchUserProfile(userId),
       updateRemote: (userId, updates) => updateUserProfile(userId, updates),
       createDefault: createDefaultProfile,
       recordKey: 'profile',
-      remoteDisabledKey: 'profileRemoteDisabled',
       get,
-      set,
-      label: 'UserProfile',
+      set
     });
 
     return {
       profile: null,
-      isLoading: false,
+      isLoading: true,
       error: null,
-      profileRemoteDisabled: false,
+      remoteDisabledKey: false,
 
       initializeProfileForUser: sync.initializeForUser,
       updateProfile: sync.updateRecord,

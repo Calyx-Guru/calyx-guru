@@ -8,12 +8,18 @@ import { CalendarWestern } from "@/features/calendar/western";
 import { CaucimOrb } from "@/features/caucim/orb";
 import { HealthBar } from "@/features/mascot/health-bar";
 import { StatusMessage } from "@/features/mascot/status-message";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { FIVE_ELEMENTS } from "@/types/UserState";
 import { VIDEOS } from "./constants";
 
 export function RouteMainMenu() {
+  const { profile } = useUserProfile();
+
+  const element = profile?.element as FIVE_ELEMENTS;
+
   return (
     <View style={styles.root}>
-      <NormalVideo url={VIDEOS.background.water} />
+      <NormalVideo url={VIDEOS.background[element]} />
 
       <View style={styles.headerWrapper}>
         <HealthBar totalValue={100} value={100} />

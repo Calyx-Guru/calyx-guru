@@ -13,6 +13,8 @@ import { getElementByBirthDate } from "@/utils/element";
 import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
 import { FramePrimary2 } from "@/components/typography/FramePrimary2";
 import { HeadingPrimary } from "@/components/typography/HeadingPrimary";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { FIVE_ELEMENTS } from "@/types/UserState";
 import { ChooseElementBackgroundVideo } from "./ChooseElementBackgroundVideo";
 import * as Types from "./type";
 
@@ -23,6 +25,7 @@ export function RouteChooseElement(properties: Types.Properties) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [element, setElement] = useState<ElementName | null>(null);
+  const { updateProfile } = useUserProfile();
 
   function onDateChange(event: Types.DateTimePickerEvent, selectedDate?: Date) {
     setShowDatePicker(false);
@@ -158,7 +161,30 @@ export function RouteChooseElement(properties: Types.Properties) {
       <ConfirmOverlay
         element={element}
         onChooseAgain={() => setStage("choose-element")}
-        onConfirm={() => setStage("hatching-sequence")}
+        onConfirm={() => {
+          if (element) {
+            let elementString = FIVE_ELEMENTS.EARTH;
+            switch (element) {
+              case "water":
+                elementString = FIVE_ELEMENTS.WATER;
+                break;
+              case "fire":
+                elementString = FIVE_ELEMENTS.FIRE;
+                break;
+              case "metal":
+                elementString = FIVE_ELEMENTS.METAL;
+                break;
+              case "earth":
+                elementString = FIVE_ELEMENTS.EARTH;
+                break;
+              case "wood":
+                elementString = FIVE_ELEMENTS.WOOD;
+                break;
+            }
+            updateProfile({ element: elementString });
+          }
+          setStage("hatching-sequence");
+        }}
       />
     );
   };

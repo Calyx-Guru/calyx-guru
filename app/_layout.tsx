@@ -3,6 +3,7 @@ import { MasterDataProvider } from "@/contexts/MasterDataContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { useMasterData } from "@/hooks/useMasterData";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserState } from "@/hooks/useUserState";
 import { runOnce, waitFor } from "@/lib/app/helper";
 import { initializeApp } from "@/lib/app/initialization";
 import { Stack } from "expo-router";
@@ -19,8 +20,8 @@ function AppContent() {
   const { initialize: initializeMasterData } = useMasterData();
   const { initializeSupabaseProfile } = useSupabaseAuth();
   const [isReady, setIsReady] = useState(false);
-  const { isLoading: isLoadingProfile } = useUserProfile();
-
+  const { getState: getUserProfileState } = useUserProfile();
+  const { getState: getUserStateState } = useUserState();
   useEffect(() => {
     async function prepare() {
       try {
@@ -32,7 +33,14 @@ function AppContent() {
           runOnce("initializeSupabaseProfile", initializeSupabaseProfile)(),
         ]);
 
-        await waitFor(() => !isLoadingProfile);
+        await Promise.all([
+          waitFor(
+            () => !getUserProfileState().isLoading,
+          ),
+          waitFor(
+            () => !getUserStateState().isLoading,
+          ),
+        ]);
       } catch (error) {
         console.error("Error during app initialization:", error);
       } finally {

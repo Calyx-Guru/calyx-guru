@@ -4,6 +4,8 @@
 
 import { storage } from '@/lib/storage';
 
+const REMOTE_DEBOUNCE_MS = 400;
+
 export function entityToRemoteUpdates<T extends { id: string }>(
   entity: T,
 ): Partial<T> {
@@ -23,17 +25,14 @@ export interface RemoteSyncedUserDocumentConfig<
   S extends object,
 > {
   storageKey: string;
-  debounceMs: number;
+  debounceMs?: number;
   /** Load from API; return null if there is simply no row yet (do not disable remote). Throw only on real failures. */
   fetchRemote: (userId: string) => Promise<T | null>;
   updateRemote: (userId: string, updates: Partial<T>) => Promise<T | null>;
   createDefault: (userId: string) => T;
   recordKey: keyof S & string;
-  remoteDisabledKey: keyof S & string;
   get: () => S;
   set: (partial: Partial<S>) => void;
-  /** Console / log context */
-  label: string;
 }
 
 export class RemoteSyncedUserDocument<T extends { id: string }, S extends object> {
@@ -41,10 +40,15 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   private isRemoteWriting = false;
   private needsAnotherRemoteWrite = false;
   private remoteFlushEpoch = 0;
+  private debounceMs = REMOTE_DEBOUNCE_MS;
+  private label: string;
 
-  constructor(private readonly cfg: RemoteSyncedUserDocumentConfig<T, S>) {}
+  constructor(private readonly cfg: RemoteSyncedUserDocumentConfig<T, S>) {
+    this.debounceMs = cfg.debounceMs ?? REMOTE_DEBOUNCE_MS;
+    this.label = cfg.recordKey;
+  }
 
-  initializeForUser = async (userId: string): Promise<void> => {
+  initializeForUser = async (userId: string | null): Promise<void> => {
     this.remoteFlushEpoch++;
     this.cancelDebounce();
     this.needsAnotherRemoteWrite = false;
@@ -52,7 +56,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
     const loadEpoch = this.remoteFlushEpoch;
 
-    if (!this.getRemoteDisabled()) {
+    if (!this.getRemoteDisabled() && userId) {
       try {
         const remote = await this.cfg.fetchRemote(userId);
         if (loadEpoch !== this.remoteFlushEpoch) return;
@@ -61,7 +65,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
             [this.cfg.recordKey]: remote,
             isLoading: false,
             error: null,
-            [this.cfg.remoteDisabledKey]: false,
+            remoteDisabledKey: false,
           });
           try {
             await storage.setItem(
@@ -70,7 +74,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
             );
           } catch (e) {
             console.error(
-              `[${this.cfg.label}] Error saving remote record to local storage:`,
+              `[${this.label}] Error saving remote record to local storage:`,
               e,
             );
           }
@@ -78,9 +82,9 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
         }
       } catch (err) {
         if (loadEpoch !== this.remoteFlushEpoch) return;
-        this.patch({ [this.cfg.remoteDisabledKey]: true });
+        this.patch({ remoteDisabledKey: true });
         console.warn(
-          `[${this.cfg.label}] Remote unreachable (first fetch failed); using local storage only:`,
+          `[${this.label}] Remote unreachable (first fetch failed); using local storage only:`,
           err,
         );
       }
@@ -91,21 +95,19 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
       if (loadEpoch !== this.remoteFlushEpoch) return;
       if (raw) {
         const parsed = JSON.parse(raw) as T;
-        if (parsed?.id === userId) {
-          this.patch({
-            [this.cfg.recordKey]: parsed,
-            isLoading: false,
-            error: null,
-          });
-          return;
-        }
+        this.patch({
+          [this.cfg.recordKey]: parsed,
+          isLoading: false,
+          error: null,
+        });
+        return;
       }
     } catch (e) {
-      console.error(`[${this.cfg.label}] Error reading local record:`, e);
+      console.error(`[${this.label}] Error reading local record:`, e);
     }
 
     if (loadEpoch !== this.remoteFlushEpoch) return;
-    const def = this.cfg.createDefault(userId);
+    const def = this.cfg.createDefault('');
     this.patch({
       [this.cfg.recordKey]: def,
       isLoading: false,
@@ -114,7 +116,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     try {
       await storage.setItem(this.cfg.storageKey, JSON.stringify(def));
     } catch (e) {
-      console.error(`[${this.cfg.label}] Error saving default record locally:`, e);
+      console.error(`[${this.label}] Error saving default record locally:`, e);
     }
   };
 
@@ -127,8 +129,9 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
     try {
       await storage.setItem(this.cfg.storageKey, JSON.stringify(merged));
+      console.info(`[${this.label}] Record saved to local storage:`, merged);
     } catch (e) {
-      console.error(`[${this.cfg.label}] Error saving record to local storage:`, e);
+      console.error(`[${this.label}] Error saving record to local storage:`, e);
     }
 
     this.scheduleRemoteFlush();
@@ -141,13 +144,13 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     try {
       await storage.removeItem(this.cfg.storageKey);
     } catch (e) {
-      console.error(`[${this.cfg.label}] Error clearing local record:`, e);
+      console.error(`[${this.label}] Error clearing local record:`, e);
     }
     this.patch({
       [this.cfg.recordKey]: null,
       error: null,
       isLoading: false,
-      [this.cfg.remoteDisabledKey]: false,
+      remoteDisabledKey: false,
     });
   };
 
@@ -156,7 +159,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     void storage.setItem(this.cfg.storageKey, JSON.stringify(record)).catch(
       (e) =>
         console.error(
-          `[${this.cfg.label}] Error persisting server record locally:`,
+          `[${this.label}] Error persisting server record locally:`,
           e,
         ),
     );
@@ -175,9 +178,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   }
 
   private getRemoteDisabled(): boolean {
-    return Boolean(
-      (this.cfg.get() as Record<string, unknown>)[this.cfg.remoteDisabledKey],
-    );
+    return Boolean((this.cfg.get() as Record<string, unknown>).remoteDisabledKey);
   }
 
   private cancelDebounce(): void {
@@ -193,7 +194,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     this.debounceTimer = setTimeout(() => {
       this.debounceTimer = null;
       void this.flushRemote();
-    }, this.cfg.debounceMs);
+    }, this.debounceMs);
   }
 
   private async flushRemote(): Promise<void> {
@@ -226,7 +227,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
               );
             } catch (e) {
               console.error(
-                `[${this.cfg.label}] Error persisting record after remote sync:`,
+                `[${this.label}] Error persisting record after remote sync:`,
                 e,
               );
             }
@@ -236,7 +237,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
           const message =
             err instanceof Error ? err.message : 'Failed to sync record';
           this.patch({ error: message });
-          console.error(`[${this.cfg.label}] Remote sync error:`, err);
+          console.error(`[${this.label}] Remote sync error:`, err);
           break;
         }
 
