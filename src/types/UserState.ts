@@ -21,6 +21,7 @@ export enum KAUCIM_CONCERNS {
 }
 
 export interface KaucimResult {
+  storyIndex: number;
   concern: KAUCIM_CONCERNS;
   stickNumber: number; 
   element: FIVE_ELEMENTS;
@@ -38,4 +39,7 @@ export interface UserState {
   id: string;
   petPower: number;
   kaucimHistory: KaucimState[];
+  lastKaucimTimestamp: number;
+  lastKaucimConcern: KAUCIM_CONCERNS | null;
+  lastKaucimResults: { [key in KAUCIM_CONCERNS]?: KaucimResult };
 }

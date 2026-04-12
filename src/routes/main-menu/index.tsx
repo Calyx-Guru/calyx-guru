@@ -8,14 +8,23 @@ import { CalendarWestern } from "@/features/calendar/western";
 import { CaucimOrb } from "@/features/caucim/orb";
 import { HealthBar } from "@/features/mascot/health-bar";
 import { StatusMessage } from "@/features/mascot/status-message";
+import { useKaucim } from "@/hooks/useKaucim";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { FIVE_ELEMENTS } from "@/types/UserState";
+import { FIVE_ELEMENTS, KAUCIM_CONCERNS } from "@/types/UserState";
+import { router } from "expo-router";
+import { useCallback } from "react";
 import { VIDEOS } from "./constants";
 
 export function RouteMainMenu() {
   const { profile } = useUserProfile();
+  const { rollKaucimResult } = useKaucim();
 
   const element = profile?.element as FIVE_ELEMENTS;
+
+  const onKaucimAction = useCallback((concern: KAUCIM_CONCERNS) => {
+    rollKaucimResult(concern);
+    router.replace("/kau-cim");
+  }, [rollKaucimResult, profile]);
 
   return (
     <View style={styles.root}>
@@ -33,7 +42,7 @@ export function RouteMainMenu() {
       />
 
       <View style={styles.bodyWrapper}>
-        <CaucimOrb />
+        <CaucimOrb onAction={onKaucimAction} />
       </View>
 
       <View style={styles.bottomWrapper}>

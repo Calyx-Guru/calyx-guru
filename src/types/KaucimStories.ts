@@ -5,11 +5,11 @@ import { KAUCIM_CONCERNS } from './UserState';
  * A story line for a specific stick number in a pack
  */
 export type KaucimStoryLineType = {  
-  stickNumber: number;
-  fortuneLevel: number;
+  stickNumber: string;
+  fortuneLevel: string;
   title: string;
   verdict: string;
-  oment: string;
+  omen: string;
   action: string;
   conclusion: string;
 }

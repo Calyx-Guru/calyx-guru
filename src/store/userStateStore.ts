@@ -23,6 +23,9 @@ function createDefaultUserState(userId: string): UserState {
     id: userId,
     petPower: 0,
     kaucimHistory: [],
+    lastKaucimTimestamp: 0,
+    lastKaucimConcern: null,
+    lastKaucimResults: {},
   };
 }
 

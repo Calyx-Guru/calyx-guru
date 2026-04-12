@@ -2,7 +2,7 @@
 
 import type { LanguageKey, MasterDataManifest } from '@/types';
 import type { FortunePoemContentType } from '@/types/FortunePoems';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 
 // Import built-in JSON files
 import { DEFAULT_LANGUAGE } from '@/constants';
@@ -109,7 +109,7 @@ export function MasterDataProvider({
     // setUpdateAvailable(hasUpdates);
   };
 
-  const getKaucimStoryBundle = (concern: KAUCIM_CONCERNS, language: LanguageKey, stickNumber: number) => {
+  const getKaucimStoryBundle = useCallback((concern: KAUCIM_CONCERNS, language: LanguageKey, stickNumber: number) => {
     const concerns = kaucimStories[concern];
     if (!concerns) {
       return [];
@@ -121,14 +121,14 @@ export function MasterDataProvider({
         return [];
       }
     }
-    const result = languages.filter(story => story.stickNumber === stickNumber);
+    const result = languages.filter(story => Number(story.stickNumber) === stickNumber);
     if (result.length === 0) {
-      const random = result[Math.floor(Math.random() * result.length)];
+      const random = languages[Math.floor(Math.random() * result.length)];
       const fallbackStickNumber = random.stickNumber;
       return languages.filter(story => story.stickNumber === fallbackStickNumber);
     }
     return result;
-  };
+  }, [kaucimStories]);
   
   useEffect(() => {
     runOnce('masterdata_initialize', () => initialize());

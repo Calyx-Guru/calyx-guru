@@ -9,23 +9,24 @@ import {
 } from "react-native";
 
 import { caucimOrb } from "@/assets/images/caucim";
+import { KAUCIM_CONCERNS } from "@/types/UserState";
 import type * as Types from "./type";
 
-const SUB_BUTTON_LABELS = [
-  "Family &\nFriends",
-  "Money",
-  "Love",
-  "Career",
-  "Health",
+const SUB_BUTTON_PROPERTIES = [
+  { label: "Family &\nFriends", action: KAUCIM_CONCERNS.FAMILY },
+  { label: "Money", action: KAUCIM_CONCERNS.WEALTH },
+  { label: "Love", action: KAUCIM_CONCERNS.LOVE },
+  { label: "Career", action: KAUCIM_CONCERNS.CAREER },
+  { label: "Health", action: KAUCIM_CONCERNS.HEALTH },
 ];
 
 export function CaucimOrb(properties: Types.Properties) {
-  const { style } = properties;
+  const { style, onAction } = properties;
 
   const orbOpacity = useRef(new Animated.Value(1)).current;
   const fanAnims = useRef<Animated.Value[]>(
     Array.from(
-      { length: SUB_BUTTON_LABELS.length },
+      { length: SUB_BUTTON_PROPERTIES.length },
       () => new Animated.Value(0),
     ),
   );
@@ -90,9 +91,9 @@ export function CaucimOrb(properties: Types.Properties) {
 
   const handleSubButtonPress = useCallback(
     (index: number) => {
-      closeMenu();
+      onAction?.(SUB_BUTTON_PROPERTIES[index].action);
     },
-    [closeMenu],
+    [properties],
   );
 
   return (
@@ -136,7 +137,7 @@ export function CaucimOrb(properties: Types.Properties) {
                 onPress={() => handleSubButtonPress(i)}
                 style={styles.subButton}
               >
-                <Text style={styles.subButtonText}>{SUB_BUTTON_LABELS[i]}</Text>
+                <Text style={styles.subButtonText}>{SUB_BUTTON_PROPERTIES[i].label}</Text>
               </Pressable>
             </Animated.View>
           );

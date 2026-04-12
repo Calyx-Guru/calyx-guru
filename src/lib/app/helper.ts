@@ -137,3 +137,7 @@ export function fetchWithTimeout(
 ): Promise<Response> {
   return runWithTimeout(() => fetch(url, options), timeout);
 }
+
+export function pickRandom<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)];
+}

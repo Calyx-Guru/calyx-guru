@@ -8,7 +8,7 @@ export type KaucimStoryLineType = {
   fortuneLevel: number;
   title: string;
   verdict: string;
-  oment: string;
+  omen: string;
   action: string;
   conclusion: string;
 }

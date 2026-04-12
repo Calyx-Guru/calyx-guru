@@ -130,7 +130,7 @@ export function KaucimStoriesPage() {
             'Level',
             'Title',
             'Verdict',
-            'Oment',
+            'Omen',
             'Action',
             'Conclusion',
           ],
@@ -174,7 +174,7 @@ export function KaucimStoriesPage() {
       item.fortuneLevel,
       item.title,
       item.verdict,
-      item.oment,
+      item.omen,
       item.action,
       item.conclusion,
     ]);
@@ -236,7 +236,7 @@ export function KaucimStoriesPage() {
       fortuneLevel: 3,
       title: '',
       verdict: '',
-      oment: '',
+      omen: '',
       action: '',
       conclusion: '',
     };
@@ -254,7 +254,7 @@ export function KaucimStoriesPage() {
       fortuneLevel: row[1] ?? 0,
       title: row[2] ?? '',
       verdict: row[3] ?? '',
-      oment: row[4] ?? '',
+      omen: row[4] ?? '',
       action: row[5] ?? '',
       conclusion: row[6] ?? '',
     }));
@@ -271,7 +271,7 @@ export function KaucimStoriesPage() {
       fortuneLevel: row[1] ?? 0,
       title: row[2] ?? '',
       verdict: row[3] ?? '',
-      oment: row[4] ?? '',
+      omen: row[4] ?? '',
       action: row[5] ?? '',
       conclusion: row[6] ?? '',
     }));
@@ -310,7 +310,6 @@ export function KaucimStoriesPage() {
 
       if (uploadError) throw uploadError;
 
-      updateManifest(updatedManifest);
     } catch (err: any) {
       setError(`Failed to save stories: ${err.message}`);
     } finally {

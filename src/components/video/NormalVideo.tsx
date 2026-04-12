@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { StyleSheet } from "react-native";
 
 interface Properties {
-  url: string;
+  url: string | number;
   loop?: boolean;
   muted?: boolean;
   contentFit?: "cover" | "contain" | "fill";
