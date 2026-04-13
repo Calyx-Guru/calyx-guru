@@ -17,7 +17,8 @@
     "admin:dev": "cd admin && vite",
     "admin:build": "cd admin && tsc -b && vite build",
     "admin:lint": "cd admin && eslint .",
-    "admin:preview": "cd admin && vite preview"
+    "admin:preview": "cd admin && vite preview",
+    "optimize:images": "tsx tools/OptimizeImages.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
@@ -90,6 +91,7 @@
     "globals": "^16.5.0",
     "sharp": "^0.34.5",
     "supabase": "^2.75.0",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",

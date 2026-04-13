@@ -1,8 +1,8 @@
-import { default as verdictExcellent1 } from "./verdict-5-1.png";
+import { default as verdictExcellent1 } from "./verdict-5-1.jpg";
 
-import { default as concludeExcellent1 } from "./conclude-5-1.png";
+import { default as concludeExcellent1 } from "./conclude-5-1.jpg";
 
-import { default as action1 } from "./action-1.png";
+import { default as action1 } from "./action-1.jpg";
 
 export const LOVE_VERDICTS = [
   [], // 0
