@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Animated,
+  Image,
   ImageBackground,
   Pressable,
   StyleSheet,
@@ -8,16 +9,24 @@ import {
   View,
 } from "react-native";
 
-import { kaucimOrb } from "@/assets/images/kau-cim";
+import {
+  career,
+  familyFriend,
+  health,
+  kaucimOrb,
+  love,
+  wealth,
+} from "@/assets/images/kau-cim";
+
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import type * as Types from "./type";
 
 const SUB_BUTTON_PROPERTIES = [
-  { label: "Family &\nFriends", action: KAUCIM_CONCERNS.FAMILY },
-  { label: "Money", action: KAUCIM_CONCERNS.WEALTH },
-  { label: "Love", action: KAUCIM_CONCERNS.LOVE },
-  { label: "Career", action: KAUCIM_CONCERNS.CAREER },
-  { label: "Health", action: KAUCIM_CONCERNS.HEALTH },
+  { image: familyFriend, action: KAUCIM_CONCERNS.FAMILY },
+  { image: wealth, action: KAUCIM_CONCERNS.WEALTH },
+  { image: love, action: KAUCIM_CONCERNS.LOVE },
+  { image: career, action: KAUCIM_CONCERNS.CAREER },
+  { image: health, action: KAUCIM_CONCERNS.HEALTH },
 ];
 
 export function KaucimOrb(properties: Types.Properties) {
@@ -133,13 +142,11 @@ export function KaucimOrb(properties: Types.Properties) {
                 },
               ]}
             >
-              <Pressable
-                onPress={() => handleSubButtonPress(i)}
-                style={styles.subButton}
-              >
-                <Text style={styles.subButtonText}>
-                  {SUB_BUTTON_PROPERTIES[i].label}
-                </Text>
+              <Pressable onPress={() => handleSubButtonPress(i)}>
+                <Image
+                  style={styles.subButton}
+                  source={SUB_BUTTON_PROPERTIES[i].image}
+                />
               </Pressable>
             </Animated.View>
           );
@@ -191,26 +198,11 @@ const styles = StyleSheet.create({
     top: "20%",
     left: "50%",
     marginLeft: -28,
-    marginTop: -28,
+    marginTop: -20,
   },
   subButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#6C5CE7",
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  subButtonText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#fff",
-    textAlign: "center",
+    width: 80,
+    height: 80,
   },
   closeWrapper: {
     position: "absolute",
