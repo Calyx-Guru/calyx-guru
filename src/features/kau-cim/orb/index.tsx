@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 
-import { caucimOrb } from "@/assets/images/caucim";
+import { kaucimOrb } from "@/assets/images/kau-cim";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import type * as Types from "./type";
 
@@ -20,7 +20,7 @@ const SUB_BUTTON_PROPERTIES = [
   { label: "Health", action: KAUCIM_CONCERNS.HEALTH },
 ];
 
-export function CaucimOrb(properties: Types.Properties) {
+export function KaucimOrb(properties: Types.Properties) {
   const { style, onAction } = properties;
 
   const orbOpacity = useRef(new Animated.Value(1)).current;
@@ -137,7 +137,9 @@ export function CaucimOrb(properties: Types.Properties) {
                 onPress={() => handleSubButtonPress(i)}
                 style={styles.subButton}
               >
-                <Text style={styles.subButtonText}>{SUB_BUTTON_PROPERTIES[i].label}</Text>
+                <Text style={styles.subButtonText}>
+                  {SUB_BUTTON_PROPERTIES[i].label}
+                </Text>
               </Pressable>
             </Animated.View>
           );
@@ -149,7 +151,7 @@ export function CaucimOrb(properties: Types.Properties) {
           style={styles.orbContainer}
         >
           <ImageBackground
-            source={caucimOrb}
+            source={kaucimOrb}
             style={styles.orbWrapper}
             resizeMode="cover"
           />

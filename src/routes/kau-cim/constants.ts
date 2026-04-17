@@ -1,6 +1,13 @@
-import { LOVE_ACTIONS, LOVE_CONCLUDES, LOVE_VERDICTS } from "@/assets/images/stories/love";
+import * as LOVE from "@/assets/images/stories/love";
 import * as KAUCIM from "@/assets/videos/kau-cim";
+
 import { KAUCIM_CONCERNS } from "@/types/UserState";
+
+interface Illustration {
+  verdict: ImageModule[][];
+  action: ImageModule[][];
+  conclude: ImageModule[][];
+}
 
 export const VIDEOS = {
   opening: {
@@ -10,10 +17,12 @@ export const VIDEOS = {
   },
 };
 
-export const ILLUSTRATIONS: { [key in KAUCIM_CONCERNS]?: { verdict: ImageModule[][]; action: ImageModule[][]; conclude: ImageModule[][] } } = {
+export const ILLUSTRATIONS: Partial<
+  Record<Lowercase<keyof typeof KAUCIM_CONCERNS>, Illustration>
+> = {
   love: {
-    verdict: LOVE_VERDICTS,
-    action: LOVE_ACTIONS,
-    conclude: LOVE_CONCLUDES,
-  }
-}
+    verdict: LOVE.VERDICTS,
+    action: LOVE.ACTIONS,
+    conclude: LOVE.CONCLUDES,
+  },
+};

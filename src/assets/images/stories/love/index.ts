@@ -4,7 +4,7 @@ import { default as concludeExcellent1 } from "./conclude-5-1.jpg";
 
 import { default as action1 } from "./action-1.jpg";
 
-export const LOVE_VERDICTS = [
+export const VERDICTS = [
   [], // 0
   [verdictExcellent1], // 1 - Very bad
   [verdictExcellent1], // 2 - Bad
@@ -13,12 +13,12 @@ export const LOVE_VERDICTS = [
   [verdictExcellent1], // 5 - Excellent
 ];
 
-export const LOVE_ACTIONS = [
+export const ACTIONS = [
   [], // 0
   [action1], // 1
 ];
 
-export const LOVE_CONCLUDES = [
+export const CONCLUDES = [
   [], // 0
   [concludeExcellent1], // 1 - Very bad
   [concludeExcellent1], // 2 - Bad

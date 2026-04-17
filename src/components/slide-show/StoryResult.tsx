@@ -1,0 +1,142 @@
+import {
+  Image,
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+import { framePrimary } from "@/assets/images/typography";
+import { formatPowerChangeLine } from "@/features/kau-cim/story-experience/constants";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+interface Properties {
+  summary: Kaucim.Summary;
+  onDismiss: () => void;
+}
+
+export function StoryResult(properties: Properties) {
+  const { summary } = properties;
+
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Pressable
+      style={[styles.root]}
+      onPress={properties.onDismiss}
+      accessibilityRole="button"
+      accessibilityLabel="Dismiss result and continue"
+    >
+      <Image
+        source={summary.image}
+        style={styles.slideImage}
+        resizeMode="cover"
+        accessibilityIgnoresInvertColors
+      />
+
+      <View style={styles.resultOverlayRoot} />
+
+      <Pressable
+        onPress={properties.onDismiss}
+        style={[styles.resultFrameTouchable, { ...insets, top: "auto" }]}
+      >
+        <ImageBackground
+          source={framePrimary}
+          style={[styles.resultFrame]}
+          resizeMode="stretch"
+        >
+          <View style={styles.resultFrameInner}>
+            <Text style={styles.resultTitle} numberOfLines={3}>
+              {summary.title}
+            </Text>
+            <View style={styles.resultLastSlideBody}>
+              <Text style={styles.resultLastSlideText}>
+                {summary.description}
+              </Text>
+            </View>
+            <Text style={styles.resultPowerLine}>
+              {formatPowerChangeLine(summary.powerChange)}
+            </Text>
+            <Text style={styles.resultHint}>Tap to continue</Text>
+          </View>
+        </ImageBackground>
+      </Pressable>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  slideImage: {
+    width: "100%",
+    height: "100%",
+  },
+  resultOverlayRoot: {
+    position: "absolute",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  resultFrameTouchable: {
+    position: "absolute",
+  },
+  resultFrame: {
+    maxWidth: "100%",
+    overflow: "hidden",
+  },
+  resultFrameInner: {
+    justifyContent: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: 28,
+    paddingTop: 24,
+    paddingBottom: 20,
+    width: "100%",
+  },
+  resultLastSlideBody: {
+    width: "100%",
+    marginBottom: 10,
+    paddingVertical: 4,
+  },
+  resultLastSlideText: {
+    color: "rgba(255,255,255,0.92)",
+    fontSize: 14,
+    lineHeight: 22,
+    fontWeight: "500",
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.35)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
+  resultTitle: {
+    color: "#ffffff",
+    fontSize: 17,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 10,
+    textShadowColor: "rgba(0,0,0,0.42)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 11,
+  },
+  resultPowerLine: {
+    color: "#f3f3f3",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: 14,
+    textShadowColor: "rgba(0,0,0,0.38)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
+  },
+  resultHint: {
+    marginBottom: 8,
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.28)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
+  },
+});
