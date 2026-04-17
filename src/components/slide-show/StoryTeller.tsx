@@ -4,8 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Animated,
   Easing,
-  Image,
-  LayoutAnimation,
   Pressable,
   StyleSheet,
   Text,
@@ -20,12 +18,12 @@ import {
   splitForReadableLines,
 } from "@/features/kau-cim/story-experience/constants";
 
+import { CrossfadeImage } from "@/components/image/CrossfadeImage";
 import { CaptionText } from "@/components/typography/CaptionText";
 
 const SENTENCE_LINE_PROMOTE_MS = 440;
 const FLY_UP_PX = 28;
 
-const CROSSFADE_MS = 480;
 const TEXT_FADE_IN_MS = 420;
 const CAPTION_LINE_PUSH_IN_MS = 320;
 
@@ -45,7 +43,6 @@ export function StoryTeller(properties: Properties) {
   const insets = useSafeAreaInsets();
   const windows = useWindowDimensions();
 
-  const incomingOpacity = useRef(new Animated.Value(0)).current;
   const lineOutgoingOpacity = useRef(new Animated.Value(1)).current;
   const lineOutgoingY = useRef(new Animated.Value(0)).current;
   const linePromoteY = useRef(new Animated.Value(0)).current;
@@ -86,14 +83,6 @@ export function StoryTeller(properties: Properties) {
       ? (currentSlide.sentences[sentenceIndex - 1] ?? "")
       : "";
 
-  const [displayedSource, setDisplayedSource] = useState<ImageModule>(
-    () => slidesData[0]!.image,
-  );
-
-  const [incomingSource, setIncomingSource] = useState<ImageModule | null>(
-    null,
-  );
-
   const advance = useCallback(() => {
     if (crossfading || sentence != null) {
       return;
@@ -127,37 +116,14 @@ export function StoryTeller(properties: Properties) {
     }
 
     const nextIndex = slideIndex + 1;
-    const nextImage = slidesData[nextIndex]?.image;
-
-    if (!nextImage) {
+    if (!slidesData[nextIndex]?.image) {
       return;
     }
 
     setCrossfading(true);
-    setIncomingSource(nextImage);
-    incomingOpacity.setValue(0);
-
-    Animated.timing(incomingOpacity, {
-      toValue: 1,
-      duration: CROSSFADE_MS,
-      useNativeDriver: true,
-    }).start(() => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setDisplayedSource(nextImage);
-      setIncomingSource(null);
-      incomingOpacity.setValue(0);
-      setSlideIndex(nextIndex);
-      setSentenceIndex(0);
-      setCrossfading(false);
-    });
-  }, [
-    crossfading,
-    slidesData,
-    slideIndex,
-    sentenceIndex,
-    incomingOpacity,
-    sentence,
-  ]);
+    setSlideIndex(nextIndex);
+    setSentenceIndex(0);
+  }, [crossfading, slidesData, slideIndex, sentenceIndex, sentence]);
 
   useEffect(() => {
     setSentence(null);
@@ -291,26 +257,13 @@ export function StoryTeller(properties: Properties) {
       disabled={sentence != null}
     >
       <View style={styles.slideshowInner}>
-        <View style={styles.imageStack}>
-          <Image
-            source={displayedSource}
-            style={styles.slideImage}
-            resizeMode="cover"
-            accessibilityIgnoresInvertColors
-          />
-          {incomingSource && (
-            <Animated.View
-              style={[styles.incomingImageWrap, { opacity: incomingOpacity }]}
-            >
-              <Image
-                source={incomingSource}
-                style={styles.slideImage}
-                resizeMode="cover"
-                accessibilityIgnoresInvertColors
-              />
-            </Animated.View>
-          )}
-        </View>
+        <CrossfadeImage
+          source={currentSlide?.image ?? slidesData[0]?.image}
+          onTransitionEnd={() => setCrossfading(false)}
+          style={styles.imageStack}
+          resizeMode="cover"
+          accessibilityIgnoresInvertColors
+        />
       </View>
 
       <View
@@ -404,15 +357,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000000",
   },
-  slideImage: {
-    width: "100%",
-    height: "100%",
-  },
   imageStack: {
+    flex: 1,
     backgroundColor: "#000000",
-  },
-  incomingImageWrap: {
-    //
   },
   textOverlay: {
     position: "absolute",
