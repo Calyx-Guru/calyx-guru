@@ -20,8 +20,17 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 
 const PAGE_STATE_PREFIX = 'kaucimStories';
 
+/** Title column (0-based index 2): paste text always starts here and wraps along the row. */
+const PASTE_TEXT_START_COL = 2;
+
 function makeFilePath(concern: KAUCIM_CONCERNS, language: LanguageKey, version: number) {
   return `${KAUCIM_STORIES_STORAGE_FOLDER}/${concern}-${language}-${version}.json`;
+}
+
+/** Clipboard text → non-empty lines (newline split, empty lines removed). */
+function clipboardNonEmptyLines(text: string): string[] {
+  const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return normalized.split('\n').filter((line) => line.trim().length > 0);
 }
 
 const KAUCIM_STORIES_DEFAULT_COLUMN_WIDTHS = [
@@ -147,6 +156,73 @@ export function KaucimStoriesPage() {
           },
           afterChange: handleTableChange,
           afterRemoveRow: handleTableRemoveRow,
+          contextMenu: {
+            items: {
+              paste_content: {
+                name: 'Paste content',
+                disabled: () => !hotInstanceRef.current?.getSelectedLast?.(),
+                callback: () => {
+                  const hot = hotInstanceRef.current;
+                  if (!hot) return;
+                  const selected = hot.getSelectedLast();
+                  if (selected == null) return;
+
+                  const [r1, , r2] = selected;
+                  const startRow = Math.min(r1, r2);
+
+                  void navigator.clipboard
+                    .readText()
+                    .then((text) => {
+                      const parts = clipboardNonEmptyLines(text);
+                      const numCols = hot.countCols?.() ?? 0;
+                      const cellsPerRow = numCols - PASTE_TEXT_START_COL;
+
+                      if (parts.length === 0 || cellsPerRow <= 0) {
+                        handleTableChange(null, 'paste_content');
+                        return;
+                      }
+
+                      const lastRowIndex =
+                        startRow + Math.floor((parts.length - 1) / cellsPerRow);
+                      const rowsNeeded = lastRowIndex + 1;
+                      const currentRows = hot.countRows();
+                      const insertCount = Math.max(0, rowsNeeded - currentRows);
+
+                      if (insertCount > 0) {
+                        if (currentRows > 0) {
+                          hot.alter(
+                            'insert_row_below',
+                            currentRows - 1,
+                            insertCount,
+                            'paste_content',
+                          );
+                        } else {
+                          hot.alter('insert_row_above', 0, insertCount, 'paste_content');
+                        }
+                      }
+
+                      const changes: [number, number, string][] = [];
+                      for (let i = 0; i < parts.length; i++) {
+                        const row = startRow + Math.floor(i / cellsPerRow);
+                        const col = PASTE_TEXT_START_COL + (i % cellsPerRow);
+                        changes.push([row, col, parts[i]]);
+                      }
+                      hot.setDataAtCell(changes, 'paste_content');
+                      handleTableChange(null, 'paste_content');
+                    })
+                    .catch((err) => {
+                      console.error('Clipboard read failed:', err);
+                    });
+                },
+              },
+              hsep1: '---------',
+              ...(typeof DEFAULT_HANDSON_TABLE_OPTIONS.contextMenu === 'object' &&
+              DEFAULT_HANDSON_TABLE_OPTIONS.contextMenu !== null &&
+              'items' in DEFAULT_HANDSON_TABLE_OPTIONS.contextMenu
+                ? DEFAULT_HANDSON_TABLE_OPTIONS.contextMenu.items
+                : {}),
+            },
+          },
         });
 
         hotInstanceRef.current = instance;
