@@ -16,6 +16,10 @@ export function setDebugTimeOffset(offset: number) {
   debugTimeOffset = offset;
 }
 
+export function getDebugTimeOffset(): number {
+  return debugTimeOffset;
+}
+
 export function createDate(date: number = Date.now()): Date {
   return new Date(date + debugTimeOffset);
 }

@@ -1,8 +1,9 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { NormalVideo } from "@/components/video/NormalVideo";
 import { TransparentVideo } from "@/components/video/TransparentVideo";
 
+import { ENV } from "@/constants";
 import { CalendarEastern } from "@/features/calendar/eastern";
 import { CalendarWestern } from "@/features/calendar/western";
 import { KaucimOrb } from "@/features/kau-cim/orb";
@@ -11,11 +12,13 @@ import { StatusMessage } from "@/features/mascot/status-message";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { FIVE_ELEMENTS, KAUCIM_CONCERNS } from "@/types/UserState";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { useCallback } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VIDEOS } from "./constants";
 
 export function RouteMainMenu() {
+  const insets = useSafeAreaInsets();
   const { profile } = useUserProfile();
   const { rollKaucimResult } = useKaucim();
 
@@ -52,6 +55,21 @@ export function RouteMainMenu() {
         <CalendarEastern />
         <CalendarWestern />
       </View>
+
+      {ENV.DEBUG_MODE && <Pressable
+        style={[
+          styles.debugButton,
+          {
+            top: insets.top + 8,
+            left: Math.max(insets.left, 10),
+          },
+        ]}
+        onPress={() => router.push("/debug" as Href)}
+        accessibilityRole="button"
+        accessibilityLabel="Open debug screen"
+      >
+        <Text style={styles.debugButtonLabel}>Debug</Text>
+      </Pressable>}
     </View>
   );
 }
@@ -87,5 +105,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
+  },
+  debugButton: {
+    position: "absolute",
+    zIndex: 50,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    minHeight: 40,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 8,
+  },
+  debugButtonLabel: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "600",
   },
 });

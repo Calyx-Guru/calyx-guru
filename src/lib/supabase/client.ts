@@ -1,10 +1,11 @@
+import { ENV } from '@/constants';
 import { USE_MOCK_DATA } from '@/constants/common';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { storage } from '@/lib/storage';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import createMockSupabaseClient from './mockClient';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = ENV.SUPABASE_URL;
+const supabaseAnonKey = ENV.SUPABASE_ANON_KEY;
 
 // Skip credential validation when using mock data
 if (!USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
