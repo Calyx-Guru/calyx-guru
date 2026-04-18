@@ -1,3 +1,4 @@
+import { timeHash, timeHashRandom } from "@/lib/app/time";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -20,7 +21,7 @@ export function CrossfadeImage({
   style,
   ...rest
 }: CrossfadeImageProps) {
-  const [sources, setSources] = useState([{ key: String(Date.now()), source }]);
+  const [sources, setSources] = useState([{ key: timeHash(), source }]);
   const currentSource = sources[sources.length - 1].source;
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -29,7 +30,7 @@ export function CrossfadeImage({
     if (source !== currentSource) {
       fadeAnim.setValue(0);
       setSources((prev) => {
-        const newKey = String(Date.now() + Math.random());
+        const newKey = timeHashRandom();
         return [...prev, { key: newKey, source }].slice(-2);
       });
 

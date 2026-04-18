@@ -1,6 +1,7 @@
 import { useAppAppearance } from '@/contexts/AppAppearanceContext';
 import { getDeviceIdAsync } from '@/lib/app/helper';
 import { getRandomInt } from '@/lib/app/rng';
+import { createDate } from '@/lib/app/time';
 import { FIVE_ELEMENTS, KAUCIM_CONCERNS, KaucimResult } from '@/types/UserState';
 import { useCallback, useEffect, useState } from 'react';
 import { useMasterData } from './useMasterData';
@@ -53,7 +54,7 @@ export function useKaucim() {
   const { profile } = useUserProfile();
 
   const getPowerChange = useCallback((fortuneLevel: number, rngSeed: number) => {
-    const num = getRandomInt(deviceId, rngSeed, new Date(), 0, 100);  
+    const num = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);  
     switch (fortuneLevel) {
       case 1:
         return -(10 + Math.ceil(15 * num / 100));
@@ -73,7 +74,7 @@ export function useKaucim() {
   const rollKaucimResult = useCallback((concern: KAUCIM_CONCERNS) => {
     let result: KaucimResult | undefined;
     if (userState) {
-      const todayFirstTimestamp = new Date().setHours(0, 0, 0, 0);
+      const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
       if (userState.lastKaucimTimestamp >= todayFirstTimestamp) {
         result = userState.lastKaucimResults[concern];
         if (result && result.powerChange > 0) {
@@ -84,8 +85,8 @@ export function useKaucim() {
 
     const concernIndex = KAUCIM_CONCERNS_META[concern].index;
     const rngIndex = KAUCIM_RNG_INDEX + concernIndex * 10;
-    const stickNumber = getRandomInt(deviceId, rngIndex, new Date(), 0, 100);
-    const storyIndex = getRandomInt(deviceId, rngIndex + 1, new Date(), 0, 100);
+    const stickNumber = getRandomInt(deviceId, rngIndex, createDate(), 0, 100);
+    const storyIndex = getRandomInt(deviceId, rngIndex + 1, createDate(), 0, 100);
     const storyBundle = getKaucimStoryBundle(concern, locale, stickNumber);
     const story = storyBundle[storyIndex % storyBundle.length];
     const powerChange = getPowerChange(Number(story.fortuneLevel), rngIndex + 2);
@@ -97,13 +98,13 @@ export function useKaucim() {
       storyIndex,
       element: profile?.element || FIVE_ELEMENTS.EARTH,
       currentPower: userState?.petPower || 0,      
-      timestamp: Date.now(),
+      timestamp: createDate().getTime(),
     };
 
     if (userState) {
       let lastKaucimTimestamp = userState.lastKaucimTimestamp || 0;
       let lastKaucimResults = userState.lastKaucimResults || {};
-      const todayFirstTimestamp = new Date().setHours(0, 0, 0, 0);
+      const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
       if (userState.lastKaucimTimestamp < todayFirstTimestamp) {
         lastKaucimTimestamp = todayFirstTimestamp;
         lastKaucimResults = {};

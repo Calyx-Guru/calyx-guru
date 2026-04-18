@@ -1,9 +1,10 @@
 import { calendarBook } from "@/assets/images/calendars";
+import { createDate } from "@/lib/app/time";
 import { ImageBackground, StyleSheet, Text } from "react-native";
 import type * as Types from "./type";
 
 export function CalendarWestern(properties: Types.Properties) {
-  const { date = new Date(), width = 60 } = properties;
+  const { date = createDate(), width = 60 } = properties;
 
   const year = date.getFullYear();
   const monthName = date.toLocaleDateString("en", { month: "short" });

@@ -14,6 +14,7 @@ import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
 import { FramePrimary2 } from "@/components/typography/FramePrimary2";
 import { HeadingPrimary } from "@/components/typography/HeadingPrimary";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { createDate } from "@/lib/app/time";
 import { FIVE_ELEMENTS } from "@/types/UserState";
 import { ChooseElementBackgroundVideo } from "./ChooseElementBackgroundVideo";
 import * as Types from "./type";
@@ -48,7 +49,7 @@ export function RouteChooseElement(properties: Types.Properties) {
   }
 
   function getRandomElement() : ElementName {
-    const todayElement = getElementByBirthDate(new Date());
+    const todayElement = getElementByBirthDate(createDate());
     return todayElement;
   }
 
@@ -91,11 +92,11 @@ export function RouteChooseElement(properties: Types.Properties) {
 
       {showDatePicker && (
         <DateTimePicker
-          value={new Date()}
+          value={createDate()}
           mode="date"
           display="default"
           onChange={onDateChange}
-          maximumDate={new Date()}
+          maximumDate={createDate()}
         />
       )}
     </View>

@@ -3,10 +3,11 @@ import { ImageBackground, StyleSheet, Text, View } from "react-native";
 
 import { calendarBook, calendarNote } from "@/assets/images/calendars";
 
+import { createDate } from "@/lib/app/time";
 import type * as Types from "./type";
 
 export function CalendarEastern(properties: Types.Properties) {
-  const { date = new Date(), width = 60 } = properties;
+  const { date = createDate(), width = 60 } = properties;
 
   return (
     <View style={styles.root}>

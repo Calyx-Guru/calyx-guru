@@ -1,3 +1,4 @@
+import { createDate } from '@/lib/app/time';
 import { storage } from '@/lib/storage';
 
 export type FortuneTellingHistoryEntry = {
@@ -28,9 +29,10 @@ export async function addFortuneTellingHistoryEntry(
       ? JSON.parse(existingRaw)
       : [];
 
+    const today = createDate();
     const newEntry: FortuneTellingHistoryEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      toldAt: new Date().toISOString(),
+      id: `${today.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+      toldAt: today.toISOString(),
       ...entry,
     };
 
@@ -52,7 +54,8 @@ export async function getTodayFortuneTellingHistoryEntries() {
     const allEntries: FortuneTellingHistoryEntry[] = existingRaw
       ? JSON.parse(existingRaw)
       : [];
-    const now = new Date();
+      
+    const today = createDate();
 
     return allEntries.filter((entry) => {
       const toldAtDate = new Date(entry.toldAt);
@@ -60,7 +63,7 @@ export async function getTodayFortuneTellingHistoryEntries() {
         return false;
       }
 
-      return isSameLocalDay(toldAtDate, now);
+      return isSameLocalDay(toldAtDate, today);
     });
   } catch (error) {
     console.error('Failed to load fortune telling history:', error);
