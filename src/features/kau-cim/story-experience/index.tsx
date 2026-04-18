@@ -19,8 +19,12 @@ import {
   expandPlaceholders,
   FLASH_BEFORE_END_SEC,
   prefetchImageModule,
+  VERDICT_SUBTITLE_FADE_DURATION_MS,
+  VERDICT_SUBTITLE_FADE_IN_AFTER_SEC,
+  VERDICT_SUBTITLE_FADE_OUT_BEFORE_END_SEC,
 } from "./constants";
 
+import { CaptionText } from "@/components/typography/CaptionText";
 import type * as Types from "./type";
 
 if (
@@ -31,7 +35,7 @@ if (
 }
 
 export function KaucimStoryExperience(properties: Types.Properties) {
-  const { video, slides, summary, onResultDismiss } = properties;
+  const { video, verdict, slides, summary, onResultDismiss } = properties;
 
   const insets = useSafeAreaInsets();
 
@@ -41,6 +45,10 @@ export function KaucimStoryExperience(properties: Types.Properties) {
   const pendingAfterPreload = useRef(false);
   const startedFlash = useRef(false);
   const endFlashOpacity = useRef(new Animated.Value(0)).current;
+
+  const verdictOpacity = useRef(new Animated.Value(0)).current;
+  const verdictFadeInStarted = useRef(false);
+  const verdictFadeOutStarted = useRef(false);
 
   const lastSlide = useMemo(() => {
     if (slides.length === 0) {
@@ -64,27 +72,54 @@ export function KaucimStoryExperience(properties: Types.Properties) {
   }, [imagesReady]);
 
   function onTimeUpdate(currentTime: number, duration: number) {
-    if (startedFlash.current) {
-      return;
-    }
-
     if (!(duration > 0)) {
       return;
     }
 
     const remaining = duration - currentTime;
 
-    if (remaining > FLASH_BEFORE_END_SEC || remaining <= 0) {
-      return;
+    if (
+      !startedFlash.current &&
+      remaining <= FLASH_BEFORE_END_SEC &&
+      remaining > 0
+    ) {
+      startedFlash.current = true;
+      endFlashOpacity.setValue(0);
+      Animated.timing(endFlashOpacity, {
+        toValue: 1,
+        duration: Math.max(remaining * 1000, 80),
+        useNativeDriver: true,
+      }).start();
     }
 
-    startedFlash.current = true;
-    endFlashOpacity.setValue(0);
-    Animated.timing(endFlashOpacity, {
-      toValue: 1,
-      duration: Math.max(remaining * 1000, 80),
-      useNativeDriver: true,
-    }).start();
+    if (remaining <= VERDICT_SUBTITLE_FADE_OUT_BEFORE_END_SEC) {
+      if (!verdictFadeOutStarted.current) {
+        verdictFadeOutStarted.current = true;
+        verdictOpacity.stopAnimation();
+        const fadeMs = Math.max(
+          100,
+          Math.min(
+            VERDICT_SUBTITLE_FADE_DURATION_MS,
+            Math.max(0, remaining) * 1000,
+          ),
+        );
+        Animated.timing(verdictOpacity, {
+          toValue: 0,
+          duration: fadeMs,
+          useNativeDriver: true,
+        }).start();
+      }
+    } else if (currentTime >= VERDICT_SUBTITLE_FADE_IN_AFTER_SEC) {
+      if (!verdictFadeInStarted.current && !verdictFadeOutStarted.current) {
+        verdictFadeInStarted.current = true;
+        verdictOpacity.stopAnimation();
+        Animated.timing(verdictOpacity, {
+          toValue: 1,
+          duration: VERDICT_SUBTITLE_FADE_DURATION_MS,
+          useNativeDriver: true,
+        }).start();
+      }
+    }
   }
 
   useEffect(() => {
@@ -113,6 +148,16 @@ export function KaucimStoryExperience(properties: Types.Properties) {
     setPhase("slideshow");
   }, [imagesReady]);
 
+  useEffect(() => {
+    if (phase !== "video") {
+      return;
+    }
+
+    verdictFadeInStarted.current = false;
+    verdictFadeOutStarted.current = false;
+    verdictOpacity.setValue(0);
+  }, [phase, video, verdictOpacity]);
+
   return (
     <View style={styles.root}>
       {phase === "video" && (
@@ -130,6 +175,18 @@ export function KaucimStoryExperience(properties: Types.Properties) {
             pointerEvents="none"
             style={[styles.flashOverlay, { opacity: endFlashOpacity }]}
           />
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.verdictSubtitleWrap,
+              {
+                opacity: verdictOpacity,
+                paddingBottom: Math.max(insets.bottom, 12) + 12,
+              },
+            ]}
+          >
+            <CaptionText fontSize={16}>{verdict}</CaptionText>
+          </Animated.View>
         </View>
       )}
       {phase === "slideshow" && imagesReady && (
@@ -176,6 +233,31 @@ const styles = StyleSheet.create({
   flashOverlay: {
     ...StyleSheet.absoluteFill,
     backgroundColor: "#ffffff",
+  },
+  verdictSubtitleWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    alignItems: "center",
+  },
+  verdictSubtitlePill: {
+    maxWidth: "100%",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: "rgba(0,0,0,0.62)",
+  },
+  verdictSubtitleText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: 22,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
   skipButton: {
     position: "absolute",

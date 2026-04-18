@@ -4,13 +4,9 @@ import { default as concludeExcellent1 } from "./conclude-5-1.jpg";
 
 import { default as action1 } from "./action-1.jpg";
 
-export const VERDICTS = [
+export const OMENS = [
   [], // 0
-  [verdictExcellent1], // 1 - Very bad
-  [verdictExcellent1], // 2 - Bad
-  [verdictExcellent1], // 3 - Neutral
-  [verdictExcellent1], // 4 - Good
-  [verdictExcellent1], // 5 - Excellent
+  [verdictExcellent1], // 1
 ];
 
 export const ACTIONS = [
@@ -20,9 +16,5 @@ export const ACTIONS = [
 
 export const CONCLUDES = [
   [], // 0
-  [concludeExcellent1], // 1 - Very bad
-  [concludeExcellent1], // 2 - Bad
-  [concludeExcellent1], // 3 - Neutral
-  [concludeExcellent1], // 4 - Good
-  [concludeExcellent1], // 5 - Excellent
+  [concludeExcellent1], // 1
 ];

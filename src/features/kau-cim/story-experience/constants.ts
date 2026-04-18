@@ -2,6 +2,14 @@ import { Image } from "react-native";
 
 export const FLASH_BEFORE_END_SEC = 0.38;
 
+/** Verdict subtitle: fade in after playback passes this mark (seconds). */
+export const VERDICT_SUBTITLE_FADE_IN_AFTER_SEC = 0.2;
+
+/** Verdict subtitle: begin fading out when this many seconds remain. */
+export const VERDICT_SUBTITLE_FADE_OUT_BEFORE_END_SEC = 0.2;
+
+export const VERDICT_SUBTITLE_FADE_DURATION_MS = 480;
+
 /** Pause before auto-advancing; scales with sentence length. */
 const READ_DELAY_BASE_MS = 550;
 const READ_MS_PER_CHAR = 38;

@@ -4,7 +4,7 @@ import * as KAUCIM from "@/assets/videos/kau-cim";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 
 interface Illustration {
-  verdict: ImageModule[][];
+  omen: ImageModule[][];
   action: ImageModule[][];
   conclude: ImageModule[][];
 }
@@ -21,7 +21,7 @@ export const ILLUSTRATIONS: Partial<
   Record<Lowercase<keyof typeof KAUCIM_CONCERNS>, Illustration>
 > = {
   love: {
-    verdict: LOVE.VERDICTS,
+    omen: LOVE.OMENS,
     action: LOVE.ACTIONS,
     conclude: LOVE.CONCLUDES,
   },

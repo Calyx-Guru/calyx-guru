@@ -48,19 +48,19 @@ export function RouteKaucim() {
     }
 
     const verdictIllustration = pickRandom(
-      illustrations.verdict[fortuneLevel % illustrations.verdict.length],
+      illustrations.omen[stickNumber % illustrations.omen.length],
     );
     const actionIllustration = pickRandom(
       illustrations.action[stickNumber % illustrations.action.length],
     );
     const concludeIllustration = pickRandom(
-      illustrations.conclude[fortuneLevel % illustrations.conclude.length],
+      illustrations.conclude[stickNumber % illustrations.conclude.length],
     );
 
     return [
       {
         image: verdictIllustration,
-        text: [story.verdict, story.omen].filter(Boolean).join(" "),
+        text: story.omen,
       },
       {
         image: actionIllustration,
@@ -102,6 +102,7 @@ export function RouteKaucim() {
     <View style={styles.root}>
       <KaucimStoryExperience
         video={video}
+        verdict={story.verdict}
         slides={slideShow}
         summary={{
           title: story.title,
