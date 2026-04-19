@@ -55,9 +55,9 @@ export function StoryResult(properties: Properties) {
                 {summary.description}
               </Text>
             </View>
-            <Text style={styles.resultPowerLine}>
+            {summary.powerChange > 0 && <Text style={styles.resultPowerLine}>
               {formatPowerChangeLine(summary.powerChange)}
-            </Text>
+            </Text>}
             <Text style={styles.resultHint}>Tap to continue</Text>
           </View>
         </ImageBackground>

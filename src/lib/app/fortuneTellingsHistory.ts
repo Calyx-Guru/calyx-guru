@@ -3,7 +3,7 @@ import { storage } from '@/lib/storage';
 
 export type FortuneTellingHistoryEntry = {
   id: string;
-  interest: string;
+  concern: string;
   resultText: string;
   toldAt: string;
 };

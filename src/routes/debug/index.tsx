@@ -1,3 +1,4 @@
+import { useAppState } from "@/hooks/useAppState";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import {
@@ -48,6 +49,7 @@ function formatOffsetHuman(ms: number): string {
 
 export function RouteDebug() {
   const insets = useSafeAreaInsets();
+  const { resetAppState } = useAppState();
   const { profile, updateProfile } = useUserProfile();
   const { userState, updateUserState } = useUserState();
   const [offsetMs, setOffsetMs] = useState(getDebugTimeOffset);
@@ -68,14 +70,12 @@ export function RouteDebug() {
       await updateUserState({
         petPower: 0,
         kaucimHistory: [],
-        lastKaucimTimestamp: 0,
-        lastKaucimConcern: null,
-        lastKaucimResults: {},
       });
     }
+    resetAppState();
 
     router.replace("/");
-  }, [profile, userState, updateProfile, updateUserState]);
+  }, [profile, resetAppState, updateProfile, updateUserState, userState]);
 
   const sampleNow = createDate();
 

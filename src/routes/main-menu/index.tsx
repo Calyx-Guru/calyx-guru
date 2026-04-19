@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { NormalVideo } from "@/components/video/NormalVideo";
 import { TransparentVideo } from "@/components/video/TransparentVideo";
 
-import { ENV } from "@/constants";
+import { ENV, MAX_PET_POWER } from "@/constants";
 import { CalendarEastern } from "@/features/calendar/eastern";
 import { CalendarWestern } from "@/features/calendar/western";
 import { KaucimOrb } from "@/features/kau-cim/orb";
@@ -11,15 +11,17 @@ import { HealthBar } from "@/features/mascot/health-bar";
 import { StatusMessage } from "@/features/mascot/status-message";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserState } from "@/hooks/useUserState";
 import { FIVE_ELEMENTS, KAUCIM_CONCERNS } from "@/types/UserState";
 import { router, type Href } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VIDEOS } from "./constants";
 
 export function RouteMainMenu() {
   const insets = useSafeAreaInsets();
   const { profile } = useUserProfile();
+  const { userState } = useUserState();
   const { rollKaucimResult } = useKaucim();
 
   const element = profile?.element as FIVE_ELEMENTS;
@@ -32,17 +34,39 @@ export function RouteMainMenu() {
     [rollKaucimResult, profile],
   );
 
+  const petState = useMemo(() => {
+    const petPower = userState?.petPower ?? 0;
+    const petPowerPercentage = petPower / MAX_PET_POWER;
+    let petVideo = VIDEOS.mascot.normal;
+    if (petPowerPercentage >= 0.75) {
+      petVideo = VIDEOS.mascot.very_good;
+    } else if (petPowerPercentage >= 0.5) {
+      petVideo = VIDEOS.mascot.good;
+    } else if (petPowerPercentage >= 0.25) {
+      petVideo = VIDEOS.mascot.bad;
+    } else {
+      petVideo = VIDEOS.mascot.very_bad;
+    }
+    const backgroundVideo = VIDEOS.background[profile?.element as FIVE_ELEMENTS];
+    return {
+      backgroundVideo,
+      petVideo,
+      petPower,
+      petPowerPercentage,
+    };
+  }, [userState, profile]);
+
   return (
     <View style={styles.root}>
-      <NormalVideo url={VIDEOS.background[element]} />
+      <NormalVideo url={petState.backgroundVideo} />
 
       <View style={styles.headerWrapper}>
-        <HealthBar totalValue={100} value={100} />
+        <HealthBar totalValue={MAX_PET_POWER} value={petState.petPower} />
         <StatusMessage />
       </View>
 
       <TransparentVideo
-        source={VIDEOS.mascot.normal}
+        source={petState.petVideo}
         style={StyleSheet.absoluteFill}
         loop={true}
       />

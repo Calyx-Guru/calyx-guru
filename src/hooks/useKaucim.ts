@@ -1,7 +1,9 @@
 import { useAppAppearance } from '@/contexts/AppAppearanceContext';
+import { useAppState } from '@/hooks/useAppState';
 import { getDeviceIdAsync } from '@/lib/app/helper';
 import { getRandomInt } from '@/lib/app/rng';
 import { createDate } from '@/lib/app/time';
+import { useUserStateStore } from '@/store/userStateStore';
 import { FIVE_ELEMENTS, KAUCIM_CONCERNS, KaucimResult } from '@/types/UserState';
 import { useCallback, useEffect, useState } from 'react';
 import { useMasterData } from './useMasterData';
@@ -51,6 +53,7 @@ export function useKaucim() {
   const { getKaucimStoryBundle } = useMasterData();
   const { locale } = useAppAppearance();
   const { userState, updateUserState } = useUserState();
+  const { lastKaucimTimestamp, lastKaucimResults, setKaucimState } = useAppState();
   const { profile } = useUserProfile();
 
   const getPowerChange = useCallback((fortuneLevel: number, rngSeed: number) => {
@@ -75,9 +78,14 @@ export function useKaucim() {
     let result: KaucimResult | undefined;
     if (userState) {
       const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
-      if (userState.lastKaucimTimestamp >= todayFirstTimestamp) {
-        result = userState.lastKaucimResults[concern];
+      if (lastKaucimTimestamp >= todayFirstTimestamp) {
+        result = lastKaucimResults[concern];
         if (result && result.powerChange > 0) {
+          setKaucimState({
+            lastKaucimConcern: concern,
+            lastKaucimFresh: false,
+          });
+
           return result;
         }
       }
@@ -102,34 +110,41 @@ export function useKaucim() {
     };
 
     if (userState) {
-      let lastKaucimTimestamp = userState.lastKaucimTimestamp || 0;
-      let lastKaucimResults = userState.lastKaucimResults || {};
+      let nextLastKaucimTimestamp = lastKaucimTimestamp || 0;
+      let nextLastKaucimResults = { ...lastKaucimResults };
       const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
-      if (userState.lastKaucimTimestamp < todayFirstTimestamp) {
-        lastKaucimTimestamp = todayFirstTimestamp;
-        lastKaucimResults = {};
+      if (lastKaucimTimestamp < todayFirstTimestamp) {
+        nextLastKaucimTimestamp = todayFirstTimestamp;
+        nextLastKaucimResults = {};
       }
-      lastKaucimResults[concern] = result;
-      updateUserState({
-        lastKaucimTimestamp,
-        lastKaucimResults,
+      nextLastKaucimResults[concern] = result;
+      const pushHistory = useUserStateStore.getState().pushKaucimHistory;
+      pushHistory(result);
+      setKaucimState({
+        lastKaucimTimestamp: nextLastKaucimTimestamp,
+        lastKaucimResults: nextLastKaucimResults,
         lastKaucimConcern: concern,
+        lastKaucimFresh: true,
+      });
+      updateUserState({
+        petPower: userState.petPower + result.powerChange,
       });
     }
     return result;
-  }, [deviceId, getKaucimStoryBundle, profile, userState]);
+  }, [
+    deviceId,
+    getKaucimStoryBundle,
+    lastKaucimResults,
+    lastKaucimTimestamp,
+    profile,
+    setKaucimState,
+    userState,
+  ]);
 
   const getKaucimStory = useCallback((concern: KAUCIM_CONCERNS, storyIndex: number) => {
     const storyBundle = getKaucimStoryBundle(concern, locale, storyIndex);
     return storyBundle[storyIndex % storyBundle.length];
   }, [getKaucimStoryBundle, locale]);
-
-  const applyKaucimResult = useCallback((result: KaucimResult) => {
-    if (!userState) return;
-    updateUserState({
-      petPower: userState.petPower + result.powerChange,
-    });
-  }, [userState, updateUserState]);
 
   useEffect(() => {
     const fetchDeviceId = async () => {
@@ -141,7 +156,6 @@ export function useKaucim() {
 
   return {
     rollKaucimResult,
-    applyKaucimResult,
     getKaucimStory
   }
 }

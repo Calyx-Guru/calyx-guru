@@ -4,8 +4,8 @@ import { StyleSheet, View } from "react-native";
 
 import { KaucimStoryExperience } from "@/features/kau-cim/story-experience";
 
+import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
-import { useUserState } from "@/hooks/useUserState";
 import { pickRandom } from "@/lib/app/helper";
 
 import * as KAUCIM_VIDEOS from "@/assets/videos/kau-cim";
@@ -25,11 +25,11 @@ function getKaucimVideoAsset(fortuneLevel: number) {
 }
 
 export function RouteKaucim() {
-  const { userState } = useUserState();
-  const { getKaucimStory, applyKaucimResult } = useKaucim();
+  const { lastKaucimConcern, lastKaucimResults, lastKaucimFresh } = useAppState();
+  const { getKaucimStory } = useKaucim();
 
-  const concern = userState?.lastKaucimConcern;
-  const result = concern ? userState?.lastKaucimResults[concern] : undefined;
+  const concern = lastKaucimConcern;
+  const result = concern ? lastKaucimResults[concern] : undefined;
   const illustrations = concern ? ILLUSTRATIONS[concern] : undefined;
   const story =
     concern && result ? getKaucimStory(concern, result.storyIndex) : undefined;
@@ -106,10 +106,9 @@ export function RouteKaucim() {
         slides={slideShow}
         summary={{
           title: story.title,
-          powerChange: result.powerChange,
+          powerChange: lastKaucimFresh ? result.powerChange : 0,
         }}
         onResultDismiss={() => {
-          applyKaucimResult(result);
           router.replace("/main-menu");
         }}
       />

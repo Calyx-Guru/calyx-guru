@@ -39,7 +39,4 @@ export interface UserState {
   id: string;
   petPower: number;
   kaucimHistory: KaucimState[];
-  lastKaucimTimestamp: number;
-  lastKaucimConcern: KAUCIM_CONCERNS | null;
-  lastKaucimResults: { [key in KAUCIM_CONCERNS]?: KaucimResult };
 }
