@@ -7,12 +7,13 @@ import {
   kaucimHistoryExceedsLimit,
   trimKaucimHistory,
 } from '@/lib/app/kaucimHistoryLimit';
+import { now } from '@/lib/app/time';
 import {
   fetchUserState,
   updateUserState,
 } from '@/lib/supabase/userStateService';
 import { RemoteSyncedUserDocument } from '@/store/RemoteSyncedUserDocument';
-import type { KaucimResult, KaucimState, UserState } from '@/types/UserState';
+import type { KAUCIM_CONCERNS, KaucimResult, KaucimState, UserState } from '@/types/UserState';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
@@ -23,6 +24,7 @@ function createDefaultUserState(userId: string): UserState {
     id: userId,
     petPower: 0,
     kaucimHistory: [],
+    kaucimStoryUnlocks: {},
   };
 }
 
@@ -37,6 +39,7 @@ export interface UserStateStore {
   clearUserState: () => Promise<void>;
   applyServerUserState: (record: UserState) => void;
   pushKaucimHistory: (result: KaucimResult) => Promise<KaucimState[]>;
+  unlockKaucimStory: (concern: KAUCIM_CONCERNS, storyIndex: number) => Promise<void>;
   updatePetPower: (power: number) => Promise<void>;
 }
 
@@ -111,6 +114,17 @@ export const useUserStateStore = create<UserStateStore>()(
           kaucimHistory: merged.kaucimHistory,
         });
         return merged.kaucimHistory;
+      },
+
+      unlockKaucimStory: async (concern: KAUCIM_CONCERNS, storyIndex: number) => {
+        const prev = get().userState;
+        if (!prev) return;
+        const storyUnlocks = prev.kaucimStoryUnlocks?.[concern] || {};
+        if (storyUnlocks[storyIndex]) return;
+        storyUnlocks[storyIndex] = now();
+        await sync.updateRecord({
+          kaucimStoryUnlocks: { ...prev.kaucimStoryUnlocks, [concern]: storyUnlocks },
+        });
       },
     };
   }, { name: 'UserStateStore' }),

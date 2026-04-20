@@ -3,7 +3,6 @@ import { useAppState } from '@/hooks/useAppState';
 import { getDeviceIdAsync } from '@/lib/app/helper';
 import { getRandomInt } from '@/lib/app/rng';
 import { createDate } from '@/lib/app/time';
-import { useUserStateStore } from '@/store/userStateStore';
 import { FIVE_ELEMENTS, KAUCIM_CONCERNS, KaucimResult } from '@/types/UserState';
 import { useCallback, useEffect, useState } from 'react';
 import { useMasterData } from './useMasterData';
@@ -52,7 +51,7 @@ export function useKaucim() {
   const [deviceId, setDeviceId] = useState<string>('');
   const { getKaucimStoryBundle } = useMasterData();
   const { locale } = useAppAppearance();
-  const { userState, updateUserState } = useUserState();
+  const { userState, updateUserState, pushKaucimHistory, unlockKaucimStory } = useUserState();
   const { lastKaucimTimestamp, lastKaucimResults, setKaucimState } = useAppState();
   const { profile } = useUserProfile();
 
@@ -73,6 +72,20 @@ export function useKaucim() {
 
     return 0;
   }, [profile?.element]);
+
+  const isConcernReadToday = useCallback((concern: KAUCIM_CONCERNS) => {  
+    if (userState) {
+      const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
+      if (lastKaucimTimestamp >= todayFirstTimestamp) {
+        const result = lastKaucimResults[concern];
+        if (result && result.powerChange > 0) {
+          return true;
+        }
+      }
+    }
+
+    return false;    
+  }, [userState, lastKaucimTimestamp, lastKaucimResults]);
 
   const rollKaucimResult = useCallback((concern: KAUCIM_CONCERNS) => {
     let result: KaucimResult | undefined;
@@ -118,8 +131,8 @@ export function useKaucim() {
         nextLastKaucimResults = {};
       }
       nextLastKaucimResults[concern] = result;
-      const pushHistory = useUserStateStore.getState().pushKaucimHistory;
-      pushHistory(result);
+      pushKaucimHistory(result);
+      unlockKaucimStory(concern, storyIndex);
       setKaucimState({
         lastKaucimTimestamp: nextLastKaucimTimestamp,
         lastKaucimResults: nextLastKaucimResults,
@@ -156,7 +169,8 @@ export function useKaucim() {
 
   return {
     rollKaucimResult,
-    getKaucimStory
+    getKaucimStory,
+    isConcernReadToday
   }
 }
 

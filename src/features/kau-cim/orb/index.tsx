@@ -12,12 +12,14 @@ import {
 import {
   career,
   familyFriend,
+  glow,
   health,
   kaucimOrb,
   love,
-  wealth,
+  wealth
 } from "@/assets/images/kau-cim";
 
+import { useKaucim } from "@/hooks/useKaucim";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import type * as Types from "./type";
 
@@ -31,6 +33,7 @@ const SUB_BUTTON_PROPERTIES = [
 
 export function KaucimOrb(properties: Types.Properties) {
   const { style, onAction } = properties;
+  const { isConcernReadToday } = useKaucim();
 
   const orbOpacity = useRef(new Animated.Value(1)).current;
   const fanAnims = useRef<Animated.Value[]>(
@@ -147,6 +150,11 @@ export function KaucimOrb(properties: Types.Properties) {
                   style={styles.subButton}
                   source={SUB_BUTTON_PROPERTIES[i].image}
                 />
+                {!isConcernReadToday(SUB_BUTTON_PROPERTIES[i].action) && <Image
+                  source={glow}
+                  style={styles.glow}
+                  resizeMode="cover"
+                />}
               </Pressable>
             </Animated.View>
           );
@@ -161,7 +169,7 @@ export function KaucimOrb(properties: Types.Properties) {
             source={kaucimOrb}
             style={styles.orbWrapper}
             resizeMode="cover"
-          />
+          />          
         </Pressable>
       </Animated.View>
 
@@ -199,6 +207,13 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -28,
     marginTop: -20,
+  },
+  glow: {
+    position: "absolute",
+    width: 110,
+    height: 110,
+    top: -14,
+    left: -17,
   },
   subButton: {
     width: 80,

@@ -20,6 +20,8 @@ export enum KAUCIM_CONCERNS {
   LOST_ITEMS = 'lost_items',
 }
 
+export type KaucimStoryUnlock = Record<number, number>;
+
 export interface KaucimResult {
   storyIndex: number;
   concern: KAUCIM_CONCERNS;
@@ -39,4 +41,5 @@ export interface UserState {
   id: string;
   petPower: number;
   kaucimHistory: KaucimState[];
+  kaucimStoryUnlocks: Partial<Record<KAUCIM_CONCERNS, KaucimStoryUnlock>>;
 }

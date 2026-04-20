@@ -14,6 +14,8 @@ export function useUserState() {
   const applyServerUserState = useUserStateStore(
     (s) => s.applyServerUserState,
   );
+  const pushKaucimHistory = useUserStateStore((s) => s.pushKaucimHistory);
+  const unlockKaucimStory = useUserStateStore((s) => s.unlockKaucimStory);
 
   return {
     getState,
@@ -24,5 +26,7 @@ export function useUserState() {
     updateUserState,
     clearUserState,
     applyServerUserState,
+    pushKaucimHistory,
+    unlockKaucimStory,
   };
 }
