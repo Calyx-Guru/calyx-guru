@@ -59,15 +59,15 @@ export function RouteKaucim() {
 
     return [
       {
-        image: verdictIllustration,
+        image: verdictIllustration(),
         text: story.omen,
       },
       {
-        image: actionIllustration,
+        image: actionIllustration(),
         text: story.action,
       },
       {
-        image: concludeIllustration,
+        image: concludeIllustration(),
         text: story.conclusion,
         textParams: { bonus: result.powerChange },
       },
