@@ -94,7 +94,7 @@ program
     for await (const pngPath of walkPngs(imagesRoot)) {
       try {
         if (isUnderStories(pngPath, imagesRoot)) {
-          await convertStoriesPngToJpeg(pngPath, opts.dryRun);
+          continue;
         } else {
           await optimizeOtherPng(pngPath, opts.dryRun);
         }

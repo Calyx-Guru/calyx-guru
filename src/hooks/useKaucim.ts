@@ -78,7 +78,7 @@ export function useKaucim() {
       const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
       if (lastKaucimTimestamp >= todayFirstTimestamp) {
         const result = lastKaucimResults[concern];
-        if (result && result.powerChange > 0) {
+        if (result) {
           return true;
         }
       }
@@ -93,7 +93,7 @@ export function useKaucim() {
       const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
       if (lastKaucimTimestamp >= todayFirstTimestamp) {
         result = lastKaucimResults[concern];
-        if (result && result.powerChange > 0) {
+        if (result) {
           setKaucimState({
             lastKaucimConcern: concern,
             lastKaucimFresh: false,
