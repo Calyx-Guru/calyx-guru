@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Animated,
-  Image,
   ImageBackground,
   Pressable,
   StyleSheet,
@@ -9,31 +8,43 @@ import {
   View,
 } from "react-native";
 
-import {
-  career,
-  familyFriend,
-  glow,
-  health,
-  kaucimOrb,
-  love,
-  wealth
-} from "@/assets/images/kau-cim";
+import { kaucimOrb } from "@/assets/images/kau-cim";
+import * as subButtonSet from "@/assets/images/kau-cim/set-2";
 
-import { useKaucim } from "@/hooks/useKaucim";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
+import { SubButton } from "../category";
 import type * as Types from "./type";
 
 const SUB_BUTTON_PROPERTIES = [
-  { image: familyFriend, action: KAUCIM_CONCERNS.FAMILY },
-  { image: wealth, action: KAUCIM_CONCERNS.WEALTH },
-  { image: love, action: KAUCIM_CONCERNS.LOVE },
-  { image: career, action: KAUCIM_CONCERNS.CAREER },
-  { image: health, action: KAUCIM_CONCERNS.HEALTH },
+  {
+    image: subButtonSet.familyFriend,
+    action: KAUCIM_CONCERNS.FAMILY,
+    labelKey: "Family & Friends",
+  },
+  {
+    image: subButtonSet.wealth,
+    action: KAUCIM_CONCERNS.WEALTH,
+    labelKey: "Wealth",
+  },
+  {
+    image: subButtonSet.love,
+    action: KAUCIM_CONCERNS.LOVE,
+    labelKey: "Love",
+  },
+  {
+    image: subButtonSet.career,
+    action: KAUCIM_CONCERNS.CAREER,
+    labelKey: "Career",
+  },
+  {
+    image: subButtonSet.health,
+    action: KAUCIM_CONCERNS.HEALTH,
+    labelKey: "Health",
+  },
 ];
 
 export function KaucimOrb(properties: Types.Properties) {
   const { style, onAction } = properties;
-  const { isConcernReadToday } = useKaucim();
 
   const orbOpacity = useRef(new Animated.Value(1)).current;
   const fanAnims = useRef<Animated.Value[]>(
@@ -101,13 +112,6 @@ export function KaucimOrb(properties: Types.Properties) {
     });
   }, [orbOpacity, fanAnimValues]);
 
-  const handleSubButtonPress = useCallback(
-    (index: number) => {
-      onAction?.(SUB_BUTTON_PROPERTIES[index].action);
-    },
-    [properties],
-  );
-
   return (
     <View style={[styles.container, style]}>
       {isMenuOpen &&
@@ -145,17 +149,14 @@ export function KaucimOrb(properties: Types.Properties) {
                 },
               ]}
             >
-              <Pressable onPress={() => handleSubButtonPress(i)}>
-                <Image
-                  style={styles.subButton}
-                  source={SUB_BUTTON_PROPERTIES[i].image}
-                />
-                {!isConcernReadToday(SUB_BUTTON_PROPERTIES[i].action) && <Image
-                  source={glow}
-                  style={styles.glow}
-                  resizeMode="cover"
-                />}
-              </Pressable>
+              <SubButton
+                image={SUB_BUTTON_PROPERTIES[i].image}
+                tag={subButtonSet.tag}
+                glow={subButtonSet.glow}
+                action={SUB_BUTTON_PROPERTIES[i].action}
+                labelKey={SUB_BUTTON_PROPERTIES[i].labelKey}
+                onPress={() => onAction?.(SUB_BUTTON_PROPERTIES[i].action)}
+              />
             </Animated.View>
           );
         })}
@@ -169,7 +170,7 @@ export function KaucimOrb(properties: Types.Properties) {
             source={kaucimOrb}
             style={styles.orbWrapper}
             resizeMode="cover"
-          />          
+          />
         </Pressable>
       </Animated.View>
 
@@ -207,13 +208,6 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -28,
     marginTop: -20,
-  },
-  glow: {
-    position: "absolute",
-    width: 110,
-    height: 110,
-    top: -14,
-    left: -17,
   },
   subButton: {
     width: 80,
