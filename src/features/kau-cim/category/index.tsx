@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   image: {
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
   },
   textContainer: {
     position: "absolute",
@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: "absolute",
-    top: -25,
-    width: 120,
-    height: 120,
+    top: -20,
+    width: 100,
+    height: 100,
   },
 });

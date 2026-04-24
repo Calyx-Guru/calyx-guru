@@ -8,7 +8,11 @@ import {
   View,
 } from "react-native";
 
-import { kaucimOrb, kaucimOrbVortex } from "@/assets/images/kau-cim";
+import {
+  kaucimIcon,
+  kaucimOrb,
+  kaucimOrbVortex,
+} from "@/assets/images/kau-cim";
 import * as subButtonSet from "@/assets/images/kau-cim/set-2";
 
 import { KAUCIM_CONCERNS } from "@/types/UserState";
@@ -55,11 +59,10 @@ export function KaucimOrb(properties: Types.Properties) {
   );
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isPlayingVortex, setIsPlayingVortex] = useState(false);
   const fanAnimValues = fanAnims.current;
 
   const SUB_BUTTON_TARGETS = useMemo(() => {
-    const a = 140;
+    const a = 160;
 
     return ([-1.1, -0.6, 0, 0.6, 1.1] as const).map((t) => {
       const x = t * a;
@@ -74,33 +77,8 @@ export function KaucimOrb(properties: Types.Properties) {
 
   const handleAction = useCallback(
     (action: KAUCIM_CONCERNS) => {
-      setIsPlayingVortex(true);
-
-      Animated.stagger(
-        40,
-        [...fanAnimValues].reverse().map((anim) =>
-          Animated.timing(anim, {
-            toValue: 0,
-            duration: 180,
-            useNativeDriver: true,
-          }),
-        ),
-      ).start(() => {
-        Animated.timing(orbOpacity, {
-          toValue: 0.8,
-          duration: 200,
-          useNativeDriver: true,
-        });
-      });
-
-      setTimeout(() => {
-        setIsPlayingVortex(false);
-        setIsMenuOpen(false);
-      }, 2400);
-
-      setTimeout(() => {
-        onAction?.(action);
-      }, 2500);
+      setIsMenuOpen(false);
+      onAction?.(action);
     },
     [onAction, fanAnimValues, orbOpacity],
   );
@@ -199,23 +177,21 @@ export function KaucimOrb(properties: Types.Properties) {
         onPress={isMenuOpen ? closeMenu : openMenu}
         style={styles.orbContainer}
       >
-        <View
-          style={[styles.orbWrapper, { borderRadius: 50, overflow: "hidden" }]}
-        >
+        <View style={[styles.orbWrapper]}>
           <Animated.View style={[styles.innerOrb, { opacity: orbOpacity }]}>
             <Image
               source={kaucimOrb}
               style={{
-                width: "110%",
-                height: "110%",
+                width: "105%",
+                height: "105%",
                 position: "absolute",
-                top: "-5%",
-                left: "-5%",
+                top: "-2.5%",
+                left: "-2.5%",
               }}
               resizeMode="cover"
             />
           </Animated.View>
-          {isPlayingVortex && (
+          {isMenuOpen && (
             <Image
               source={kaucimOrbVortex}
               style={styles.innerVortex}
@@ -223,6 +199,17 @@ export function KaucimOrb(properties: Types.Properties) {
             />
           )}
         </View>
+
+        {!isMenuOpen && (
+          <View style={styles.centerIconContainer} pointerEvents="none">
+            <Image
+              source={kaucimIcon}
+              style={styles.centerIconImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.mainTagText}>KauCim</Text>
+          </View>
+        )}
       </Pressable>
 
       {isMenuOpen && (
@@ -246,10 +233,12 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   orbWrapper: {
-    width: 100,
+    width: 120,
     aspectRatio: "1/1",
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: "100%",
+    overflow: "hidden",
   },
   innerVortex: {
     position: "absolute",
@@ -270,14 +259,10 @@ const styles = StyleSheet.create({
     height: 56,
     alignItems: "center",
     justifyContent: "center",
-    top: "20%",
+    top: "60%",
     left: "50%",
     marginLeft: -28,
     marginTop: -20,
-  },
-  subButton: {
-    width: 80,
-    height: 80,
   },
   closeWrapper: {
     position: "absolute",
@@ -287,11 +272,35 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.7)",
     alignItems: "center",
     justifyContent: "center",
-    bottom: -150,
+    bottom: "-175%",
   },
   closeText: {
     color: "#fff",
     fontSize: 20,
     fontWeight: "700",
+  },
+  centerIconContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  centerIconImage: {
+    width: 48,
+    height: 48,
+    marginBottom: 4,
+  },
+  mainTagText: {
+    color: "#FFD700",
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
   },
 });
