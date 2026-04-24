@@ -37,9 +37,13 @@ export interface KaucimState {
   results: { [key in KAUCIM_CONCERNS]?: KaucimResult };
 }
 
+export type KaucimResultsMap = { [key in KAUCIM_CONCERNS]?: KaucimResult };
+
 export interface UserState {
   id: string;
   petPower: number;
+  lastKaucimTimestamp: number;
+  lastKaucimResults: KaucimResultsMap;
   kaucimHistory: KaucimState[];
   kaucimStoryUnlocks: Partial<Record<KAUCIM_CONCERNS, KaucimStoryUnlock>>;
 }

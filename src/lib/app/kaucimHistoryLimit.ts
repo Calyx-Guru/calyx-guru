@@ -10,8 +10,22 @@ export function trimKaucimHistory(history: KaucimState[]): KaucimState[] {
 
 export function clampUserState(state: UserState): UserState {
   const kaucimHistory = trimKaucimHistory(state.kaucimHistory);
-  if (kaucimHistory === state.kaucimHistory) return state;
-  return { ...state, kaucimHistory };
+  const hasValidLastKaucimTimestamp = Number.isFinite(state.lastKaucimTimestamp);
+  const hasValidLastKaucimResults =
+    state.lastKaucimResults !== null && typeof state.lastKaucimResults === 'object';
+  if (
+    kaucimHistory === state.kaucimHistory &&
+    hasValidLastKaucimTimestamp &&
+    hasValidLastKaucimResults
+  ) {
+    return state;
+  }
+  return {
+    ...state,
+    lastKaucimTimestamp: hasValidLastKaucimTimestamp ? state.lastKaucimTimestamp : 0,
+    lastKaucimResults: hasValidLastKaucimResults ? state.lastKaucimResults : {},
+    kaucimHistory,
+  };
 }
 
 export function kaucimHistoryExceedsLimit(history: KaucimState[]): boolean {

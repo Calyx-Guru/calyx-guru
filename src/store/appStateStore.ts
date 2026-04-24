@@ -1,13 +1,9 @@
-import { KAUCIM_CONCERNS, KaucimResult } from '@/types/UserState';
+import { KAUCIM_CONCERNS } from '@/types/UserState';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-type KaucimResultsMap = { [key in KAUCIM_CONCERNS]?: KaucimResult };
-
 interface AppState {
-  lastKaucimTimestamp: number;
   lastKaucimConcern: KAUCIM_CONCERNS | null;
-  lastKaucimResults: KaucimResultsMap;
   lastKaucimFresh: boolean;
 }
 
@@ -17,9 +13,7 @@ interface AppStateStore extends AppState {
 }
 
 const defaultAppState: AppState = {
-  lastKaucimTimestamp: 0,
   lastKaucimConcern: null,
-  lastKaucimResults: {},
   lastKaucimFresh: false,
 };
 
