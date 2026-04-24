@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Animated,
-  ImageBackground,
+  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
-import { kaucimOrb } from "@/assets/images/kau-cim";
+import { kaucimOrb, kaucimOrbVortex } from "@/assets/images/kau-cim";
 import * as subButtonSet from "@/assets/images/kau-cim/set-2";
 
 import { KAUCIM_CONCERNS } from "@/types/UserState";
@@ -55,6 +55,7 @@ export function KaucimOrb(properties: Types.Properties) {
   );
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isPlayingVortex, setIsPlayingVortex] = useState(false);
   const fanAnimValues = fanAnims.current;
 
   const SUB_BUTTON_TARGETS = useMemo(() => {
@@ -71,6 +72,39 @@ export function KaucimOrb(properties: Types.Properties) {
     });
   }, []);
 
+  const handleAction = useCallback(
+    (action: KAUCIM_CONCERNS) => {
+      setIsPlayingVortex(true);
+
+      Animated.stagger(
+        40,
+        [...fanAnimValues].reverse().map((anim) =>
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: 180,
+            useNativeDriver: true,
+          }),
+        ),
+      ).start(() => {
+        Animated.timing(orbOpacity, {
+          toValue: 0.8,
+          duration: 200,
+          useNativeDriver: true,
+        });
+      });
+
+      setTimeout(() => {
+        setIsPlayingVortex(false);
+        setIsMenuOpen(false);
+      }, 2400);
+
+      setTimeout(() => {
+        onAction?.(action);
+      }, 2500);
+    },
+    [onAction, fanAnimValues, orbOpacity],
+  );
+
   const openMenu = useCallback(() => {
     setIsMenuOpen(true);
 
@@ -83,7 +117,7 @@ export function KaucimOrb(properties: Types.Properties) {
         60,
         fanAnimValues.map((anim) =>
           Animated.spring(anim, {
-            toValue: 1,
+            toValue: 0.9,
             friction: 6,
             tension: 80,
             useNativeDriver: true,
@@ -155,24 +189,41 @@ export function KaucimOrb(properties: Types.Properties) {
                 glow={subButtonSet.glow}
                 action={SUB_BUTTON_PROPERTIES[i].action}
                 labelKey={SUB_BUTTON_PROPERTIES[i].labelKey}
-                onPress={() => onAction?.(SUB_BUTTON_PROPERTIES[i].action)}
+                onPress={() => handleAction(SUB_BUTTON_PROPERTIES[i].action)}
               />
             </Animated.View>
           );
         })}
 
-      <Animated.View style={{ opacity: orbOpacity }}>
-        <Pressable
-          onPress={isMenuOpen ? closeMenu : openMenu}
-          style={styles.orbContainer}
+      <Pressable
+        onPress={isMenuOpen ? closeMenu : openMenu}
+        style={styles.orbContainer}
+      >
+        <View
+          style={[styles.orbWrapper, { borderRadius: 50, overflow: "hidden" }]}
         >
-          <ImageBackground
-            source={kaucimOrb}
-            style={styles.orbWrapper}
-            resizeMode="cover"
-          />
-        </Pressable>
-      </Animated.View>
+          <Animated.View style={[styles.innerOrb, { opacity: orbOpacity }]}>
+            <Image
+              source={kaucimOrb}
+              style={{
+                width: "110%",
+                height: "110%",
+                position: "absolute",
+                top: "-5%",
+                left: "-5%",
+              }}
+              resizeMode="cover"
+            />
+          </Animated.View>
+          {isPlayingVortex && (
+            <Image
+              source={kaucimOrbVortex}
+              style={styles.innerVortex}
+              resizeMode="cover"
+            />
+          )}
+        </View>
+      </Pressable>
 
       {isMenuOpen && (
         <Pressable onPress={closeMenu} style={styles.closeWrapper}>
@@ -197,6 +248,21 @@ const styles = StyleSheet.create({
   orbWrapper: {
     width: 100,
     aspectRatio: "1/1",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  innerVortex: {
+    position: "absolute",
+    width: "150%",
+    height: "150%",
+    mixBlendMode: "screen",
+    zIndex: 2,
+  },
+  innerOrb: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    zIndex: 1,
   },
   subButtonContainer: {
     position: "absolute",
