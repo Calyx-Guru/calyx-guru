@@ -6,6 +6,7 @@ import { KaucimStoryExperience } from "@/features/kau-cim/story-experience";
 
 import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
+import { useUserState } from "@/hooks/useUserState";
 import { pickRandom } from "@/lib/app/helper";
 
 import * as KAUCIM_VIDEOS from "@/assets/videos/kau-cim";
@@ -25,11 +26,12 @@ function getKaucimVideoAsset(fortuneLevel: number) {
 }
 
 export function RouteKaucim() {
-  const { lastKaucimConcern, lastKaucimResults, lastKaucimFresh } =
-    useAppState();
+  const { lastKaucimConcern, lastKaucimFresh } = useAppState();
+  const { userState } = useUserState();
   const { getKaucimStory } = useKaucim();
 
   const concern = lastKaucimConcern;
+  const lastKaucimResults = userState?.lastKaucimResults || {};
   const result = concern ? lastKaucimResults[concern] : undefined;
   const illustrations = concern ? ILLUSTRATIONS[concern] : undefined;
   const story =
@@ -60,15 +62,15 @@ export function RouteKaucim() {
 
     return [
       {
-        image: verdictIllustration,
+        image: verdictIllustration(),
         text: story.omen,
       },
       {
-        image: actionIllustration,
+        image: actionIllustration(),
         text: story.action,
       },
       {
-        image: concludeIllustration,
+        image: concludeIllustration(),
         text: story.conclusion,
         textParams: { bonus: result.powerChange },
       },

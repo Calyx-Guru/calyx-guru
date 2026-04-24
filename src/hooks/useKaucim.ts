@@ -52,8 +52,9 @@ export function useKaucim() {
   const { getKaucimStoryBundle } = useMasterData();
   const { locale } = useAppAppearance();
   const { userState, updateUserState, pushKaucimHistory, unlockKaucimStory } = useUserState();
-  const { lastKaucimTimestamp, lastKaucimResults, setKaucimState } = useAppState();
-  const { profile } = useUserProfile();
+  const { setKaucimState } = useAppState();
+  const { profile } = useUserProfile();  
+  const lastKaucimResults = userState?.lastKaucimResults || {};
 
   const getPowerChange = useCallback((fortuneLevel: number, rngSeed: number) => {
     const num = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);  
@@ -75,6 +76,7 @@ export function useKaucim() {
 
   const isConcernReadToday = useCallback((concern: KAUCIM_CONCERNS) => {  
     if (userState) {
+      const lastKaucimTimestamp = userState?.lastKaucimTimestamp || 0;
       const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
       if (lastKaucimTimestamp >= todayFirstTimestamp) {
         const result = lastKaucimResults[concern];
@@ -85,11 +87,12 @@ export function useKaucim() {
     }
 
     return false;    
-  }, [userState, lastKaucimTimestamp, lastKaucimResults]);
+  }, [userState, lastKaucimResults]);
 
   const rollKaucimResult = useCallback((concern: KAUCIM_CONCERNS) => {
     let result: KaucimResult | undefined;
     if (userState) {
+      const lastKaucimTimestamp = userState?.lastKaucimTimestamp || 0;
       const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
       if (lastKaucimTimestamp >= todayFirstTimestamp) {
         result = lastKaucimResults[concern];
@@ -123,6 +126,7 @@ export function useKaucim() {
     };
 
     if (userState) {
+      const lastKaucimTimestamp = userState.lastKaucimTimestamp || 0;
       let nextLastKaucimTimestamp = lastKaucimTimestamp || 0;
       let nextLastKaucimResults = { ...lastKaucimResults };
       const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
@@ -134,12 +138,12 @@ export function useKaucim() {
       pushKaucimHistory(result);
       unlockKaucimStory(concern, storyIndex);
       setKaucimState({
-        lastKaucimTimestamp: nextLastKaucimTimestamp,
-        lastKaucimResults: nextLastKaucimResults,
         lastKaucimConcern: concern,
         lastKaucimFresh: true,
       });
       updateUserState({
+        lastKaucimTimestamp: nextLastKaucimTimestamp,
+        lastKaucimResults: nextLastKaucimResults,
         petPower: userState.petPower + result.powerChange,
       });
     }
@@ -148,7 +152,6 @@ export function useKaucim() {
     deviceId,
     getKaucimStoryBundle,
     lastKaucimResults,
-    lastKaucimTimestamp,
     profile,
     setKaucimState,
     userState,

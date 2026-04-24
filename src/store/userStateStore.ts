@@ -23,6 +23,8 @@ function createDefaultUserState(userId: string): UserState {
   return {
     id: userId,
     petPower: 0,
+    lastKaucimTimestamp: 0,
+    lastKaucimResults: {},
     kaucimHistory: [],
     kaucimStoryUnlocks: {},
   };
