@@ -47,7 +47,8 @@ export function RouteMainMenu() {
     } else {
       petVideo = VIDEOS.mascot.very_bad;
     }
-    const backgroundVideo = VIDEOS.background[profile?.element as FIVE_ELEMENTS];
+    const backgroundVideo =
+      VIDEOS.background[profile?.element as FIVE_ELEMENTS];
     return {
       backgroundVideo,
       petVideo,
@@ -76,24 +77,26 @@ export function RouteMainMenu() {
       </View>
 
       <View style={styles.bottomWrapper}>
-        <CalendarEastern />
+        <CalendarEastern date={new Date("2038-06-26")} />
         <CalendarWestern />
       </View>
 
-      {ENV.DEBUG_MODE && <Pressable
-        style={[
-          styles.debugButton,
-          {
-            top: insets.top + 8,
-            left: Math.max(insets.left, 10),
-          },
-        ]}
-        onPress={() => router.push("/debug" as Href)}
-        accessibilityRole="button"
-        accessibilityLabel="Open debug screen"
-      >
-        <Text style={styles.debugButtonLabel}>Debug</Text>
-      </Pressable>}
+      {ENV.DEBUG_MODE && (
+        <Pressable
+          style={[
+            styles.debugButton,
+            {
+              top: insets.top + 8,
+              left: Math.max(insets.left, 10),
+            },
+          ]}
+          onPress={() => router.push("/debug" as Href)}
+          accessibilityRole="button"
+          accessibilityLabel="Open debug screen"
+        >
+          <Text style={styles.debugButtonLabel}>Debug</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -119,7 +122,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: "20%",
+    bottom: "34.5%",
   },
   bottomWrapper: {
     position: "absolute",

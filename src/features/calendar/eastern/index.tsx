@@ -1,9 +1,12 @@
+import { Image } from "expo-image";
 import { getZodiac, toLunar } from "lunar-ts";
+import { useEffect, useState } from "react";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
 
 import { calendarBook } from "@/assets/images/calendars";
-
+import * as ZODIACS from "@/assets/images/zodiacs/set-1";
 import { createDate } from "@/lib/app/time";
+
 import type * as Types from "./type";
 
 export function CalendarEastern(properties: Types.Properties) {
@@ -12,6 +15,21 @@ export function CalendarEastern(properties: Types.Properties) {
   const lunarDate = toLunar(date.getTime());
   const zodiac = getZodiac(date.getTime());
 
+  const [zodiacImage, setZodiacImage] = useState<any>(null);
+
+  useEffect(() => {
+    if (!zodiac) {
+      return;
+    }
+
+    for (const [key, value] of Object.entries(ZODIACS)) {
+      if (zodiac === key) {
+        setZodiacImage(value);
+        break;
+      }
+    }
+  }, [zodiac]);
+
   return (
     <View style={styles.root}>
       <ImageBackground
@@ -19,12 +37,16 @@ export function CalendarEastern(properties: Types.Properties) {
         style={[styles.calendarWrapper, { width }]}
         resizeMode="cover"
       >
-        <Text style={[styles.animalText, { fontSize: width / 7 }]}>
-          {zodiac}
-        </Text>
-        <Text style={[styles.dayNumber, { fontSize: width / 5 }]}>
+        <Text style={[styles.zodiacText, { fontSize: width / 7 }]}>
           {lunarDate?.lMonth} 月 {lunarDate?.lDay}
         </Text>
+        {zodiacImage && (
+          <Image
+            source={zodiacImage}
+            style={styles.zodiacImage}
+            contentFit="contain"
+          />
+        )}
       </ImageBackground>
       {/* <ImageBackground
         source={calendarNote}
@@ -47,10 +69,15 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: "6/7",
   },
-  animalText: {
+  zodiacText: {
     marginTop: "12.5%",
     color: "#ffffff",
     textTransform: "uppercase",
+  },
+  zodiacImage: {
+    width: "75%",
+    aspectRatio: 1,
+    marginTop: "8%",
   },
   dayNumber: {
     marginTop: "25%",

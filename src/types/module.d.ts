@@ -16,6 +16,11 @@ declare module "*.jpeg" {
   export default source;
 }
 
+declare module "*.gif" {
+  const source: ImageModule;
+  export default source;
+}
+
 declare module "*.mp4" {
   const source: VideoModule;
   export default source;

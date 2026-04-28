@@ -1,0 +1,12 @@
+export { default as dog } from "./dog.png";
+export { default as dragon } from "./dragon.png";
+export { default as goat } from "./goat.png";
+export { default as horse } from "./horse.png";
+export { default as monkey } from "./monkey.png";
+export { default as ox } from "./ox.png";
+export { default as pig } from "./pig.png";
+export { default as rabbit } from "./rabbit.png";
+export { default as rat } from "./rat.png";
+export { default as rooster } from "./rooster.png";
+export { default as snake } from "./snake.png";
+export { default as tiger } from "./tiger.png";
