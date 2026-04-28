@@ -1,17 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
+import { Animated, Easing, Pressable, StyleSheet, View } from "react-native";
 
 import {
-  estimateMaxCharsForTwoLines,
   expandPlaceholders,
   readingPauseMsForSentence,
-  splitForReadableLines,
+  splitOnSentencePunctuation,
 } from "@/features/kau-cim/story-experience/constants";
 
 import { CrossfadeImage } from "@/components/image/CrossfadeImage";
-import { ScrollText } from "../typography/ScrollText";
+import { CaptionText } from "../typography/CaptionText";
 
 interface Properties {
   slides: Kaucim.Slide[];
@@ -22,27 +21,21 @@ export function StoryTeller(properties: Properties) {
   const { slides } = properties;
 
   const insets = useSafeAreaInsets();
-  const windows = useWindowDimensions();
 
   const [slideIndex, setSlideIndex] = useState(0);
   const [sentenceIndex, setSentenceIndex] = useState(0);
   const [crossfading, setCrossfading] = useState(false);
-
-  const maxChunkChars = useMemo(
-    () => estimateMaxCharsForTwoLines(windows.width, insets.left, insets.right),
-    [windows.width, insets.left, insets.right],
-  );
+  const captionOpacity = useRef(new Animated.Value(1)).current;
 
   const slidesData = useMemo(
     () =>
       slides.map((slide) => ({
         image: slide.image,
-        sentences: splitForReadableLines(
+        sentences: splitOnSentencePunctuation(
           expandPlaceholders(slide.text, slide.textParams),
-          maxChunkChars,
         ),
       })),
-    [slides, maxChunkChars],
+    [slides],
   );
 
   const currentSlide = slidesData[slideIndex];
@@ -87,11 +80,31 @@ export function StoryTeller(properties: Properties) {
     }
 
     const line = currentSlide.sentences[sentenceIndex] ?? "";
-    const delay = readingPauseMsForSentence(line);
-    const handle = setTimeout(advance, delay);
+    const totalDelay = readingPauseMsForSentence(line);
+    const fadeDurationMs = Math.min(460, Math.max(260, Math.round(totalDelay * 0.24)));
+    const holdDurationMs = Math.max(80, totalDelay - fadeDurationMs);
 
-    return () => clearTimeout(handle);
-  }, [slideIndex, sentenceIndex, crossfading, advance, currentSlide]);
+    captionOpacity.stopAnimation();
+    captionOpacity.setValue(1);
+
+    const holdTimer = setTimeout(() => {
+      Animated.timing(captionOpacity, {
+        toValue: 0,
+        duration: fadeDurationMs,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          advance();
+        }
+      });
+    }, holdDurationMs);
+
+    return () => {
+      clearTimeout(holdTimer);
+      captionOpacity.stopAnimation();
+    };
+  }, [slideIndex, sentenceIndex, crossfading, advance, currentSlide, captionOpacity]);
 
   return (
     <Pressable style={styles.slideshowPressable} onPress={advance}>
@@ -117,11 +130,11 @@ export function StoryTeller(properties: Properties) {
         pointerEvents="none"
       >
         <View style={styles.captionColumn}>
-          <ScrollText
-            key={slideIndex}
-            texts={currentSlide?.sentences ?? []}
-            scrollIndex={sentenceIndex}
-          />
+          <Animated.View style={{ opacity: captionOpacity }}>
+            <CaptionText fontSize={20}>
+              {currentSlide?.sentences[sentenceIndex] ?? ""}
+            </CaptionText>
+          </Animated.View>
         </View>
       </View>
     </Pressable>
