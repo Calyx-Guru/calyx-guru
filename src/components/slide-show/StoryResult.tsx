@@ -1,4 +1,5 @@
 import {
+  Animated,
   Image,
   ImageBackground,
   Pressable,
@@ -6,6 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useEffect, useRef } from "react";
 
 import { framePrimary } from "@/assets/images/typography";
 import { formatPowerChangeLine } from "@/features/kau-cim/story-experience/constants";
@@ -20,6 +22,43 @@ export function StoryResult(properties: Properties) {
   const { summary } = properties;
 
   const insets = useSafeAreaInsets();
+  const appearProgress = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    appearProgress.setValue(0);
+    Animated.spring(appearProgress, {
+      toValue: 1,
+      friction: 8,
+      tension: 70,
+      useNativeDriver: true,
+    }).start();
+  }, [appearProgress, summary.title, summary.description]);
+
+  const frameOpacity = appearProgress.interpolate({
+    inputRange: [0, 0.2, 1],
+    outputRange: [0, 0.7, 1],
+    extrapolate: "clamp",
+  });
+  const frameScale = appearProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.88, 1],
+    extrapolate: "clamp",
+  });
+  const frameTranslateY = appearProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [32, 0],
+    extrapolate: "clamp",
+  });
+  const contentOpacity = appearProgress.interpolate({
+    inputRange: [0.2, 0.55, 1],
+    outputRange: [0, 0.25, 1],
+    extrapolate: "clamp",
+  });
+  const hintPulse = appearProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.7, 1],
+    extrapolate: "clamp",
+  });
 
   return (
     <Pressable
@@ -41,26 +80,37 @@ export function StoryResult(properties: Properties) {
         onPress={properties.onDismiss}
         style={[styles.resultFrameTouchable, { ...insets, top: "auto" }]}
       >
-        <ImageBackground
-          source={framePrimary}
-          style={[styles.resultFrame]}
-          resizeMode="stretch"
+        <Animated.View
+          style={{
+            opacity: frameOpacity,
+            transform: [{ translateY: frameTranslateY }, { scale: frameScale }],
+          }}
         >
-          <View style={styles.resultFrameInner}>
-            <Text style={styles.resultTitle} numberOfLines={3}>
-              {summary.title}
-            </Text>
-            <View style={styles.resultLastSlideBody}>
-              <Text style={styles.resultLastSlideText}>
-                {summary.description}
+          <ImageBackground
+            source={framePrimary}
+            style={[styles.resultFrame]}
+            resizeMode="stretch"
+          >
+            <Animated.View style={[styles.resultFrameInner, { opacity: contentOpacity }]}>
+              <Text style={styles.resultTitle} numberOfLines={3}>
+                {summary.title}
               </Text>
-            </View>
-            {summary.powerChange > 0 && <Text style={styles.resultPowerLine}>
-              {formatPowerChangeLine(summary.powerChange)}
-            </Text>}
-            <Text style={styles.resultHint}>Tap to continue</Text>
-          </View>
-        </ImageBackground>
+              <View style={styles.resultLastSlideBody}>
+                <Text style={styles.resultLastSlideText}>
+                  {summary.description}
+                </Text>
+              </View>
+              {summary.powerChange > 0 && <Text style={styles.resultPowerLine}>
+                {formatPowerChangeLine(summary.powerChange)}
+              </Text>}
+              <Animated.Text
+                style={[styles.resultHint, { opacity: hintPulse }]}
+              >
+                Tap to continue
+              </Animated.Text>
+            </Animated.View>
+          </ImageBackground>
+        </Animated.View>
       </Pressable>
     </Pressable>
   );
