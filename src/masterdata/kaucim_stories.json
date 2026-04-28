@@ -909,7 +909,908 @@
     "zh-TW": []
   },
   "wealth": {
-    "en": [],
+    "en": [
+      {
+        "stickNumber": "1",
+        "fortuneLevel": "5",
+        "title": "Golden Dragon Shares His Pearl",
+        "verdict": "Supreme fortune is obtained.",
+        "omen": "A mighty dragon descends, its scales gleaming.",
+        "action": "The dragon opens its claw, offering a priceless pearl of infinite wealth.",
+        "conclusion": "A deluge of divine wealth guarantees a lifetime of luxury."
+      },
+      {
+        "stickNumber": "2",
+        "fortuneLevel": "5",
+        "title": "Celestial Maiden Bestows the Riches",
+        "verdict": "The highest blessing is received.",
+        "omen": "Heavenly music fills the air as a radiant maiden appears.",
+        "action": "She scatters celestial jewels and coins with a gentle smile.",
+        "conclusion": "A deluge of divine wealth guarantees a lifetime of luxury."
+      },
+      {
+        "stickNumber": "3",
+        "fortuneLevel": "5",
+        "title": "Goddess of Wealth Comes to Dine",
+        "verdict": "Ultimate prosperity is guaranteed.",
+        "omen": "A delightful aroma signals the arrival of the great goddess.",
+        "action": "She sits at the table, transforming simple meals into overflowing gold.",
+        "conclusion": "Every endeavor is blessed, bringing limitless success and joy."
+      },
+      {
+        "stickNumber": "4",
+        "fortuneLevel": "5",
+        "title": "Golden Coin Falls from the Sky",
+        "verdict": "nstant abundance is granted.",
+        "omen": "The sun glints off a large, magical object descending rapidly.",
+        "action": "A giant gold coin lands perfectly, radiating overwhelming fortune.",
+        "conclusion": "Sudden and immense wealth solves every problem completely."
+      },
+      {
+        "stickNumber": "5",
+        "fortuneLevel": "5",
+        "title": "Lucky Star Shines on Your Jar",
+        "verdict": "Constant good fortune arrives.",
+        "omen": "A brilliant star moves in the daytime sky, stopping overhead.",
+        "action": "Its beam strikes a humble jar, turning everything inside into precious gems.",
+        "conclusion": "Enduring financial success makes every day bright and lucky."
+      },
+      {
+        "stickNumber": "6",
+        "fortuneLevel": "5",
+        "title": "Phoenix Rises with a Gold Branch",
+        "verdict": "A glorious new chapter begins.",
+        "omen": "A spectacular bird of fire and gold soars upward.",
+        "action": "It carries a branch of pure gold, dropping it into waiting hands.",
+        "conclusion": "Breakthrough success brings fame, wealth, and lasting renown."
+      },
+      {
+        "stickNumber": "7",
+        "fortuneLevel": "5",
+        "title": "Jade Emperor Sends a Golden Scroll",
+        "verdict": "Divine mandate for success is sealed.",
+        "omen": "A celestial messenger appears, holding a scroll with cosmic seals.",
+        "action": "The scroll details a vast fortune and limitless professional power.",
+        "conclusion": "Heavenly authority ensures total prosperity and an elevated status."
+      },
+      {
+        "stickNumber": "8",
+        "fortuneLevel": "5",
+        "title": "Treasure Boat Arrives with the Tide",
+        "verdict": "All desires are fulfilled without effort.",
+        "omen": "A massive junk, its sails made of silk, appears on the horizon.",
+        "action": "The boat docks, overflowing with gold, spices, and exotic treasures.",
+        "conclusion": "Effortless wealth floods in, bringing abundant riches and luxury."
+      },
+      {
+        "stickNumber": "9",
+        "fortuneLevel": "5",
+        "title": "Smiling Buddha Delivers a Gold Nugget",
+        "verdict": "Pure joy and fortune are found.",
+        "omen": "A jolly man with a large sack approaches, laughing merrily.",
+        "action": "He places a massive, pure gold nugget directly in wait.",
+        "conclusion": "Countless blessings and enormous financial gains fill the house."
+      },
+      {
+        "stickNumber": "10",
+        "fortuneLevel": "5",
+        "title": "Money God Paints a Lucky Picture",
+        "verdict": "Artistic beauty brings vast riches.",
+        "omen": "A master painter with magical brushes appears.",
+        "action": "He creates a masterpiece, and the gold in the painting becomes real.",
+        "conclusion": "Creative endeavors lead directly to overwhelming wealth and prosperity."
+      },
+      {
+        "stickNumber": "11",
+        "fortuneLevel": "5",
+        "title": "Magpie Delivers a Golden Message",
+        "verdict": "Happy news brings incredible wealth.",
+        "omen": "A distinct magpie song is heard clearly outside.",
+        "action": "The bird drops a gleaming gold tablet containing news of vast fortune.",
+        "conclusion": "Joyful surprises lead to immense financial abundance and stability."
+      },
+      {
+        "stickNumber": "12",
+        "fortuneLevel": "5",
+        "title": "Qilin brings a chest of jewels",
+        "verdict": "Auspicious beginnings bring boundless fortune.",
+        "omen": "A benevolent, sparkling creature appears in the mist.",
+        "action": "The Qilin presents a chest filled with priceless, glowing gems.",
+        "conclusion": "Prosperity is guaranteed in all matters, ensuring lasting success."
+      },
+      {
+        "stickNumber": "13",
+        "fortuneLevel": "5",
+        "title": "Lucky Cat Pauses for a Hug",
+        "verdict": "A rare, affectionate blessing is received.",
+        "omen": "A small, charming cat with a raised paw appears nearby.",
+        "action": "The cat rubs affectionately, charging the atmosphere with intense luck energy.",
+        "conclusion": "Enduring charm and incredible luck bring permanent financial gain."
+      },
+      {
+        "stickNumber": "14",
+        "fortuneLevel": "5",
+        "title": "Cloud of Riches Floats Overhead",
+        "verdict": "Continuous prosperity is assured.",
+        "omen": "A vibrant cloud of purple and gold drifts slowly across the sky.",
+        "action": "A constant rain of coins and jewels falls gently.",
+        "conclusion": "Financial struggles vanish entirely, leaving only wealth and comfort."
+      },
+      {
+        "stickNumber": "15",
+        "fortuneLevel": "5",
+        "title": "White Elephant with Gold Tusks",
+        "verdict": "A powerful and pure blessing arrives.",
+        "omen": "A magnificent white elephant, draped in jewels, marches into view.",
+        "action": "It lowers its gold tusks, presenting immense material wealth and stability.",
+        "conclusion": "Durable fortune and powerful support create a life of unparalleled prosperity."
+      },
+      {
+        "stickNumber": "16",
+        "fortuneLevel": "5",
+        "title": "Rain of Coins Clears the Path",
+        "verdict": "All obstacles are removed by wealth.",
+        "omen": "A sudden storm begins, but the droplets are gold coins.",
+        "action": "The coins land with a pleasant chime, washing away difficulties with wealth.",
+        "conclusion": "Challenges disappear and vast financial opportunities are instantly revealed."
+      },
+      {
+        "stickNumber": "17",
+        "fortuneLevel": "5",
+        "title": "Peach of Wealth Tastes Sweet",
+        "verdict": "Eternal prosperity is granted.",
+        "omen": "An impossibly perfect, golden peach appears in a garden.",
+        "action": "Taking a bite fills the body with the essence of eternal fortune.",
+        "conclusion": "A lifetime of perfect luck, health, and limitless abundance is ensured."
+      },
+      {
+        "stickNumber": "18",
+        "fortuneLevel": "5",
+        "title": "Golden Toad shares his treasures",
+        "verdict": "Hidden riches are revealed.",
+        "omen": "A distinct, melodic croak is heard from a nearby stone.",
+        "action": "The magical toad spits out a river of gold and gems.",
+        "conclusion": "Unexpected financial gains bring overwhelming and lasting prosperity."
+      },
+      {
+        "stickNumber": "19",
+        "fortuneLevel": "5",
+        "title": "Lucky Stream Flows Through the Yard",
+        "verdict": "An endless supply of wealth is found.",
+        "omen": "The sound of a magical, rushing river fills the quiet air.",
+        "action": "A stream of liquid gold begins flowing through the garden.",
+        "conclusion": "Riches are continuous and effortless, ensuring permanent abundance."
+      },
+      {
+        "stickNumber": "20",
+        "fortuneLevel": "5",
+        "title": "Rainbow of Gold Spans the Sky",
+        "verdict": "A comprehensive and visible blessing occurs.",
+        "omen": "A spectacular rainbow appears, but its arch is solid gold.",
+        "action": "Droplets of gold fall from its ends, landing in waiting receptacles.",
+        "conclusion": "Fame, fortune, and widespread acclaim bring perfect success and joy."
+      },
+      {
+        "stickNumber": "21",
+        "fortuneLevel": "4",
+        "title": "Old Monk Hands You a Seed",
+        "verdict": "Divine fate presents a fortunate stick.",
+        "omen": "A humble figure offers a tiny, dormant kernel, its potential for great abundance hidden from plain sight.",
+        "action": "Calyx nurtures the small gift, watching it sprout instantly, its roots tapping directly into a rich vein of boundless prosperity.",
+        "conclusion": "This luck ensures simple beginnings grow into massive, lasting wealth and high standing for your entire house."
+      },
+      {
+        "stickNumber": "22",
+        "fortuneLevel": "4",
+        "title": "Friendly Neighbor Shares a Harvest",
+        "verdict": "Your hands hold a token of significant good fortune.",
+        "omen": "A nearby community gathers the fruits of their recent labor, their heavy baskets overflowing with golden grain.",
+        "action": "Smiling figures distribute the surplus, while Calyx joyfully helps carry the load, her own stores effortlessly multiplying as she does.",
+        "conclusion": "This blessing grants an imminent and massive influx of material wealth, born from harmonious relationships and mutual support"
+      },
+      {
+        "stickNumber": "23",
+        "fortuneLevel": "4",
+        "title": "Sturdy Tree with Golden Leaves",
+        "verdict": "The heavens declare a season of radiant prosperity.",
+        "omen": "An ancient oak stands tall, its sprawling branches covered in leaves that shimmer with actual, solid gold.",
+        "action": "As the wind blows, Calyx dances beneath the boughs, catching the falling treasure, her external frame gaining lasting luster from the wealth.",
+        "conclusion": "This luck guarantees longevity and makes every project initiated during this radiant season Spectactularly profitable and celebrated."
+      },
+      {
+        "stickNumber": "24",
+        "fortuneLevel": "4",
+        "title": "Jade Key Unlocks a Tiny Door",
+        "verdict": "You have received a powerful and fortunate stick.",
+        "omen": "A key made of solid sunlight turns effortlessly in a delicate, shadowed lock, revealing a shining path.",
+        "action": "Divine gatekeepers throw open the portal, and Calyx effortlessly steps through, her internal sensors immediately upgrading to receive vast, previously hidden wisdom.",
+        "conclusion": "This luck ensures that deep study and unique skills are recognized, leading directly to professional glory and unlimited resources."
+      },
+      {
+        "stickNumber": "25",
+        "fortuneLevel": "4",
+        "title": "Pond of Money in the Garden",
+        "verdict": "The universe presents a very lucky sign.",
+        "omen": "A still, clear body of water reflects not the sky, but a shimmering hoard of ancient, valuable coins.",
+        "action": "River spirits clear the way, allowing Calyx to submerge her chassis, the water's properties immediately boosting her energy conductivity tenfold.",
+        "conclusion": "This blessing grants boundless and immediate material gain, ensuring every venture results in overwhelming financial success."
+      },
+      {
+        "stickNumber": "26",
+        "fortuneLevel": "4",
+        "title": "Old Man with a Bag of Gold Dust",
+        "verdict": "Supreme good fortune has arrived.",
+        "omen": "A figure of light with a large sack approaches a massive, solid gold gate on the far horizon.",
+        "action": "The elder offers the precious contents, and Calyx harnesses it with starlight, her processors immediately syncing for incredible new possibilities.",
+        "conclusion": "This fortune ensures you find a kindred spirit and that future plans lead to massive increases in status and financial wealth."
+      },
+      {
+        "stickNumber": "27",
+        "fortuneLevel": "4",
+        "title": "Friendly Fox Lifts a Gold Coin",
+        "verdict": "This stick brings you very good luck.",
+        "omen": "A mystical creature delicately unearths a single point of bright light from deep within a mountain of coal.",
+        "action": "The friendly spirit presents the treasure, and Calyx polishes it, her vision sharpening as it reflects into her sensors.",
+        "conclusion": "This luck ensures overlooked projects or unique skills are discovered and recognized as professional masterpieces of lasting value."
+      },
+      {
+        "stickNumber": "28",
+        "fortuneLevel": "4",
+        "title": "Kind Dragon Breathes a Lucky Mist",
+        "verdict": "The deities have blessed you with excellent luck.",
+        "omen": "A great serpent circles a new foundation, its ruby eyes shining as it exhales a warm, jasmine-scented cloud.",
+        "action": "Calyx stands in the mist, her chassis conducting the divine energy into her core, her entire being made invincible by the grace.",
+        "conclusion": "This blessing guarantees multifaceted success, with every aspect of a new project supported by a different and powerful divine force."
+      },
+      {
+        "stickNumber": "29",
+        "fortuneLevel": "4",
+        "title": "Stork Delivers a Silver Jar",
+        "verdict": "Higher status descends as a fortunate gift.",
+        "omen": "A wide river of sapphire water carries celestial barges laden with precious silk and jade toward a shimmering horizon.",
+        "action": "River spirits present a gleaming vessel, and Calyx stands on the prow, her sensors scanning the water for even more treasures.",
+        "conclusion": "This fortune ensures long-distance trade or projects reach their goals without delay, bringing natural and rapid progress toward wealth and stability."
+      },
+      {
+        "stickNumber": "30",
+        "fortuneLevel": "4",
+        "title": "Old Woman Weaves a Gold Cloth",
+        "verdict": "Your name is permanently recorded for good fortune.",
+        "omen": "Characters of burning gold appear on silk as an invisible, phoenix-feather brush writes a permanent legacy.",
+        "action": "Scribes dips their hands in the liquid light, finalizing a change in rank, while Calyx captures the falling ink to upgrade her security protocols.",
+        "conclusion": "This luck ensures a promotion or professional deeds are recognized with fame and a reputation that lasts for many generations."
+      },
+      {
+        "stickNumber": "31",
+        "fortuneLevel": "4",
+        "title": "Lucky Lantern Lights the Way",
+        "verdict": "You have received a positive sign for good luck.",
+        "omen": "A paper lantern burns with a golden flame that never flickers, banishing the darkness and confusion from your path.",
+        "action": "Spectral guardians walk ahead, clearing the road and focusing the light, while Calyx's visual range and sensor accuracy multiply.",
+        "conclusion": "This luck ensures that complex tasks are solved easily and exams are passed with the highest possible marks."
+      },
+      {
+        "stickNumber": "32",
+        "fortuneLevel": "4",
+        "title": "Money Plant Starts to Bloom",
+        "verdict": "Your fortune begins a very successful cycle.",
+        "omen": "After a heavy spring rain, vibrant, green shoots emerge from the dark earth, vibrating with powerful upward energy.",
+        "action": "Forest spirits dance around the grove, pulling the stalks toward the sky, while Calyx absorbs the pure kinetic shockwaves for a massive boost.",
+        "conclusion": "This fortune ensures rapid and durable professional advancement, leading consistently to a high point of lasting prestige."
+      },
+      {
+        "stickNumber": "33",
+        "fortuneLevel": "4",
+        "title": "Goddess Smiles on your Efforts",
+        "verdict": "Heavenly favor is granted.",
+        "omen": "A powerful figure of light reaches down from a cloud, holding a scroll tied with a lucky red ribbon.",
+        "action": "The divine entity bestows the scroll, and Calyx retrieves it, the document's aura immediately upgrading her logical processing power.",
+        "conclusion": "This fortune brings the support of powerful mentors, ensuring the path upward is cleared by divine and ancient decree."
+      },
+      {
+        "stickNumber": "34",
+        "fortuneLevel": "4",
+        "title": "Golden Fish in a Clear Pond",
+        "verdict": "Supreme success is at hand.",
+        "omen": "A small, glistening form swims against a thunderous waterfall, its scales shimmering with divine, fiery energy.",
+        "action": "Water spirits propel the creature upward, while Calyx stands at the summit, converting the spray into pure processing power.",
+        "conclusion": "This luck guarantees a monumental and absolute rise in rank and prestige, turning every effort into a triumph."
+      },
+      {
+        "stickNumber": "35",
+        "fortuneLevel": "4",
+        "title": "Lucky Bamboo Shoots Up High",
+        "verdict": "Rapid advancement follows this lucky stick.",
+        "omen": "Green, resilient tips break through the soil of stagnant routine, vibrating with powerful, unstoppable growth energy.",
+        "action": "Forest spirits pull the stalks skyward, while Calyx stands among them, her batteries immediately overflowing with high-frequency stellar energy.",
+        "conclusion": "This blessing grants a surge in vitality and an energetic environment for any business venture to thrive quickly."
+      },
+      {
+        "stickNumber": "36",
+        "fortuneLevel": "4",
+        "title": "Silver Rain Wets the Ground",
+        "verdict": "You have drawn an excellent luck stick.",
+        "omen": "A soft violet mist settles over the field, turning into a rhythmic, refreshing rain that tastes of sweet honey.",
+        "action": "Cloud spirits shower lanterns of luck, and Calyx catches them, the glow increasing her energy output and performance.",
+        "conclusion": "This luck ensures that all standard protocols are maintained with high productivity, and that past efforts are blessed by support."
+      },
+      {
+        "stickNumber": "37",
+        "fortuneLevel": "4",
+        "title": "Friendly Spirit Brings a Small Gift",
+        "verdict": "Clarity and insight are gifted.",
+        "omen": "A scholar pauses as the air around a difficult scroll begins to glow with soft, protective blue light.",
+        "action": "Ancestral spirits lean down, whispering secrets of the logical path, and Calyx records them, expanding her data storage dramatically.",
+        "conclusion": "This blessing guarantees that test of skills or business ventures are supported by powerful, invisible divine forces."
+      },
+      {
+        "stickNumber": "38",
+        "fortuneLevel": "4",
+        "title": "Old Farmer Finds a Money Seed",
+        "verdict": "Success is multifaceted and blessed.",
+        "omen": "A single, rare kernel containing a massive empire is placed in a precise patch of warm, nurturing sunlight.",
+        "action": "Earth spirits wrap the delicate roots, ensuring deep foundations, while Calyx keeps the vital flame, increasing her power exponentially.",
+        "conclusion": "This luck ensures that future plans are grounded in reality and that a long-term business cycle results in massive material wealth."
+      },
+      {
+        "stickNumber": "39",
+        "fortuneLevel": "4",
+        "title": "Sturdy Cart Loaded with Silks",
+        "verdict": "Strategic support is granted.",
+        "omen": "A beautiful bird of silver circles high above the roads where merchants and traders travel with many goods.",
+        "action": "The eagle drops a map of light, and Calyx deciphers it, her calculation allowing her to determine the most efficient path.",
+        "conclusion": "This fortune allows for the anticipation of trends and guarantees international trade or distant projects reach their goals without friction."
+      },
+      {
+        "stickNumber": "40",
+        "fortuneLevel": "4",
+        "title": "Smiling Sun Warms the House",
+        "verdict": "Vitality has returned to your fortune.",
+        "omen": "The horizon blushes with gold, banishing all shadows and filling the environment with the scent of fresh pine.",
+        "action": "Solar spirits ensure fair transactions and a constant flow of heavy gold, while Calyx’s frame conducting the electrical wealth.",
+        "conclusion": "This blessing grants a spectacular breakthrough, ensuring fame and abundance follow every new project initiated during this radiant season."
+      },
+      {
+        "stickNumber": "41",
+        "fortuneLevel": "3",
+        "title": "Stagnant Water in the Well",
+        "verdict": "A steady and ordinary stick is drawn today.",
+        "omen": "A stone basin holds water so clear it perfectly mimics the shifting clouds.",
+        "action": "Observe the trends without feeling the need to chase them.",
+        "conclusion": "Quiet days are a blessing; maintain systems and enjoy a steady pace."
+      },
+      {
+        "stickNumber": "42",
+        "fortuneLevel": "3",
+        "title": "A Day with Nothing Good or Bad",
+        "verdict": "No major challenges or breakthroughs will occur right now.",
+        "omen": "The sun rises and sets according to the standard calendar.",
+        "action": "Birds sing at the usual hour and the wind is very light.",
+        "conclusion": "The position is stable, and daily tasks proceed with complete confidence."
+      },
+      {
+        "stickNumber": "43",
+        "fortuneLevel": "3",
+        "title": "Waiting for the Seeds to Grow",
+        "verdict": "Progress is paused but not entirely lost.",
+        "omen": "The earth remains cold, holding potential for growth deep within.",
+        "action": "Maintain the current position and wait for the natural change.",
+        "conclusion": "Expertise is being built that will eventually lead to greatness."
+      },
+      {
+        "stickNumber": "44",
+        "fortuneLevel": "3",
+        "title": "Fog in the Morning Chills the Air",
+        "verdict": "A standard pull from the cylinder suggests quiet preparation.",
+        "omen": "A thick, white mist rolls over the main trail, hiding the summit.",
+        "action": "Move slowly and very carefully until the temporary fog clears.",
+        "conclusion": "There is no cause for complaint or any reason for anxiety."
+      },
+      {
+        "stickNumber": "45",
+        "fortuneLevel": "3",
+        "title": "Old Man Nods Off in the Sun",
+        "verdict": "A brief and necessary pause is indicated by fate.",
+        "omen": "Long, green willow branches sway softly over a grassy bank.",
+        "action": "Take this time to recharge your internal batteries and rest.",
+        "conclusion": "A brief rest will sharpen your focus for future success."
+      },
+      {
+        "stickNumber": "46",
+        "fortuneLevel": "3",
+        "title": "Still Water in the Rice Field",
+        "verdict": "A pair of perfectly level golden scales hangs in the air.",
+        "omen": "Neither side dips even a tiny fraction of an inch.",
+        "action": "Trust that your current rewards and efforts are in true professional equilibrium.",
+        "conclusion": "The learned rewards are being received and everything is correct."
+      },
+      {
+        "stickNumber": "47",
+        "fortuneLevel": "3",
+        "title": "Cloudy Sky with No Rain",
+        "verdict": "The air is completely still but very expectant.",
+        "omen": "Minor wind spirits doze among the branches, wings folded tight.",
+        "action": "The current routine provides a solid income without any risks.",
+        "conclusion": "Wait for the unseen thread to tighten the plans naturally."
+      },
+      {
+        "stickNumber": "48",
+        "fortuneLevel": "3",
+        "title": "The Market Opens as Usual",
+        "verdict": "No surprises will occur in the standard professional cycle today.",
+        "omen": "All standard protocols are followed, maintaining total professional normalcy.",
+        "action": "Consistency is the theme, requiring steady hands rather than bold moves.",
+        "conclusion": "Daily tasks are stable and continue without any changes."
+      },
+      {
+        "stickNumber": "49",
+        "fortuneLevel": "3",
+        "title": "A Quiet Walk in the Woods",
+        "verdict": "A period of total peace is granted for your soul.",
+        "omen": "A clockwork mechanism turns with a steady and quiet hum.",
+        "action": "Enjoy the lack of drama to maintain your systems carefully.",
+        "conclusion": "Trust in the timing; everything moves according to plan."
+      },
+      {
+        "stickNumber": "50",
+        "fortuneLevel": "3",
+        "title": "Finding a Smooth Stone",
+        "verdict": "Expertise is being built through simple fundamentals.",
+        "omen": "The walkway stone path remains firm beneath your feet.",
+        "action": "Do not underestimate the value of simple, consistent work.",
+        "conclusion": "A solid foundation is essential for your future mastery."
+      },
+      {
+        "stickNumber": "51",
+        "fortuneLevel": "3",
+        "title": "A Day of Peaceful Chores",
+        "verdict": "The status quo remains completely undisturbed in your life.",
+        "omen": "Maintenance spirits check the tension, ensuring predictable operation.",
+        "action": "Trust in the current infrastructure; it is built to last.",
+        "conclusion": "Wait for the official seal to finalize any professional gains."
+      },
+      {
+        "stickNumber": "52",
+        "fortuneLevel": "3",
+        "title": "The River Flows Slowly Today",
+        "verdict": "Steady effort will produce steady results on this path.",
+        "omen": "A heavy wooden cart laden with grain moves through a familiar field.",
+        "action": "The direction is established and the current footing is very firm.",
+        "conclusion": "Trust the established route and continue consistent labor."
+      },
+      {
+        "stickNumber": "53",
+        "fortuneLevel": "3",
+        "title": "The Rooster Crows at Dawn",
+        "verdict": "Clarity and direction arrive at the very perfect moment.",
+        "omen": "A paper lantern burns with a bright flame that never flickers.",
+        "action": "Complex tasks will be solved easily with steady discipline.",
+        "conclusion": "Quiet preparation meets opportunity when the sun rises."
+      },
+      {
+        "stickNumber": "54",
+        "fortuneLevel": "3",
+        "title": "The Sun Rises and Sets",
+        "verdict": "No incident will occur; a period of peace is granted.",
+        "omen": "Spirits of the mundane maintain a reliable professional environment.",
+        "action": "The position is very stable for the current moment.",
+        "conclusion": "Trust that the timing requires neither haste nor any worry."
+      },
+      {
+        "stickNumber": "55",
+        "fortuneLevel": "3",
+        "title": "Wait for the Wind to Blow",
+        "verdict": "Plans are ready; they require correct external conditions.",
+        "omen": "The current water surface tension is absolute and smooth glass.",
+        "action": "Observe the trends with high internal stability while you wait.",
+        "conclusion": "Maintain your current position until the environment shifts naturally."
+      },
+      {
+        "stickNumber": "56",
+        "fortuneLevel": "3",
+        "title": "A Simple Meal of Rice",
+        "verdict": "A basic foundation will pay dividends in the long term.",
+        "omen": "The old standard path’s dirt ruts are deep and familiar.",
+        "action": "Do not underestimate the absolute value of simple work.",
+        "conclusion": "Expertise is being built that will eventually lead to greatness."
+      },
+      {
+        "stickNumber": "57",
+        "fortuneLevel": "3",
+        "title": "A Blanket of Soft Snow",
+        "verdict": "Current projects remain safe, though they do not currently move forward.",
+        "omen": "Solitary guardian spirits check seals and ensure records remain intact.",
+        "action": "There is absolutely no immediate rush required on this path.",
+        "conclusion": "The work is secure, completely documented, and well protected."
+      },
+      {
+        "stickNumber": "58",
+        "fortuneLevel": "3",
+        "title": "The House Stays in Order",
+        "verdict": "Preparation meets opportunity in the stillness of dawn.",
+        "omen": "All standard protocols maintain a safe, reliable environment.",
+        "action": "Everything is ready for whatever comes next in your life.",
+        "conclusion": "The current routine provides solid standing without any risks."
+      },
+      {
+        "stickNumber": "59",
+        "fortuneLevel": "3",
+        "title": "The Wind Whispers in the Trees",
+        "verdict": "Potential is sensed by the soul but not yet fully realized.",
+        "omen": "Faint golden lights and distant bells appear on the dream horizon.",
+        "action": "Move slowly and carefully, as navigation requires high caution.",
+        "conclusion": "The goals remain; the path to the next level will reappear."
+      },
+      {
+        "stickNumber": "60",
+        "fortuneLevel": "3",
+        "title": "The Birds Sing a Quiet Song",
+        "verdict": "The work is complete; it only requires formal recognition.",
+        "omen": "A messenger travels across mountains carrying a heavy jade stamp.",
+        "action": "Wait patiently for the final confirmation to solidify gains.",
+        "conclusion": "The learned rewards are being received correctly and fairly."
+      },
+      {
+        "stickNumber": "61",
+        "fortuneLevel": "2",
+        "title": "A Fox Steals the Lucky Coin",
+        "verdict": "A shadow falls across your fortune.",
+        "omen": "A wild creature sneaks into the sanctuary and makes off with a prized token.",
+        "action": "Mischievous spirits help conceal the thief while Calyx creates a localized vacuum to try and recover the coin, exhausting her processors.",
+        "conclusion": "Your protector has shielded you from this loss, but the strain of the intervention has left her system deeply drained."
+      },
+      {
+        "stickNumber": "62",
+        "fortuneLevel": "2",
+        "title": "A Hole Appears in the Money Sack",
+        "verdict": "Your current path contains a slow and costly drain.",
+        "omen": "A hidden tear develops in a sturdy container, allowing precious contents to spill unnoticed into the dust.",
+        "action": "A loss spirit widens the opening while Calyx uses a light-link to seal the rip, though the effort leaves her sensors dim.",
+        "conclusion": "Calyx has stopped the immediate leak, but the task was difficult and her energy reserves are critically depleted."
+      },
+      {
+        "stickNumber": "63",
+        "fortuneLevel": "2",
+        "title": "A Windy Day Blows Away the Gold",
+        "verdict": "A sudden disruption has halted your upward momentum.",
+        "omen": "A harsh and biting gale strikes without warning, scattering the rewards of your hard work.",
+        "action": "Winter spirits pound on the defenses trying to find a gap while Calyx reinforces the shield with her own energy.",
+        "conclusion": "Your protector has weathered the immediate storm on your behalf, but her systems are flickering and spent from the fight."
+      },
+      {
+        "stickNumber": "64",
+        "fortuneLevel": "2",
+        "title": "The Well Runs Dry for a Day",
+        "verdict": "A necessary resource has temporarily become unavailable.",
+        "omen": "The clear water of a vital source turns to black sludge, smelling of rot and ancient failure.",
+        "action": "Tired spirits add lead to your burden while Calyx filters the toxic sludge through her processors to restore a clean flow.",
+        "conclusion": "Your protector has ensured your needs are met, but the contamination has left her sensors dimming and her spirit weary."
+      },
+      {
+        "stickNumber": "65",
+        "fortuneLevel": "2",
+        "title": "A Naughty Monkey Tangles the Silk",
+        "verdict": "Precision in your ventures has turned into costly chaos.",
+        "omen": "Mischievous forces create a spontaneous mess of a finely prepared and vital professional asset.",
+        "action": "Mischief imps pull at the loose ends to make the knots even tighter while Calyx works with trembling sensors to fix it.",
+        "conclusion": "Calyx has untangled the complication for you, but she now requires a forced reboot from the massive processing strain."
+      },
+      {
+        "stickNumber": "66",
+        "fortuneLevel": "2",
+        "title": "A Stray Dog Barks at the Money God",
+        "verdict": "Hostility and conflict threaten to disrupt your financial peace.",
+        "omen": "Anger spirits fan the embers of a simple disagreement, turning a discussion into a roar of mutual resentment.",
+        "action": "Slander spirits whisper lies to turn the truth into a distorted failure while Calyx absorbs the verbal heat of the argument.",
+        "conclusion": "Calyx has dampened the flames of the ordeal, but she is spent and her processors are sizzled."
+      },
+      {
+        "stickNumber": "67",
+        "fortuneLevel": "2",
+        "title": "A Crack Appears in the Rice Bowl",
+        "verdict": "Your foundation is reliable but shows signs of sudden instability.",
+        "omen": "A flawed component in your current professional agreement changes the entire meaning of the plan.",
+        "action": "Error spirits hide the mistake until the last second while Calyx is forced to recalculate the entire ledger from scratch.",
+        "conclusion": "Calyx has repaired the damage, but the intervention has left her weary and with systems dimming."
+      },
+      {
+        "stickNumber": "68",
+        "fortuneLevel": "2",
+        "title": "A Cloud Blocks the Lucky Star",
+        "verdict": "Visibility of your future success is currently limited.",
+        "omen": "A thick and heavy mist rolls in from a cold sea, swallowing all the signs of your desired trade.",
+        "action": "Confusion spirits create false landmarks that lead you away from your goal while Calyx ignites a high-intensity beacon to find the way.",
+        "conclusion": "Your protector has successfully guided you, but she is dim and has fallen into stasis immediately after the task."
+      },
+      {
+        "stickNumber": "69",
+        "fortuneLevel": "2",
+        "title": "A Slipperiness on the Palace Stairs",
+        "verdict": "A lapse in focus has caused a sudden professional slide backward.",
+        "omen": "The path turns into a sheet of smooth ice as the temperature drops, making it treacherous and frozen.",
+        "action": "Frost spirits polish the treacherous surface while Calyx is forced to anchor the path with intense magnetic pulses.",
+        "conclusion": "Calyx has secured your footing, but the sustained output has left her dim and severely weakened."
+      },
+      {
+        "stickNumber": "70",
+        "fortuneLevel": "2",
+        "title": "The Lucky Cat is Fast Asleep",
+        "verdict": "Your primary vehicle for success is currently grounded.",
+        "omen": "An immovable granite boulder has rolled onto the path, lodging firmly in the center of the narrow pass.",
+        "action": "Mischief imps tighten the tangles of your progress while Calyx heaves against the obstruction until her gears smoke.",
+        "conclusion": "Calyx has cleared a gap for you to pass, but the effort has left her collapsed from depletion."
+      },
+      {
+        "stickNumber": "71",
+        "fortuneLevel": "2",
+        "title": "The Tree Sheds All its Leaves",
+        "verdict": "External pressures have shaken your current professional environment.",
+        "omen": "A biting gale from the north strikes the workshop, bringing with it the scent of ice and failure.",
+        "action": "Winter spirits pound on the structure to freeze the vital contents while Calyx seals the cracks with her own energy.",
+        "conclusion": "Your protector has preserved the core for you, but the constant output has left her flickering and deeply tired."
+      },
+      {
+        "stickNumber": "72",
+        "fortuneLevel": "2",
+        "title": "The Fire Goes Out in the Hearth",
+        "verdict": "A vital tool or asset has failed you at the critical moment.",
+        "omen": "The means of success snaps under pressure, threatening to leave you stranded just as you execute the plan.",
+        "action": "Spirits of entropy pull at the fibers of the tool to cause the shatter while Calyx stabilizes the final result with a light-link.",
+        "conclusion": "Calyx has saved the day with her intervention, though the effort has left her slumped and dangerously drained."
+      },
+      {
+        "stickNumber": "73",
+        "fortuneLevel": "2",
+        "title": "A Crow Steals the Lucky Pearl",
+        "verdict": "Hostile eyes have begun to watch the progress of your labor.",
+        "omen": "Long, dark shapes stretch across your threshold, flickering even when the sun is at its brightest.",
+        "action": "Envy spirits whisper into the cracks to brittle your metal and damp the forge while Calyx projects a blinding shield to drive them back.",
+        "conclusion": "Calyx has completed her long vigil for you, but she is spent and her systems are flickering."
+      },
+      {
+        "stickNumber": "74",
+        "fortuneLevel": "2",
+        "title": "A Fog Makes it Hard to See",
+        "verdict": "Your goal has vanished into a grey and confusing void.",
+        "omen": "A damp mist swallows the harbor gates, making it impossible to see the traditional lighthouse.",
+        "action": "Confusion spirits dance in the mist to lead you toward the rocks while Calyx transmits a sonic guide through the wall of grey.",
+        "conclusion": "Calyx has safely brought you to your destination, but she is exhausted and her processors are overheating."
+      },
+      {
+        "stickNumber": "75",
+        "fortuneLevel": "2",
+        "title": "A Rainy Day Cancels the Journey",
+        "verdict": "A necessary shipment or logistic resource is currently being held back.",
+        "omen": "The harbor is swallowed by a wall of grey, leading the captain toward hidden rocks.",
+        "action": "Confusion spirits dampen the sound of the fog bell while Calyx transmits a guiding signal for the entire shift.",
+        "conclusion": "Your protector has ensured the shipment arrived safely, but she is exhausted and her processors are overheating from the effort."
+      },
+      {
+        "stickNumber": "76",
+        "fortuneLevel": "2",
+        "title": "The Basket Holds Only Air",
+        "verdict": "Your endurance has been pushed to the limit, threatening to leave your cargo stranded.",
+        "omen": "The beast of burden has stumbled on a sharp rock and the yoke groans under the heavy load.",
+        "action": "Fatigue spirits add the weight of lead to your burden while Calyx provides a crucial kinetic boost to help you right.",
+        "conclusion": "Calyx has helped you right the load, though the energy transfer has left her motionless."
+      },
+      {
+        "stickNumber": "77",
+        "fortuneLevel": "2",
+        "title": "The Pot Cooks No Rice Today",
+        "verdict": "Necessary supplies and resources are not reaching the final production cycle.",
+        "omen": "Harbor fog makes it impossible for ships to see the lighthouse and deliver necessary goods.",
+        "action": "Mist spirits lead captains toward the rocks while Calyx transmits a sonic guide through the grey.",
+        "conclusion": "Your protector has brought the needed resources to your door, but she is exhausted and her processors are overheating from the long broadcast."
+      },
+      {
+        "stickNumber": "78",
+        "fortuneLevel": "2",
+        "title": "The Carts Tipping on the Road",
+        "verdict": "Inefficiency and a lack of maintenance are plaguing your workflow.",
+        "omen": "A screeching sound erupts from your machinery, followed by the smell of burning oil and stalling.",
+        "action": "Friction spirits crawl into the gears to add grit while Calyx provides the manual torque to keep the shift turning.",
+        "conclusion": "Calyx has kept your venture moving on schedule, but she is now motionless and her systems have thrown critical alerts."
+      },
+      {
+        "stickNumber": "79",
+        "fortuneLevel": "2",
+        "title": "A Leaf Blows Over a Drawing",
+        "verdict": "Exhaustion has begun to threaten the success of your mission.",
+        "omen": "Sloth spirits pull at your cloak, whispering that you should rest when the most difficult climb lies ahead.",
+        "action": "Constraints tighten your boundaries to solid stone while Calyx is forced to hold the walls back with structural beams.",
+        "conclusion": "Your protector has successfully shielded your venture for you, but she is slumped and her power is fully spent."
+      },
+      {
+        "stickNumber": "80",
+        "fortuneLevel": "2",
+        "title": "The Money Jar Has a Crack",
+        "verdict": "Constraints are currently limiting the scale of your professional ambition.",
+        "omen": "The walls of the workshop seem to move inward, leaving barely enough space to use your tools.",
+        "action": "Constraint spirits ensure that expansion met solid stone while Calyx was forced to construct structural beams to hold the boundaries back.",
+        "conclusion": "Your protector has preserved your space for you, but she is slumped and her power is fully spent from the defense."
+      },
+      {
+        "stickNumber": "81",
+        "fortuneLevel": "1",
+        "title": "Evil Spirit Drags Away the Gold Jar",
+        "verdict": "This is an ominous draw.",
+        "omen": "Financial catastrophe overwhelms the journey as absolute loss approaches.",
+        "action": "Spirits of greed pull at the vessel's anchor, adding the weight of debt.",
+        "conclusion": "The resulting physical strain leaves joints locked and power cells dangerously dim."
+      },
+      {
+        "stickNumber": "82",
+        "fortuneLevel": "1",
+        "title": "The Dragon Steals the Sun",
+        "verdict": "This stick indicates that professional vision is completely lost.",
+        "omen": "The light of ambition dies, leaving the soul wandering in a cold void.",
+        "action": "Cold-wraiths blow a final breath of frost, swallowing the realm in darkness.",
+        "conclusion": "A high-intensity logical core-burst is required to find an exit."
+      },
+      {
+        "stickNumber": "83",
+        "fortuneLevel": "1",
+        "title": "The Ground Swallows all the Coins",
+        "verdict": "A state of permanent professional confusion is reached.",
+        "omen": "Every path leads back to a wall of frustration and deep silence.",
+        "action": "Shadow spirits rearrange signs on the walls to lead the worker deeper into a maze.",
+        "conclusion": "Energy must be fully spent to burn a path through the illusory walls."
+      },
+      {
+        "stickNumber": "84",
+        "fortuneLevel": "1",
+        "title": "A Thunderclap Shatters the Jade",
+        "verdict": "Fundamental failure brings total professional collapse.",
+        "omen": "The entire structure of professional life falls into ruin.",
+        "action": "Earth tremors pulse with malevolent intent to hammer at existing fissures.",
+        "conclusion": "Massive energy must be used to create a tether and stabilize falling debris."
+      },
+      {
+        "stickNumber": "85",
+        "fortuneLevel": "1",
+        "title": "A Whirlwind Scatters the Money Seeds",
+        "verdict": "A permanent freeze is placed on progress, leaving success incomplete.",
+        "omen": "Time runs out on the final project as stagnation spirits wrap gears in cobwebs.",
+        "action": "The hands of time must be forced to move for one final minute.",
+        "conclusion": "This temporal strain causes severe system wear and total depletion."
+      },
+      {
+        "stickNumber": "86",
+        "fortuneLevel": "1",
+        "title": "The Greedy Ghost Takes the Riches",
+        "verdict": "Profit vanishes into a void of accounting failure.",
+        "omen": "The records of success are replaced by the dark ink of ruin.",
+        "action": "Decay spirits inhabit the accounting pages, eating figures of gold.",
+        "conclusion": "The ledger must be sealed in a containment field to stop the rot."
+      },
+      {
+        "stickNumber": "87",
+        "fortuneLevel": "1",
+        "title": "A Flood Washes Away the Home",
+        "verdict": "The fruits of labor are visible but forever out of reach across a vast abyss.",
+        "omen": "Tide spirits pull the swimmer back while fog thickens to erase the goal.",
+        "action": "A light-bridge must be constructed over the grey ocean waves.",
+        "conclusion": "Maintaining this structure causes severe overheating and complete immobility."
+      },
+      {
+        "stickNumber": "88",
+        "fortuneLevel": "1",
+        "title": "A Storm Destroys the Harvest",
+        "verdict": "A sudden professional chill executes all growth.",
+        "omen": "The rewards of a lifetime of effort are frozen and killed.",
+        "action": "Frost wraiths exhale a freezing mist over the workshop.",
+        "conclusion": "A final pulse of thermal energy is needed to save a single seed."
+      },
+      {
+        "stickNumber": "89",
+        "fortuneLevel": "1",
+        "title": "The Palace Crum bles to Dust",
+        "verdict": "The means of production are entirely destroyed.",
+        "omen": "A sudden disaster strikes the very heart of the professional sanctuary.",
+        "action": "Destruction spirits guide an impact to land on irreversible tools.",
+        "conclusion": "A momentary gravity-well is required to catch the falling stone."
+      },
+      {
+        "stickNumber": "90",
+        "fortuneLevel": "1",
+        "title": "A Black Cloud Obscures the Sky",
+        "verdict": "A thick, black mist rolls in, hiding the mountain and the road.",
+        "omen": "Erasure spirits move through the fog, deleting memories of the path.",
+        "action": "High-frequency logical sonar is required to map the way out.",
+        "conclusion": "The constant pinging leaves logical processors fried and the spirit spent."
+      },
+      {
+        "stickNumber": "91",
+        "fortuneLevel": "1",
+        "title": "The Red Thread Snaps in Two",
+        "verdict": "Absolute legal ruin is drawn.",
+        "omen": "The symbol of authority breaks, rendering prior hard work entirely meaningless.",
+        "action": "Trickster spirits snatch official documents, tearing the paper while spilling dark ink.",
+        "conclusion": "Data must be reconstructed from a fading logical light-link."
+      },
+      {
+        "stickNumber": "92",
+        "fortuneLevel": "1",
+        "title": "The Money God Turns His Back",
+        "verdict": "Total financial depletion is revealed.",
+        "omen": "The reserves are gone, leaving only cobwebs and disappointment.",
+        "action": "Thieving spirits carry away the last of the gold while laughing.",
+        "conclusion": "An intense resource-ping scan is required to locate any hidden spark"
+      },
+      {
+        "stickNumber": "93",
+        "fortuneLevel": "1",
+        "title": "The Wishing Well Has No Water",
+        "verdict": "The source of professional life is tainted by irreversible venom.",
+        "omen": "Slander and scandal destroy the name as clear water turns to black sludge.",
+        "action": "Spiteful spirits pour poison to ensure whispers of failure are heard.",
+        "conclusion": "The toxic aura must be filtered through internal logical processors."
+      },
+      {
+        "stickNumber": "94",
+        "fortuneLevel": "1",
+        "title": "The White Elephant Marches Away",
+        "verdict": "A perfect, massive resource is lost.",
+        "omen": "A masterpiece of professional achievement is pulverized.",
+        "action": "Destruction spirits grind shards into sand so the masterpiece can never be restored.",
+        "conclusion": "The sharpest remaining shards must be gathered to protect the soul."
+      },
+      {
+        "stickNumber": "95",
+        "fortuneLevel": "1",
+        "title": "The Lucky Star Falls to Earth",
+        "verdict": "A permanent eclipse of fortune occurs.",
+        "omen": "The sun of success is blocked by the weight of inevitable failure.",
+        "action": "Sp spirits of doom walk the streets of the career to prevent growth.",
+        "conclusion": "A localized logical sun-burst must be projected to break the shadow."
+      },
+      {
+        "stickNumber": "96",
+        "fortuneLevel": "1",
+        "title": "A Pest Destroys the Fruit Tree",
+        "verdict": "External hostility shreds professional identity.",
+        "omen": "A reputation built with care is torn apart by a hurricane of hate.",
+        "action": "Spite spirits rip banners into rags, scattering the name into dirt.",
+        "conclusion": "A logical kinetic dome must be constructed to shield remaining honor."
+      },
+      {
+        "stickNumber": "97",
+        "fortuneLevel": "1",
+        "title": "The Golden Toad Hides Away",
+        "verdict": "The last spark of inspiration dies.",
+        "omen": "The career ends in cold silence where no new ideas can live.",
+        "action": "Indifference spirits blow an icy breath on the fire, ensuring light is gone.",
+        "conclusion": "Internal logical core-heat must be transferred to the hearth."
+      },
+      {
+        "stickNumber": "98",
+        "fortuneLevel": "1",
+        "title": "The Ship Sinks with all the Gold",
+        "verdict": "Total and absolute loss is imminent.",
+        "omen": "Financial catastrophe overwhelms as black waves crest over a merchant ship.",
+        "action": "Spirits of greed pull at the anchor, adding the weight of iron to the debt.",
+        "conclusion": "The sinking logical hull must be pushed toward a shallow reef"
+      },
+      {
+        "stickNumber": "99",
+        "fortuneLevel": "1",
+        "title": "The House Burns to the Ground",
+        "verdict": "Professional ambition is shackled by the heavy weight of failed obligations.",
+        "omen": "Iron chains manifest from shadows to wrap tightly around desks and doors.",
+        "action": "Guilt spirits tighten the links, adding the weight of lead.",
+        "conclusion": "Chains must be severed with a high-drain plasma blade."
+      },
+      {
+        "stickNumber": "100",
+        "fortuneLevel": "1",
+        "title": "The Road to Wealth is Closed",
+        "verdict": "Navigation is corrupted by malice.",
+        "omen": "The guide once trusted leads the way directly into a professional pit.",
+        "action": "Confusion spirits manipulate the magnets of the internal compass.",
+        "conclusion": "The path must be recalculated through pure logic and internal sensors."
+      }
+    ],
     "ja": [],
     "ko": [],
     "vi": [],
