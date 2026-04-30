@@ -20,11 +20,11 @@ import { SubButton } from "../category";
 import type * as Types from "./type";
 
 const SUB_BUTTON_PROPERTIES = [
-  {
-    image: subButtonSet.familyFriend,
-    action: KAUCIM_CONCERNS.FAMILY,
-    labelKey: "Family & Friends",
-  },
+  // {
+  //   image: subButtonSet.familyFriend,
+  //   action: KAUCIM_CONCERNS.FAMILY,
+  //   labelKey: "Family & Friends",
+  // },
   {
     image: subButtonSet.wealth,
     action: KAUCIM_CONCERNS.WEALTH,
@@ -40,11 +40,11 @@ const SUB_BUTTON_PROPERTIES = [
     action: KAUCIM_CONCERNS.CAREER,
     labelKey: "Career",
   },
-  {
-    image: subButtonSet.health,
-    action: KAUCIM_CONCERNS.HEALTH,
-    labelKey: "Health",
-  },
+  // {
+  //   image: subButtonSet.health,
+  //   action: KAUCIM_CONCERNS.HEALTH,
+  //   labelKey: "Health",
+  // },
 ];
 
 export function KaucimOrb(properties: Types.Properties) {

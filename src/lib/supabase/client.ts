@@ -8,11 +8,11 @@ const supabaseUrl = ENV.SUPABASE_URL;
 const supabaseAnonKey = ENV.SUPABASE_ANON_KEY;
 
 // Skip credential validation when using mock data
-if (!USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
-  throw new Error(
-    'Missing Supabase credentials. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file',
-  );
-}
+// if (!USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
+//   throw new Error(
+//     'Missing Supabase credentials. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file',
+//   );
+// }
 
 const customStorage = {
   getItem: async (key: string) => {
