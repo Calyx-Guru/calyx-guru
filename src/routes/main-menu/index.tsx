@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: "34.5%",
+    bottom: "20%",
   },
   bottomWrapper: {
     position: "absolute",

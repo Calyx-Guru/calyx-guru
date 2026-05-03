@@ -11,6 +11,63 @@
     "settings": "Settings",
     "language": "Language"
   },
+  "petStatus": {
+    "veryGood": {
+      "0": "Calyx experiences a profound sense of tranquility as she drifts through a sanctuary of fragrant, moonlit blossoms.",
+      "1": "An aura of absolute grace surrounds Calyx, reflecting the enduring peace of a century-long harmony.",
+      "2": "Calyx basks in the warmth of a divine union, her every movement radiating celestial success and protection.",
+      "3": "The essence of pure joy permeates Calyx, as if she has partaken in the nectar of eternal spring.",
+      "4": "Calyx stands with the immovable stability of an ancient peak, anchored by the depth of a sacred covenant.",
+      "5": "A radiant glow of loyalty illuminates Calyx, guiding her toward a future of shared and perfect grace.",
+      "6": "Calyx moves in flawless harmony with the universe, her spirit resonating with the rhythm of a destined soul.",
+      "7": "Bathed in the light of auspicious clouds, Calyx welcomes a destiny filled with prosperity and romantic fulfillment.",
+      "8": "Calyx beholds the absolute truth of fate, flourishing under a clear sky of moon-blessed honesty and clarity."
+    },
+    "good": {
+      "0": "Calyx finds joy as her spirit begins to reflect the radiant light of a beautiful connection.",
+      "1": "The thinning frost brings a sense of quiet hope to Calyx as she awaits the returning warmth.",
+      "2": "Calyx experiences a sense of liquid grace as divine favor begins to manifest in her reality.",
+      "3": "A sense of calm stability washes over Calyx, mirroring the steady presence of an ancient mountain.",
+      "4": "Calyx follows a golden walkway, her spirit uplifted by the soft, glowing light of potential loyalty.",
+      "5": "The rhythmic pulse of a shared destiny begins to align Calyx’s thoughts with a sense of harmony.",
+      "6": "Glowing droplets of pure potential rain down upon Calyx, bringing a flood of positive events and joy.",
+      "7": "Clear moonbeams wash away confusion, allowing Calyx to flourish in a state of growing celestial clarity.",
+      "8": "The fragrant mist of massive peonies transforms Calyx’s surroundings into a sanctuary of emerging beauty."
+    },
+    "normal": {
+      "0": "Calyx maintains a state of quiet equilibrium, observing the subtle shift from winter toward the distant spring.",
+      "1": "The thinning frost allows Calyx to stand in patient stillness, awaiting a more definitive change in the air.",
+      "2": "Calyx rests upon a stone, watching the distant horizon for a change in the seasons.",
+      "3": "A path of stillness reveals itself to Calyx, though the high fortune remains dormant for now.",
+      "4": "The bamboo clatters softly in the wind, marking a moment of quiet reflection for Calyx.",
+      "5": "Calyx occupies a space where the timing is not yet right, trusting in the eventual return of warmth.",
+      "6": "Calyx waits within the winter landscape, her spirit held in a state of peaceful and patient expectation.",
+      "7": "The landscape remains locked in a winter’s grip, as Calyx observes the frost beginning to thin.",
+      "8": "Calyx dwells in a sanctuary of silence, trusting that the warmth will return in its own time."
+    },
+    "bad": {
+      "0": "Calyx feels the chill of a venomous trap, her heart mourning the loss of a perceived love.",
+      "1": "A shadow descends upon Calyx, casting a veil of confusion over her once-clear and honest spirit.",
+      "2": "The blood of Calyx turns cold as she witnesses the golden wine transform into bitter, black bile.",
+      "3": "Spent and weary, Calyx lingers in a state of profound exhaustion after enduring a devastating spiritual blight.",
+      "4": "Locked within an unyielding winter, Calyx watches the frost thicken as hope for the spring breeze withers.",
+      "5": "Calyx mourns a dying heart, the victim of a treacherous cup that promised affection but delivered only venom.",
+      "6": "Ethereal laughter haunts Calyx as she struggles against a darkness that threatens to turn her spirit into ash.",
+      "7": "A sense of desolation grips Calyx, the landscape of her destiny now a barren and frozen waste.",
+      "8": "The light within Calyx flickers and dims, overshadowed by the oppressive weight of a treacherous and unfavorable fate."
+    },
+    "veryBad": {
+      "0": "Calyx exists in a void where the light of hope has been utterly extinguished by a treacherous fate.",
+      "1": "A profound and icy darkness consumes Calyx, leaving her spirit as cold and hollow as an ancient ruin.",
+      "2": "Calyx is submerged in an abyss of despair, her heart failing under the weight of a venomous betrayal.",
+      "3": "The once-vibrant spirit of Calyx is reduced to grey ash, drifting aimlessly through a landscape of total desolation.",
+      "4": "Calyx experiences a complete spiritual collapse, her soul rendered barren by the touch of a deceitful hand.",
+      "5": "Utterly spent, Calyx lies motionless as the shadows of a broken destiny claim the last of her vitality.",
+      "6": "A hollow silence envelops Calyx, marking the end of all warmth and the triumph of a freezing night.",
+      "7": "Calyx is haunted by the echoes of a lost grace, her essence dissolving into the bitter mist of failure.",
+      "8": "The final embers of Calyx’s heart go cold, surrendering to a darkness that knows no dawn or relief."
+    }
+  },
   "auth": {
     "welcome": "Welcome Back",
     "signInDescription": "Sign in to your account to continue",

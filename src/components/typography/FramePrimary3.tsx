@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TextStyle,
+  View,
   ViewStyle,
 } from "react-native";
 
@@ -19,11 +20,12 @@ export const FramePrimary3: React.FC<FramePrimaryProps> = ({
   style,
 }) => {
   return (
-    <ImageBackground
-      source={framePrimary3}
-      style={[styles.frame, style]}
-      resizeMode="cover"
-    >
+    <View style={[styles.frame, style]}>
+      <ImageBackground
+        source={framePrimary3}
+        style={styles.background}
+        resizeMode="cover"
+      />
       {typeof children === "string" ? (
         <Text style={[styles.text]}>
           {typeof children === "string" ? children : children}
@@ -31,7 +33,7 @@ export const FramePrimary3: React.FC<FramePrimaryProps> = ({
       ) : (
         children
       )}
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -41,6 +43,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
     aspectRatio: "2/1",
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.8,
   },
   text: {
     fontSize: 16,

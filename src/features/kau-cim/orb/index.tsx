@@ -64,9 +64,9 @@ export function KaucimOrb(properties: Types.Properties) {
   const SUB_BUTTON_TARGETS = useMemo(() => {
     const a = 160;
 
-    return ([-0.6, 0, 0.6] as const).map((t) => {
+    return ([-0.8, 0, 0.8] as const).map((t) => {
       const x = t * a;
-      const y = 60 + 60 * Math.sqrt(Math.max(0, 1 - t * t));
+      const y = 40 + 50 * Math.sqrt(Math.max(0, 1 - t * t));
 
       return {
         x,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.7)",
     alignItems: "center",
     justifyContent: "center",
-    bottom: "-175%",
+    bottom: "-135%",
   },
   closeText: {
     color: "#fff",

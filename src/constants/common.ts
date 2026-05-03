@@ -1,6 +1,6 @@
 import { LanguageKey } from '@/types';
 
-export const USE_MOCK_DATA = false;
+export const USE_MOCK_DATA = true; // process.env.EXPO_PUBLIC_USE_MOCK_DATA;
 
 export const DEFAULT_LANGUAGE: LanguageKey = 'en';
 export const SUPPORTED_LANGUAGES: LanguageKey[] = [
