@@ -1,3 +1,5 @@
+import { getLocales } from "expo-localization";
+import * as Speech from "expo-speech";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -26,6 +28,8 @@ export function StoryTeller(properties: Properties) {
   const [sentenceIndex, setSentenceIndex] = useState(0);
   const [crossfading, setCrossfading] = useState(false);
   const captionOpacity = useRef(new Animated.Value(1)).current;
+  const speechUnavailable = useRef(false);
+  const narrationVoice = useRef<string | undefined>(undefined);
 
   const slidesData = useMemo(
     () =>
@@ -39,6 +43,53 @@ export function StoryTeller(properties: Properties) {
   );
 
   const currentSlide = slidesData[slideIndex];
+
+  const resolveNarrationVoice = useCallback(async () => {
+    if (narrationVoice.current !== undefined) {
+      return narrationVoice.current;
+    }
+
+    const locales = getLocales();
+    const preferredTag = locales[0]?.languageTag?.toLowerCase();
+    const preferredLanguage = locales[0]?.languageCode?.toLowerCase();
+
+    const voices = await Speech.getAvailableVoicesAsync();
+    if (!voices.length) {
+      narrationVoice.current = "";
+      return undefined;
+    }
+
+    const byLanguage = voices.filter((voice) => {
+      const voiceLanguage = voice.language?.toLowerCase() ?? "";
+      if (preferredTag != null && voiceLanguage === preferredTag) {
+        return true;
+      }
+      if (preferredLanguage != null && voiceLanguage.startsWith(preferredLanguage)) {
+        return true;
+      }
+      return false;
+    });
+
+    const candidates = byLanguage.length > 0 ? byLanguage : voices;
+
+    const scored = candidates
+      .map((voice) => {
+        const id = `${voice.identifier ?? ""} ${voice.name ?? ""}`.toLowerCase();
+        let score = 0;
+
+        if (id.includes("neural")) score += 5;
+        if (id.includes("enhanced") || id.includes("premium")) score += 4;
+        if (id.includes("natural") || id.includes("studio")) score += 3;
+        if (id.includes("wavenet")) score += 3;
+        if (id.includes("narrator")) score += 2;
+
+        return { voice, score };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    narrationVoice.current = scored[0]?.voice.identifier ?? "";
+    return narrationVoice.current || undefined;
+  }, []);
 
   const advance = useCallback(() => {
     if (crossfading) {
@@ -80,31 +131,103 @@ export function StoryTeller(properties: Properties) {
     }
 
     const line = currentSlide.sentences[sentenceIndex] ?? "";
+    const spokenLine = line.trim();
     const totalDelay = readingPauseMsForSentence(line);
-    const fadeDurationMs = Math.min(460, Math.max(260, Math.round(totalDelay * 0.24)));
+    const fadeDurationMs = Math.min(
+      460,
+      Math.max(260, Math.round(totalDelay * 0.24)),
+    );
     const holdDurationMs = Math.max(80, totalDelay - fadeDurationMs);
 
     captionOpacity.stopAnimation();
     captionOpacity.setValue(1);
 
-    const holdTimer = setTimeout(() => {
-      Animated.timing(captionOpacity, {
-        toValue: 0,
-        duration: fadeDurationMs,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }).start(({ finished }) => {
-        if (finished) {
-          advance();
+    let disposed = false;
+    let holdTimer: ReturnType<typeof setTimeout> | null = null;
+    let fadeStarted = false;
+
+    const startFade = (delayMs: number) => {
+      if (disposed || fadeStarted) {
+        return;
+      }
+
+      fadeStarted = true;
+      holdTimer = setTimeout(() => {
+        if (disposed) {
+          return;
         }
-      });
-    }, holdDurationMs);
+
+        Animated.timing(captionOpacity, {
+          toValue: 0,
+          duration: fadeDurationMs,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }).start(({ finished }) => {
+          if (finished) {
+            advance();
+          }
+        });
+      }, delayMs);
+    };
+
+    const runDefaultTiming = () => {
+      startFade(holdDurationMs);
+    };
+
+    if (!spokenLine || speechUnavailable.current) {
+      runDefaultTiming();
+    } else {
+      void (async () => {
+        try {
+          await Speech.stop();
+          const voice = await resolveNarrationVoice();
+
+          if (disposed) {
+            return;
+          }
+
+          Speech.speak(spokenLine, {
+            voice,
+            rate: 0.93,
+            pitch: 1.0,
+            onDone: () => startFade(0),
+            onStopped: () => startFade(0),
+            onError: () => {
+              speechUnavailable.current = true;
+              runDefaultTiming();
+            },
+          });
+
+          // Safety fallback in case the underlying TTS engine never calls completion callbacks.
+          holdTimer = setTimeout(() => {
+            startFade(0);
+          }, Math.max(holdDurationMs, spokenLine.length * 60));
+        } catch {
+          speechUnavailable.current = true;
+          runDefaultTiming();
+        }
+      })();
+    }
 
     return () => {
-      clearTimeout(holdTimer);
+      disposed = true;
+      if (holdTimer != null) {
+        clearTimeout(holdTimer);
+      }
       captionOpacity.stopAnimation();
+      if (!speechUnavailable.current) {
+        void Speech.stop();
+      }
     };
-  }, [slideIndex, sentenceIndex, crossfading, advance, currentSlide, captionOpacity]);
+  }, [
+    slideIndex,
+    sentenceIndex,
+    crossfading,
+    advance,
+    currentSlide,
+    captionOpacity,
+    resolveNarrationVoice,
+  ]);
 
   return (
     <Pressable style={styles.slideshowPressable} onPress={advance}>
