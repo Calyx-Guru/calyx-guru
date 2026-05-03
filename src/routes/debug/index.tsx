@@ -60,6 +60,16 @@ export function RouteDebug() {
     setOffsetMs(next);
   }, [offsetMs]);
 
+  const bumpPetPower = useCallback(
+    (delta: number) => {
+      if (!userState) return;
+      void updateUserState({
+        petPower: userState.petPower + delta,
+      });
+    },
+    [updateUserState, userState],
+  );
+
   const onResetUserStateAndRoot = useCallback(async () => {
     if (profile) {
       await updateProfile({
@@ -158,6 +168,38 @@ export function RouteDebug() {
         </Pressable>
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Pet power</Text>
+        <Text style={styles.mono}>
+          Current:{" "}
+          {userState ? userState.petPower.toLocaleString() : "— (no state)"}
+        </Text>
+        <View style={styles.row}>
+          <Pressable
+            disabled={!userState}
+            style={({ pressed }) => [
+              styles.stepButton,
+              !userState && styles.stepButtonDisabled,
+              userState && pressed && styles.stepButtonPressed,
+            ]}
+            onPress={() => bumpPetPower(-10)}
+          >
+            <Text style={styles.stepButtonLabel}>−10</Text>
+          </Pressable>
+          <Pressable
+            disabled={!userState}
+            style={({ pressed }) => [
+              styles.stepButton,
+              !userState && styles.stepButtonDisabled,
+              userState && pressed && styles.stepButtonPressed,
+            ]}
+            onPress={() => bumpPetPower(10)}
+          >
+            <Text style={styles.stepButtonLabel}>+10</Text>
+          </Pressable>
+        </View>
+      </View>
+
       <Pressable
         style={({ pressed }) => [
           styles.primaryButton,
@@ -236,6 +278,9 @@ const styles = StyleSheet.create({
   },
   stepButtonPressed: {
     backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  stepButtonDisabled: {
+    opacity: 0.45,
   },
   stepButtonLabel: {
     color: "#fafafa",

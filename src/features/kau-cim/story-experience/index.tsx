@@ -166,7 +166,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
             url={video}
             loop={false}
             muted={false}
-            contentFit="contain"
+            contentFit="cover"
             timeUpdateEventIntervalSec={0.08}
             onTimeUpdate={onTimeUpdate}
             onPlayToEnd={onPlayToEnd}

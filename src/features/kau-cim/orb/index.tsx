@@ -64,7 +64,7 @@ export function KaucimOrb(properties: Types.Properties) {
   const SUB_BUTTON_TARGETS = useMemo(() => {
     const a = 160;
 
-    return ([-1.1, -0.6, 0, 0.6, 1.1] as const).map((t) => {
+    return ([-0.6, 0, 0.6] as const).map((t) => {
       const x = t * a;
       const y = 60 + 60 * Math.sqrt(Math.max(0, 1 - t * t));
 
