@@ -89,11 +89,44 @@ export function useKaucim() {
     return false;    
   }, [userState, lastKaucimResults]);
 
+  const calculateStickNumber = (journeyProgress: number, randomStickNumber: number) => {
+    // Always a good or greater good stick in the first 3 days
+    switch (journeyProgress) {
+      case 0:
+      case 1:
+        return randomStickNumber % 20;
+      case 2:
+      case 3:
+        return randomStickNumber % 40;
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+        return randomStickNumber % 60;
+      case 8:
+      case 9:
+        return randomStickNumber % 80;
+      case 10:
+        return randomStickNumber % 20 + 60;
+      case 11:
+        return randomStickNumber % 40;
+      case 12:
+        return randomStickNumber % 60;
+      case 13:
+        return randomStickNumber % 40 + 60;
+      case 14:
+        return randomStickNumber % 80;
+    }
+
+    return randomStickNumber % 100;
+  }
+
   const rollKaucimResult = useCallback((concern: KAUCIM_CONCERNS) => {
+    const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
+
     let result: KaucimResult | undefined;
     if (userState) {
-      const lastKaucimTimestamp = userState?.lastKaucimTimestamp || 0;
-      const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
+      const lastKaucimTimestamp = userState?.lastKaucimTimestamp || 0;      
       if (lastKaucimTimestamp >= todayFirstTimestamp) {
         result = lastKaucimResults[concern];
         if (result) {
@@ -107,11 +140,18 @@ export function useKaucim() {
       }
     }
 
+    const lastKaucimRollTimestamp = userState?.lastKaucimRollTimestamp || 0;
+    let journeyProgress = userState?.kaucimJourneyProgress || 0;
+    if (lastKaucimRollTimestamp >= todayFirstTimestamp) {
+      journeyProgress += 1;
+    }
+
     const concernIndex = KAUCIM_CONCERNS_META[concern].index;
     const rngIndex = KAUCIM_RNG_INDEX + concernIndex * 10;
-    const stickNumber = getRandomInt(deviceId, rngIndex, createDate(), 0, 100);
-    const storyIndex = getRandomInt(deviceId, rngIndex + 1, createDate(), 0, 100);
+    const randomStickNumber = getRandomInt(deviceId, rngIndex, createDate(), 0, 100);
+    const stickNumber = calculateStickNumber(journeyProgress, randomStickNumber);
     const storyBundle = getKaucimStoryBundle(concern, locale, stickNumber);
+    const storyIndex = getRandomInt(deviceId, rngIndex + 1, createDate(), 0, storyBundle.length);
     const story = storyBundle[storyIndex % storyBundle.length];
     const powerChange = getPowerChange(Number(story.fortuneLevel), rngIndex + 2);
     
@@ -142,6 +182,8 @@ export function useKaucim() {
         lastKaucimFresh: true,
       });
       updateUserState({
+        lastKaucimRollTimestamp: todayFirstTimestamp,
+        kaucimJourneyProgress: journeyProgress,
         lastKaucimTimestamp: nextLastKaucimTimestamp,
         lastKaucimResults: nextLastKaucimResults,
         petPower: userState.petPower + result.powerChange,

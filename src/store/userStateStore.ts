@@ -2,6 +2,7 @@
  * Zustand store for per-user app state (kaucim history, …): same sync pattern as {@link useUserProfileStore}.
  */
 
+import { MAX_PET_POWER } from '@/constants';
 import {
   clampUserState,
   kaucimHistoryExceedsLimit,
@@ -22,11 +23,13 @@ const STORAGE_KEY = 'userState';
 function createDefaultUserState(userId: string): UserState {
   return {
     id: userId,
-    petPower: 0,
+    petPower: Math.floor(MAX_PET_POWER / 2) + 1,
     lastKaucimTimestamp: 0,
     lastKaucimResults: {},
     kaucimHistory: [],
     kaucimStoryUnlocks: {},
+    lastKaucimRollTimestamp: 0,
+    kaucimJourneyProgress: 0,
   };
 }
 

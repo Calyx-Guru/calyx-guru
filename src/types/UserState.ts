@@ -46,4 +46,6 @@ export interface UserState {
   lastKaucimResults: KaucimResultsMap;
   kaucimHistory: KaucimState[];
   kaucimStoryUnlocks: Partial<Record<KAUCIM_CONCERNS, KaucimStoryUnlock>>;
+  lastKaucimRollTimestamp: number;
+  kaucimJourneyProgress: number;
 }
