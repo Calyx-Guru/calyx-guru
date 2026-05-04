@@ -35,7 +35,9 @@ export function RouteKaucim() {
   const result = concern ? lastKaucimResults[concern] : undefined;
   const illustrations = concern ? ILLUSTRATIONS[concern] : undefined;
   const story =
-    concern && result ? getKaucimStory(concern, result.storyIndex) : undefined;
+    concern && result
+      ? getKaucimStory(concern, result.stickNumber, result.storyIndex)
+      : undefined;
 
   const fortuneLevel = story ? Number(story.fortuneLevel) : 0;
   const stickNumber = story ? Number(story.stickNumber) : 0;
