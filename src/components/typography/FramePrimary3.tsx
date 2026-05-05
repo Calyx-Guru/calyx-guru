@@ -24,7 +24,7 @@ export const FramePrimary3: React.FC<FramePrimaryProps> = ({
       <ImageBackground
         source={framePrimary3}
         style={styles.background}
-        resizeMode="cover"
+        resizeMode="stretch"
       />
       {typeof children === "string" ? (
         <Text style={[styles.text]}>
