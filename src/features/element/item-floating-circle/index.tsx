@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Animated, Image, Pressable, StyleSheet } from "react-native";
+import {
+  Animated,
+  Image,
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+} from "react-native";
 
+import { circleBlueButton } from "@/assets/images/ui";
 import { ELEMENTS } from "../constants";
 import type * as Types from "./type";
 
@@ -80,7 +87,13 @@ export function ElementItemFloatingCircle(properties: Types.Properties) {
           style={styles.elementImageWrapper}
           onPress={() => onSelectElement(element.key)}
         >
-          <Image source={element.source} style={styles.elementImage} />
+          <ImageBackground
+            source={circleBlueButton}
+            style={styles.elementButtonBackground}
+            resizeMode="stretch"
+          >
+            <Image source={element.source} style={styles.elementImage} />
+          </ImageBackground>
         </Pressable>
       </Animated.View>
     );
@@ -135,11 +148,29 @@ const styles = StyleSheet.create({
     left: 25,
   },
   elementImageWrapper: {
+    width: "100%",
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
-  elementImage: {
+  elementButtonBackground: {
     width: "100%",
     height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    aspectRatio: 1.02,
+  },
+  elementImage: {
+    width: "80%",
+    height: "80%",
+    resizeMode: "contain",
+    marginBottom: 10,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderRadius: 100,
+    overflow: "hidden",
   },
 });

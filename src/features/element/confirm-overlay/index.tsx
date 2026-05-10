@@ -112,12 +112,19 @@ export function ConfirmOverlay(properties: Types.Properties) {
 
   const renderTool = () => (
     <View style={styles.toolWrapper}>
-      <ButtonPrimary onPress={() => properties.onConfirm?.(element)}>
-        {`Confirm Element "${element.toUpperCase()}"`}
-      </ButtonPrimary>
-      <Pressable onPress={properties.onChooseAgain}>
-        <Text style={styles.toolChooseAgainTitle}>Choose Again</Text>
-      </Pressable>
+      <View
+        style={{
+          width: 100,
+          height: 100,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ButtonPrimary onPress={() => properties.onConfirm?.(element)}>
+          {`Confirm Element "${element.toUpperCase()}"`}
+        </ButtonPrimary>
+      </View>
     </View>
   );
 
@@ -134,6 +141,13 @@ export function ConfirmOverlay(properties: Types.Properties) {
         {renderHeader()}
         {renderImage()}
         {renderTool()}
+
+        <Pressable
+          onPress={properties.onChooseAgain}
+          style={styles.closeWrapper}
+        >
+          <Text style={styles.closeText}>✕</Text>
+        </Pressable>
       </View>
     </Modal>
   );
@@ -142,15 +156,18 @@ export function ConfirmOverlay(properties: Types.Properties) {
 const styles = StyleSheet.create({
   overlayWrapper: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
+    width: "100%",
+    height: "100%",
+    paddingHorizontal: 8,
   },
   backdropWrapper: {
     backgroundColor: "#ffffff",
   },
   frameWrapper: {
-    marginTop: 28,
+    marginTop: 36,
+    width: "100%",
+    height: "auto",
+    aspectRatio: 3 / 2,
   },
   headerWrapper: {
     paddingVertical: 16,
@@ -161,21 +178,33 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: "700",
     textAlign: "center",
+    textShadowColor: "#000000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   headerDescription: {
     color: "#b0b8c0",
     fontSize: 14,
     fontWeight: "400",
     textAlign: "center",
+    textShadowColor: "#000000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   headerDescriptionHighlight: {
     color: "#f0e68c",
     fontSize: 16,
     fontWeight: "800",
+    textShadowColor: "#000000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   headerDescriptionBold: {
     color: "#ffffff",
     fontWeight: "900",
+    textShadowColor: "#000000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   previewWrapper: {
     flex: 1,
@@ -194,9 +223,10 @@ const styles = StyleSheet.create({
     height: 220,
   },
   toolWrapper: {
+    display: "flex",
     alignItems: "center",
     rowGap: 12,
-    marginBottom: 35,
+    marginBottom: 16,
     width: "100%",
     zIndex: 1,
   },
@@ -214,5 +244,22 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textDecorationLine: "underline",
     fontWeight: "600",
+  },
+  closeWrapper: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    zIndex: 2,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
   },
 });

@@ -1,4 +1,4 @@
-import { headingPrimary } from "@/assets/images/typography";
+import { ribbon } from "@/assets/images/ui";
 import React from "react";
 import {
   GestureResponderEvent,
@@ -16,9 +16,9 @@ interface ButtonPrimaryProps {
 export const HeadingPrimary: React.FC<ButtonPrimaryProps> = ({ children }) => {
   return (
     <ImageBackground
-      source={headingPrimary}
+      source={ribbon}
       style={[styles.heading]}
-      resizeMode="cover"
+      resizeMode="stretch"
     >
       <Text style={[styles.text]}>{children}</Text>
     </ImageBackground>
@@ -28,14 +28,19 @@ export const HeadingPrimary: React.FC<ButtonPrimaryProps> = ({ children }) => {
 const styles = StyleSheet.create({
   heading: {
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "stretch",
     width: "100%",
-    aspectRatio: "6/1",
+    height: "auto",
+    aspectRatio: 7,
   },
   text: {
     fontSize: 16,
     fontWeight: "600",
     color: "#ffffff",
     textAlign: "center",
+    textShadowColor: "#000000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+    marginBottom: 10,
   },
 });

@@ -1,4 +1,4 @@
-import { buttonPrimary2 } from "@/assets/images/typography";
+import { blueButton } from "@/assets/images/ui";
 import React from "react";
 import {
   GestureResponderEvent,
@@ -22,9 +22,9 @@ export const ButtonPrimary: React.FC<ButtonPrimaryProps> = ({
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled}>
       <ImageBackground
-        source={buttonPrimary2}
+        source={blueButton}
         style={[styles.button]}
-        resizeMode="cover"
+        resizeMode="contain"
       >
         <Text style={[styles.text]}>{children}</Text>
       </ImageBackground>
@@ -37,12 +37,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    aspectRatio: "6/1",
+    height: "100%",
+    aspectRatio: 3,
   },
   text: {
     fontSize: 16,
     fontWeight: "600",
     color: "#ffffff",
     textAlign: "center",
+    marginBottom: 14,
+    textShadowColor: "#000000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
 });

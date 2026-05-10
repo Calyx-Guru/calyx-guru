@@ -48,7 +48,7 @@ export function RouteChooseElement(properties: Types.Properties) {
     handleSelectElement(element);
   }
 
-  function getRandomElement() : ElementName {
+  function getRandomElement(): ElementName {
     const todayElement = getElementByBirthDate(createDate());
     return todayElement;
   }
@@ -57,7 +57,7 @@ export function RouteChooseElement(properties: Types.Properties) {
     setElement(elementName);
     setStage("confirm-element");
   }
-  
+
   const renderTitle = () => {
     if (stage !== "choose-element") {
       return null;
@@ -140,7 +140,15 @@ export function RouteChooseElement(properties: Types.Properties) {
 
   const RandomElementButton = () => {
     return (
-      <View style={{ marginTop: "auto" }}>
+      <View
+        style={{
+          width: 480,
+          height: 100,
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+        }}
+      >
         <ButtonPrimary
           onPress={() => {
             const element = getRandomElement();
@@ -192,7 +200,11 @@ export function RouteChooseElement(properties: Types.Properties) {
 
   return (
     <View style={styles.root}>
-      <ChooseElementBackgroundVideo isIdle={stage === "choose-element" || stage === "confirm-element"} element={element} onHatchingEnd={() => router.replace("/main-menu")} />
+      <ChooseElementBackgroundVideo
+        isIdle={stage === "choose-element" || stage === "confirm-element"}
+        element={element}
+        onHatchingEnd={() => router.replace("/main-menu")}
+      />
 
       <View style={styles.toolWrapper}>
         {renderTitle()}
@@ -214,7 +226,8 @@ const styles = StyleSheet.create({
   toolWrapper: {
     flex: 1,
     justifyContent: "space-between",
-    padding: 8,
+    alignItems: "center",
+    padding: 16,
   },
   dateContainer: {
     //
