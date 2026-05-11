@@ -7,6 +7,7 @@ export function useAppState() {
   const lastKaucimConcern = useAppStateStore((s) => s.lastKaucimConcern);
   const lastKaucimFresh = useAppStateStore((s) => s.lastKaucimFresh);
   const lastPetPowerChange = useAppStateStore((s) => s.lastPetPowerChange);
+  const kaucimReplay = useAppStateStore((s) => s.kaucimReplay);
   const setAppState = useAppStateStore((s) => s.setAppState);
   const resetAppState = useAppStateStore((s) => s.resetAppState);
 
@@ -23,6 +24,7 @@ export function useAppState() {
     lastKaucimConcern,
     lastKaucimFresh,
     lastPetPowerChange,
+    kaucimReplay,
     setAppState,
     resetAppState,
   };

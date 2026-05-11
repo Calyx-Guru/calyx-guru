@@ -6,5 +6,7 @@ export interface Properties {
   verdict: string;
   slides: Slide[];
   summary: Pick<Kaucim.Summary, "title" | "powerChange">;
+  showIntroVideo?: boolean;
+  showResultPopup?: boolean;
   onResultDismiss: () => void;
 }

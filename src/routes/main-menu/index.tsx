@@ -192,6 +192,21 @@ export function RouteMainMenu() {
           <Text style={styles.debugButtonLabel}>Debug</Text>
         </Pressable>
       )}
+
+      <Pressable
+        style={[
+          styles.debugButton,
+          {
+            top: insets.top + 64,
+            left: Math.max(insets.left, 10),
+          },
+        ]}
+        onPress={() => router.push("/kau-cim-collection" as Href)}
+        accessibilityRole="button"
+        accessibilityLabel="Open kaucim collection screen"
+      >
+        <Text style={styles.debugButtonLabel}>Kaucim Collection</Text>
+      </Pressable>
     </View>
   );
 }

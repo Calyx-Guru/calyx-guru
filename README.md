@@ -61,3 +61,18 @@ ffmpeg -i "bad.mp4" -vf "scale=-2:720,fps=24" -c:v libx264 -preset veryslow -crf
 ## Play the video
 
 ffplay -vcodec libvpx-vp9 -i input.webm -vf "format=yuva420p,drawgrid=w=40:h=40:t=1:c=gray@0.5"
+
+## Rename images
+
+Get-ChildItem -Filter "_\_\_\_\*.png" | ForEach-Object {
+if ($_.Name -match '^[^_]+_(\d+)_([^\.]+)\.png$') {
+    $newName = "$($Matches[2].ToLower())-$($Matches[1]).png"
+Rename-Item -LiteralPath $\_.FullName -NewName $newName
+}
+}
+
+Get-ChildItem -Filter "conclude-\*.png" | ForEach-Object {
+if ($_.Name -match '^conclude-(\d+)\.png$') {
+Rename-Item -LiteralPath $_.FullName -NewName "conclusion-$($Matches[1]).png"
+}
+}

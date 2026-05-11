@@ -7,6 +7,7 @@ import { KaucimStoryExperience } from "@/features/kau-cim/story-experience";
 import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useUserState } from "@/hooks/useUserState";
+import { FIVE_ELEMENTS } from "@/types/UserState";
 import { pickRandom } from "@/lib/app/helper";
 
 import * as KAUCIM_VIDEOS from "@/assets/videos/kau-cim";
@@ -26,11 +27,16 @@ function getKaucimVideoAsset(fortuneLevel: number) {
 }
 
 export function RouteKaucim() {
-  const { lastKaucimConcern } = useAppState();
+  const { lastKaucimConcern, kaucimReplay } = useAppState();
   const { rollKaucimResult } = useKaucim();
   const [isKaucimReady, setIsKaucimReady] = useState(false);
 
   useEffect(() => {
+    if (kaucimReplay) {
+      setIsKaucimReady(true);
+      return;
+    }
+
     if (lastKaucimConcern) {
       rollKaucimResult(lastKaucimConcern);
       setIsKaucimReady(true);
@@ -41,13 +47,28 @@ export function RouteKaucim() {
 }
 
 function KaucimSlideShow() {
-  const { lastKaucimConcern, lastKaucimFresh } = useAppState();
+  const { lastKaucimConcern, lastKaucimFresh, kaucimReplay, setAppState } =
+    useAppState();
   const { userState } = useUserState();
   const { getKaucimStory } = useKaucim();
 
-  const concern = lastKaucimConcern;
+  const concern = kaucimReplay?.concern ?? lastKaucimConcern;
   const lastKaucimResults = userState?.lastKaucimResults || {};
-  const result = concern ? lastKaucimResults[concern] : undefined;
+  const result = kaucimReplay
+    ? {
+        concern: kaucimReplay.concern,
+        stickNumber: kaucimReplay.stickNumber,
+        storyIndex: kaucimReplay.storyIndex,
+        powerChange: kaucimReplay.powerChange,
+        element:
+          userState?.lastKaucimResults[kaucimReplay.concern]?.element ??
+          FIVE_ELEMENTS.EARTH,
+        currentPower: userState?.petPower ?? 0,
+        timestamp: 0,
+      }
+    : concern
+      ? lastKaucimResults[concern]
+      : undefined;
   const illustrations = concern ? ILLUSTRATIONS[concern] : undefined;
   const story =
     concern && result
@@ -76,11 +97,14 @@ function KaucimSlideShow() {
     const concludeIllustration = pickRandom(
       illustrations.conclude[stickNumber % illustrations.conclude.length],
     );
+    const openingText = kaucimReplay
+      ? [story.verdict.trim(), story.omen.trim()].filter(Boolean).join("\n\n")
+      : story.omen;
 
     return [
       {
         image: verdictIllustration(),
-        text: story.omen,
+        text: openingText,
       },
       {
         image: actionIllustration(),
@@ -92,7 +116,7 @@ function KaucimSlideShow() {
         textParams: { bonus: result.powerChange },
       },
     ];
-  }, []);
+  }, [illustrations, kaucimReplay, result, stickNumber, story]);
 
   if (!concern) {
     console.warn("Invalid state: no concern");
@@ -124,11 +148,20 @@ function KaucimSlideShow() {
         video={video}
         verdict={story.verdict}
         slides={slideShow}
+        showIntroVideo={!kaucimReplay}
+        showResultPopup={!kaucimReplay}
         summary={{
           title: story.title,
-          powerChange: lastKaucimFresh ? result.powerChange : 0,
+          powerChange:
+            !kaucimReplay && lastKaucimFresh ? result.powerChange : 0,
         }}
         onResultDismiss={() => {
+          const replayedFromCollection = Boolean(kaucimReplay);
+          setAppState({ kaucimReplay: null });
+          if (replayedFromCollection) {
+            router.back();
+            return;
+          }
           router.replace("/main-menu");
         }}
       />

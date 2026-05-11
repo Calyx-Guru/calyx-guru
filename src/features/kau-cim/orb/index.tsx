@@ -203,6 +203,12 @@ export function KaucimOrb(properties: Types.Properties) {
           <View style={styles.centerIconContainer} pointerEvents="none">
             <Image
               source={kaucimIcon}
+              style={styles.centerIconGlow}
+              resizeMode="contain"
+              blurRadius={12}
+            />
+            <Image
+              source={kaucimIcon}
               style={styles.centerIconImage}
               resizeMode="contain"
             />
@@ -300,17 +306,27 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   centerIconImage: {
-    width: 48,
-    height: 48,
-    marginBottom: 4,
+    width: 54,
+    height: 54,
+    marginBottom: 0,
+  },
+  centerIconGlow: {
+    position: "absolute",
+    width: 56,
+    height: 56,
+    tintColor: "#FFFFFF",
+    opacity: 0.9,
+    transform: [{ scale: 1.08 }],
+    marginBottom: 30,
   },
   mainTagText: {
-    color: "#FFD700",
-    fontSize: 12,
+    color: "#FFFFFF",
+    fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0.5,
     textShadowColor: "rgba(0, 0, 0, 0.8)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
+    marginBottom: 10,
   },
 });

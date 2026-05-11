@@ -23,3 +23,7 @@ export function getDebugTimeOffset(): number {
 export function createDate(date: number = Date.now()): Date {
   return new Date(date + debugTimeOffset);
 }
+
+export function getTodayFirstTimestamp(): number {
+  return Math.floor(createDate().setHours(0, 0, 0, 0) / 86400000) * 86400000;
+}

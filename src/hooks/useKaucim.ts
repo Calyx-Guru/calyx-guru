@@ -2,7 +2,7 @@ import { KAUCIM_RNG_INDEX, MAX_PET_POWER } from "@/constants";
 import { useAppAppearance } from "@/contexts/AppAppearanceContext";
 import { useAppState } from "@/hooks/useAppState";
 import { getRandomInt } from "@/lib/app/rng";
-import { createDate } from "@/lib/app/time";
+import { createDate, getTodayFirstTimestamp } from "@/lib/app/time";
 import {
   FIVE_ELEMENTS,
   KAUCIM_CONCERNS,
@@ -83,7 +83,7 @@ export function useKaucim() {
     (concern: KAUCIM_CONCERNS) => {
       if (userState) {
         const lastKaucimTimestamp = userState?.lastKaucimTimestamp || 0;
-        const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
+        const todayFirstTimestamp = getTodayFirstTimestamp();
         if (lastKaucimTimestamp >= todayFirstTimestamp) {
           const result = lastKaucimResults[concern];
           if (result) {
@@ -134,7 +134,7 @@ export function useKaucim() {
 
   const rollKaucimResult = useCallback(
     (concern: KAUCIM_CONCERNS) => {
-      const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
+      const todayFirstTimestamp = getTodayFirstTimestamp();
 
       let result: KaucimResult | undefined;
       if (userState) {
@@ -145,7 +145,9 @@ export function useKaucim() {
             setAppState({
               lastKaucimConcern: concern,
               lastKaucimFresh: false,
+              kaucimReplay: null,
             });
+            unlockKaucimStory(concern, result.stickNumber);
 
             return result;
           }
@@ -203,18 +205,19 @@ export function useKaucim() {
         const lastKaucimTimestamp = userState.lastKaucimTimestamp || 0;
         let nextLastKaucimTimestamp = lastKaucimTimestamp || 0;
         let nextLastKaucimResults = { ...lastKaucimResults };
-        const todayFirstTimestamp = createDate().setHours(0, 0, 0, 0);
+        const todayFirstTimestamp = getTodayFirstTimestamp();
         if (lastKaucimTimestamp < todayFirstTimestamp) {
           nextLastKaucimTimestamp = todayFirstTimestamp;
           nextLastKaucimResults = {};
         }
         nextLastKaucimResults[concern] = result;
         pushKaucimHistory(result);
-        unlockKaucimStory(concern, storyIndex);
+        unlockKaucimStory(concern, stickNumber);
         setAppState({
           lastKaucimConcern: concern,
           lastKaucimFresh: true,
           lastPetPowerChange: result.powerChange,
+          kaucimReplay: null,
         });
         updateUserState({
           lastKaucimRollTimestamp: todayFirstTimestamp,
@@ -244,9 +247,33 @@ export function useKaucim() {
     [getKaucimStoryBundle, locale],
   );
 
+  const findKaucimResultForStick = useCallback(
+    (concern: KAUCIM_CONCERNS, stickNumber: number) => {
+      if (!userState) {
+        return undefined;
+      }
+
+      const todayResult = userState.lastKaucimResults[concern];
+      if (todayResult?.stickNumber === stickNumber) {
+        return todayResult;
+      }
+
+      for (const entry of userState.kaucimHistory) {
+        const result = entry.results[concern];
+        if (result?.stickNumber === stickNumber) {
+          return result;
+        }
+      }
+
+      return undefined;
+    },
+    [userState],
+  );
+
   return {
     rollKaucimResult,
     getKaucimStory,
+    findKaucimResultForStick,
     isConcernReadToday,
   };
 }

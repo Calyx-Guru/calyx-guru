@@ -37,11 +37,24 @@ if (
 }
 
 export function KaucimStoryExperience(properties: Types.Properties) {
-  const { video, verdict, slides, summary, onResultDismiss } = properties;
+  const {
+    video,
+    verdict,
+    slides,
+    summary,
+    showIntroVideo = true,
+    showResultPopup = true,
+    onResultDismiss,
+  } = properties;
 
   const insets = useSafeAreaInsets();
 
-  const [phase, setPhase] = useState<Types.Phase>("video");
+  const [phase, setPhase] = useState<Types.Phase>(
+    showIntroVideo ? "video" : "slideshow",
+  );
+  const showSkipButton =
+    phase !== "result" &&
+    (phase === "slideshow" || (showIntroVideo && phase === "video"));
   const [imagesReady, setImagesReady] = useState(false);
 
   const pendingAfterPreload = useRef(false);
@@ -326,9 +339,18 @@ export function KaucimStoryExperience(properties: Types.Properties) {
         </View>
       )}
       {phase === "slideshow" && imagesReady && (
-        <StoryTeller slides={slides} onEnded={() => setPhase("result")} />
+        <StoryTeller
+          slides={slides}
+          onEnded={() => {
+            if (showResultPopup) {
+              setPhase("result");
+              return;
+            }
+            onResultDismiss();
+          }}
+        />
       )}
-      {phase === "result" && imagesReady && lastSlide && (
+      {showResultPopup && phase === "result" && imagesReady && lastSlide && (
         <StoryResult
           summary={{
             ...summary,
@@ -337,7 +359,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
           onDismiss={onResultDismiss}
         />
       )}
-      {phase !== "result" && (
+      {showSkipButton && (
         <Pressable
           style={[
             styles.skipButton,
@@ -346,9 +368,17 @@ export function KaucimStoryExperience(properties: Types.Properties) {
               right: Math.max(insets.right, 12),
             },
           ]}
-          onPress={() => setPhase("result")}
+          onPress={() => {
+            if (showResultPopup) {
+              setPhase("result");
+              return;
+            }
+            onResultDismiss();
+          }}
           accessibilityRole="button"
-          accessibilityLabel="Skip to result"
+          accessibilityLabel={
+            showResultPopup ? "Skip to result" : "Back to collection"
+          }
         >
           <Text style={styles.skipButtonLabel}>Skip</Text>
         </Pressable>

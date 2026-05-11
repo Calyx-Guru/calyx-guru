@@ -51,7 +51,7 @@ export interface UserStateStore {
   pushKaucimHistory: (result: KaucimResult) => Promise<KaucimState[]>;
   unlockKaucimStory: (
     concern: KAUCIM_CONCERNS,
-    storyIndex: number,
+    stickNumber: number,
   ) => Promise<void>;
   updatePetPower: (power: number) => Promise<void>;
 }
@@ -137,13 +137,13 @@ export const useUserStateStore = create<UserStateStore>()(
 
         unlockKaucimStory: async (
           concern: KAUCIM_CONCERNS,
-          storyIndex: number,
+          stickNumber: number,
         ) => {
           const prev = get().userState;
           if (!prev) return;
           const storyUnlocks = prev.kaucimStoryUnlocks?.[concern] || {};
-          if (storyUnlocks[storyIndex]) return;
-          storyUnlocks[storyIndex] = now();
+          if (storyUnlocks[stickNumber]) return;
+          storyUnlocks[stickNumber] = now();
           await sync.updateRecord({
             kaucimStoryUnlocks: {
               ...prev.kaucimStoryUnlocks,

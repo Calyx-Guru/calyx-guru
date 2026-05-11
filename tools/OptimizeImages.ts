@@ -1,7 +1,7 @@
-import { Command } from 'commander';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import sharp from 'sharp';
+import { Command } from "commander";
+import fs from "node:fs/promises";
+import path from "node:path";
+import sharp from "sharp";
 
 async function* walkPngs(dir: string): AsyncGenerator<string> {
   const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -9,7 +9,7 @@ async function* walkPngs(dir: string): AsyncGenerator<string> {
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
       yield* walkPngs(full);
-    } else if (e.isFile() && e.name.toLowerCase().endsWith('.png')) {
+    } else if (e.isFile() && e.name.toLowerCase().endsWith(".png")) {
       yield full;
     }
   }
@@ -18,37 +18,13 @@ async function* walkPngs(dir: string): AsyncGenerator<string> {
 function isUnderStories(filePath: string, imagesRoot: string): boolean {
   const rel = path.relative(imagesRoot, filePath);
   const first = rel.split(path.sep)[0];
-  return first === 'stories';
+  return first === "stories";
 }
 
-async function convertStoriesPngToJpeg(
+async function optimizeOtherPng(
   pngPath: string,
   dryRun: boolean,
 ): Promise<void> {
-  const jpgPath = pngPath.slice(0, -'.png'.length) + '.jpg';
-  if (dryRun) {
-    console.log(`[dry-run] ${pngPath} -> ${jpgPath} (jpeg q80, max height 1280)`);
-    return;
-  }
-
-  const meta = await sharp(pngPath).metadata();
-  let pipeline = sharp(pngPath).rotate();
-  if (meta.hasAlpha) {
-    pipeline = pipeline.flatten({ background: '#ffffff' });
-  }
-  await pipeline
-    .resize({
-      height: 1280,
-      fit: 'inside',
-      withoutEnlargement: true,
-    })
-    .jpeg({ quality: 80, mozjpeg: true })
-    .toFile(jpgPath);
-  await fs.unlink(pngPath);
-  console.log(`Converted: ${pngPath} -> ${jpgPath}`);
-}
-
-async function optimizeOtherPng(pngPath: string, dryRun: boolean): Promise<void> {
   if (dryRun) {
     console.log(`[dry-run] optimize PNG: ${pngPath}`);
     return;
@@ -70,16 +46,16 @@ async function optimizeOtherPng(pngPath: string, dryRun: boolean): Promise<void>
 const program = new Command();
 
 program
-  .name('optimize-images')
+  .name("optimize-images")
   .description(
-    'Optimize PNGs under src/assets/images; story PNGs become JPEG (q80, max height 1280)',
+    "Optimize PNGs under src/assets/images; story PNGs become JPEG (q80, max height 1280)",
   )
   .option(
-    '--root <dir>',
-    'Images root directory (relative to cwd)',
-    'src/assets/images',
+    "--root <dir>",
+    "Images root directory (relative to cwd)",
+    "src/assets/images",
   )
-  .option('--dry-run', 'Print actions without writing files', false)
+  .option("--dry-run", "Print actions without writing files", false)
   .action(async (opts: { root: string; dryRun: boolean }) => {
     const imagesRoot = path.resolve(process.cwd(), opts.root);
     try {

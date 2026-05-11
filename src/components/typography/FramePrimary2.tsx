@@ -1,4 +1,4 @@
-import { framePrimary2 } from "@/assets/images/typography";
+import { thinGoldFrame } from "@/assets/images/ui";
 import React from "react";
 import {
   ImageBackground,
@@ -20,7 +20,7 @@ export const FramePrimary2: React.FC<FramePrimaryProps> = ({
 }) => {
   return (
     <ImageBackground
-      source={framePrimary2}
+      source={thinGoldFrame}
       style={[styles.frame, style]}
       resizeMode="cover"
     >
