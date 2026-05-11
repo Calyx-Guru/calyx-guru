@@ -5,9 +5,10 @@ import {
   ImageBackground,
   Pressable,
   StyleSheet,
+  View,
 } from "react-native";
 
-import { circleBlueButton } from "@/assets/images/ui";
+import { orbButton } from "@/assets/images/ui";
 import { ELEMENTS } from "../constants";
 import type * as Types from "./type";
 
@@ -88,11 +89,18 @@ export function ElementItemFloatingCircle(properties: Types.Properties) {
           onPress={() => onSelectElement(element.key)}
         >
           <ImageBackground
-            source={circleBlueButton}
+            source={orbButton}
             style={styles.elementButtonBackground}
             resizeMode="stretch"
           >
-            <Image source={element.source} style={styles.elementImage} />
+            <View style={styles.elementImageStack}>
+              <Image
+                source={element.source}
+                style={styles.elementImageGlow}
+                blurRadius={12}
+              />
+              <Image source={element.source} style={styles.elementImage} />
+            </View>
           </ImageBackground>
         </Pressable>
       </Animated.View>
@@ -161,16 +169,32 @@ const styles = StyleSheet.create({
     aspectRatio: 1.02,
   },
   elementImage: {
-    width: "80%",
-    height: "80%",
+    width: "100%",
+    height: "100%",
     resizeMode: "contain",
+    borderRadius: 100,
+  },
+  elementImageStack: {
+    width: "70%",
+    height: "70%",
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 10,
+  },
+  elementImageGlow: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
+    tintColor: "#eeeeee",
+    opacity: 1,
+    transform: [{ scale: 1.08 }],
+    borderRadius: 100,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.15,
     shadowRadius: 3.84,
-    elevation: 5,
-    borderRadius: 100,
-    overflow: "hidden",
+    elevation: 2,
   },
 });

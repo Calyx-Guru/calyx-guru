@@ -104,6 +104,11 @@ export function ConfirmOverlay(properties: Types.Properties) {
       <Animated.View style={[styles.previewWrapper, animated]}>
         <Image
           source={ELEMENTS.find((el) => el.key === element)?.source}
+          style={styles.previewWrapperImageGlow}
+          blurRadius={4}
+        />
+        <Image
+          source={ELEMENTS.find((el) => el.key === element)?.source}
           style={styles.previewWrapperImage}
         />
       </Animated.View>
@@ -224,6 +229,18 @@ const styles = StyleSheet.create({
     marginTop: -145,
     width: 220,
     height: 220,
+  },
+  previewWrapperImageGlow: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: -110,
+    marginTop: -145,
+    width: 220,
+    height: 220,
+    tintColor: "#eeeeee",
+    opacity: 1,
+    transform: [{ scale: 1.1 }],
   },
   toolWrapper: {
     display: "flex",

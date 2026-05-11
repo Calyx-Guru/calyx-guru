@@ -10,7 +10,7 @@ export const ELEMENTS: Types.Element[] = [
     color: "#7ED972",
     description: "Growth, Vitality, and Creativity",
     source: wood,
-    positionStyleKey: "elementTop",
+    positionStyleKey: "elementBottomLeft",
   },
   {
     key: "fire",
@@ -37,7 +37,7 @@ export const ELEMENTS: Types.Element[] = [
     color: "#E7E7E7",
     description: "Precision, Strength, and Focus",
     source: metal,
-    positionStyleKey: "elementBottomLeft",
+    positionStyleKey: "elementTop",
   },
   {
     key: "water",
