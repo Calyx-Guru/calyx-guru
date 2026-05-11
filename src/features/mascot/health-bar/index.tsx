@@ -1,13 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 
-import {
-  energyBorder1,
-  energyEmpty1,
-  energyEmptyOverlay1,
-  energyIcon,
-  energyValue1,
-} from "@/assets/images/mascot";
+import { energyIcon, powerBarBase, powerBarFill } from "@/assets/images/ui";
 
 import type * as Types from "./type";
 
@@ -17,6 +11,12 @@ export const HealthBar = (properties: Types.Properties) => {
   const initialPercent =
     (Math.max(0, Math.min(value, totalValue)) / totalValue) * 100;
   const animatedValue = useRef(new Animated.Value(initialPercent)).current;
+  const [fillTrackWidth, setFillTrackWidth] = useState<number | null>(null);
+
+  const clipWidth = animatedValue.interpolate({
+    inputRange: [0, 100],
+    outputRange: ["0%", "100%"],
+  });
 
   const bars = useMemo(() => {
     const currentValue = Math.max(0, Math.min(value, totalValue));
@@ -44,59 +44,63 @@ export const HealthBar = (properties: Types.Properties) => {
     <View
       style={{
         width: "100%",
+        display: "flex",
+        alignItems: "center",
       }}
     >
       <ImageBackground
-        source={energyEmpty1}
+        source={powerBarBase}
         style={[styles.empty, style]}
-        resizeMode="cover"
+        resizeMode="stretch"
       >
+        <View
+          style={styles.valueTrack}
+          onLayout={(event) => {
+            setFillTrackWidth(event.nativeEvent.layout.width);
+          }}
+        >
+          <Animated.View style={[styles.valueClip, { width: clipWidth }]}>
+            {fillTrackWidth != null ? (
+              <ImageBackground
+                source={powerBarFill}
+                style={[styles.valueFill, { width: fillTrackWidth }]}
+                resizeMode="stretch"
+              />
+            ) : null}
+          </Animated.View>
+        </View>
         <ImageBackground
-          source={energyValue1}
-          style={[styles.value]}
-          resizeMode="cover"
-        />
-        <Animated.Image
-          source={energyEmptyOverlay1}
-          style={[
-            styles.emptyOverlay,
-            {
-              width: animatedValue.interpolate({
-                inputRange: [0, 100],
-                outputRange: ["100%", "0%"],
-              }),
-            },
-          ]}
-          resizeMode="stretch"
-        />
-        <ImageBackground
-          source={energyBorder1}
-          style={styles.border}
+          source={energyIcon}
+          style={[styles.icon]}
           resizeMode="cover"
         />
       </ImageBackground>
-      <ImageBackground
-        source={energyIcon}
-        style={[styles.icon]}
-        resizeMode="cover"
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   empty: {
-    width: "100%",
+    width: 400,
     borderRadius: 16,
-    aspectRatio: "12/1",
+    aspectRatio: 6,
+    overflow: "hidden",
+    display: "flex",
+    justifyContent: "center",
+  },
+  valueTrack: {
+    position: "absolute",
+    top: 2,
+    left: 4,
+    right: 4,
+    bottom: 4,
+    opacity: 0.8,
+  },
+  valueClip: {
+    height: "100%",
     overflow: "hidden",
   },
-  value: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
+  valueFill: {
     height: "100%",
   },
   emptyOverlay: {
@@ -111,11 +115,10 @@ const styles = StyleSheet.create({
     aspectRatio: "12/1",
   },
   icon: {
-    position: "absolute",
-    top: -5,
-    left: -10,
-    width: 30,
-    height: 42,
+    width: 54,
+    height: 108,
     aspectRatio: "5/7",
+    marginLeft: 24,
+    marginTop: 24,
   },
 });

@@ -13,7 +13,9 @@ import { getElementByBirthDate } from "@/utils/element";
 import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
 import { FramePrimary2 } from "@/components/typography/FramePrimary2";
 import { HeadingPrimary } from "@/components/typography/HeadingPrimary";
+import { INITIAL_PET_POWER } from "@/constants";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserState } from "@/hooks/useUserState";
 import { createDate } from "@/lib/app/time";
 import { FIVE_ELEMENTS } from "@/types/UserState";
 import { ChooseElementBackgroundVideo } from "./ChooseElementBackgroundVideo";
@@ -27,6 +29,7 @@ export function RouteChooseElement(properties: Types.Properties) {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [element, setElement] = useState<ElementName | null>(null);
   const { updateProfile } = useUserProfile();
+  const { updateUserState } = useUserState();
 
   function onDateChange(event: Types.DateTimePickerEvent, selectedDate?: Date) {
     setShowDatePicker(false);
@@ -63,7 +66,19 @@ export function RouteChooseElement(properties: Types.Properties) {
       return null;
     }
 
-    return <HeadingPrimary>Choose your Element</HeadingPrimary>;
+    return (
+      <View
+        style={{
+          width: 400,
+          height: 100,
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+        }}
+      >
+        <HeadingPrimary>Choose your Element</HeadingPrimary>;
+      </View>
+    );
   };
 
   const renderChooseBirthday = () => (
@@ -191,6 +206,9 @@ export function RouteChooseElement(properties: Types.Properties) {
                 break;
             }
             updateProfile({ element: elementString });
+            updateUserState({
+              petPower: INITIAL_PET_POWER,
+            });
           }
           setStage("hatching-sequence");
         }}

@@ -159,13 +159,16 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     paddingHorizontal: 8,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   backdropWrapper: {
     backgroundColor: "#ffffff",
   },
   frameWrapper: {
     marginTop: 36,
-    width: "100%",
+    width: 400,
     height: "auto",
     aspectRatio: 3 / 2,
   },
@@ -183,7 +186,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 1,
   },
   headerDescription: {
-    color: "#b0b8c0",
+    color: "#dddddd",
     fontSize: 14,
     fontWeight: "400",
     textAlign: "center",
