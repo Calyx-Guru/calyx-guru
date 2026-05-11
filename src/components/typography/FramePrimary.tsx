@@ -49,9 +49,11 @@ export const FramePrimary: React.FC<FramePrimaryProps> = ({
         ]}
         resizeMode="stretch"
       >
-        <Text style={[styles.text]}>
-          {typeof children === "string" ? children : children}
-        </Text>
+        {typeof children === "string" ? (
+          <Text style={styles.text}>{children}</Text>
+        ) : (
+          children
+        )}
       </ImageBackground>
     </View>
   );

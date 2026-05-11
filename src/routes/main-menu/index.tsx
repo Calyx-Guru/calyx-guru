@@ -1,4 +1,12 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { NormalVideo } from "@/components/video/NormalVideo";
 import { TransparentVideo } from "@/components/video/TransparentVideo";
@@ -9,12 +17,11 @@ import { CalendarWestern } from "@/features/calendar/western";
 import { KaucimOrb } from "@/features/kau-cim/orb";
 import { HealthBar } from "@/features/mascot/health-bar";
 import { StatusMessage } from "@/features/mascot/status-message";
-import { useKaucim } from "@/hooks/useKaucim";
+import { useAppState } from "@/hooks/useAppState";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import { FIVE_ELEMENTS, KAUCIM_CONCERNS } from "@/types/UserState";
 import { router, type Href } from "expo-router";
-import { useCallback, useMemo } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VIDEOS } from "./constants";
 
@@ -22,16 +29,82 @@ export function RouteMainMenu() {
   const insets = useSafeAreaInsets();
   const { profile } = useUserProfile();
   const { userState } = useUserState();
-  const { rollKaucimResult } = useKaucim();
+  const { lastPetPowerChange, setAppState } = useAppState();
 
-  const element = profile?.element as FIVE_ELEMENTS;
+  const [petPowerGainChange, setPetPowerGainChange] = useState<number | null>(
+    null,
+  );
+  const [powerFlyerAmount, setPowerFlyerAmount] = useState<number | null>(null);
+
+  const flyerTranslateY = useRef(new Animated.Value(0)).current;
+  const flyerOpacity = useRef(new Animated.Value(1)).current;
+  /** Must not cancel when lastPetPowerChange drops to 0 after consume — that re-runs this effect. */
+  const powerFlyerDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useLayoutEffect(() => {
+    if (lastPetPowerChange === 0) return;
+    const amount = lastPetPowerChange;
+    setAppState({ lastPetPowerChange: 0 });
+    setPetPowerGainChange(amount);
+    if (powerFlyerDelayTimerRef.current != null) {
+      clearTimeout(powerFlyerDelayTimerRef.current);
+    }
+    powerFlyerDelayTimerRef.current = setTimeout(() => {
+      powerFlyerDelayTimerRef.current = null;
+      setPowerFlyerAmount(amount);
+    }, 1000);
+  }, [lastPetPowerChange, setAppState]);
+
+  useEffect(() => {
+    return () => {
+      if (powerFlyerDelayTimerRef.current != null) {
+        clearTimeout(powerFlyerDelayTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (powerFlyerAmount == null) return undefined;
+
+    flyerTranslateY.setValue(0);
+    flyerOpacity.setValue(1);
+
+    const animation = Animated.parallel([
+      Animated.timing(flyerTranslateY, {
+        toValue: -180,
+        duration: 1600,
+        useNativeDriver: true,
+      }),
+      Animated.sequence([
+        Animated.delay(400),
+        Animated.timing(flyerOpacity, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]);
+
+    animation.start(({ finished }) => {
+      if (finished) {
+        setPowerFlyerAmount(null);
+        setPetPowerGainChange(null);
+      }
+    });
+
+    return () => {
+      animation.stop();
+    };
+  }, [powerFlyerAmount, flyerTranslateY, flyerOpacity]);
 
   const onKaucimAction = useCallback(
     (concern: KAUCIM_CONCERNS) => {
-      rollKaucimResult(concern);
+      setAppState({ lastKaucimConcern: concern });
       router.replace("/kau-cim");
     },
-    [rollKaucimResult, profile],
+    [profile],
   );
 
   const petState = useMemo(() => {
@@ -62,7 +135,11 @@ export function RouteMainMenu() {
       <NormalVideo url={petState.backgroundVideo} />
 
       <View style={styles.headerWrapper}>
-        <HealthBar totalValue={MAX_PET_POWER} value={petState.petPower} />
+        <HealthBar
+          totalValue={MAX_PET_POWER}
+          value={petState.petPower}
+          change={petPowerGainChange ?? lastPetPowerChange}
+        />
         <StatusMessage />
       </View>
 
@@ -75,6 +152,24 @@ export function RouteMainMenu() {
       <View style={styles.bodyWrapper}>
         <KaucimOrb onAction={onKaucimAction} />
       </View>
+
+      {powerFlyerAmount != null && (
+        <View style={styles.powerFlyerOverlay} pointerEvents="none">
+          <Animated.Text
+            accessibilityLiveRegion="polite"
+            style={[
+              styles.powerFlyerText,
+              {
+                color: powerFlyerAmount < 0 ? "#FF4D4D" : "#FFD700",
+                opacity: flyerOpacity,
+                transform: [{ translateY: flyerTranslateY }],
+              },
+            ]}
+          >
+            {`POWER ${powerFlyerAmount > 0 ? `+${powerFlyerAmount}` : powerFlyerAmount}`}
+          </Animated.Text>
+        </View>
+      )}
 
       <View style={styles.bottomWrapper}>
         <CalendarEastern date={new Date("2038-06-26")} />
@@ -123,6 +218,21 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: "20%",
+  },
+  powerFlyerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  powerFlyerText: {
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    color: "#FFD700",
+    textShadowColor: "rgba(0,0,0,0.85)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   bottomWrapper: {
     position: "absolute",

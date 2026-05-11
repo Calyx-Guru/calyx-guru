@@ -39,11 +39,11 @@ export const StatusMessage = (properties: Types.Properties) => {
 
 const styles = StyleSheet.create({
   frameWrapper: {
-    width: '100%',
-    aspectRatio: 3 / 1,
+    width: 400,
+    height: 120,
   },
   text: {
-    width: "90%",
+    margin: 24,
     color: "#ffffff",
     textAlign: "center",
     fontSize: 18,

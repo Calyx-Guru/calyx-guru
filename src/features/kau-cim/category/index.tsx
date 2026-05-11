@@ -46,7 +46,7 @@ export function SubButton({
       <ImageBackground
         source={tag}
         style={styles.textContainer}
-        resizeMode="contain"
+        resizeMode="stretch"
       >
         <Text style={styles.label}>{t(labelKey)}</Text>
       </ImageBackground>
@@ -61,20 +61,20 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   image: {
-    width: 70,
-    height: 70,
+    width: 96,
+    height: 96,
   },
   textContainer: {
     position: "absolute",
-    bottom: -10,
+    bottom: -12,
     alignItems: "center",
     justifyContent: "center",
-    width: 65,
-    height: 25,
+    width: 82,
+    height: 26,
   },
   label: {
     color: "#fff",
-    fontSize: 7,
+    fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
     textShadowColor: "rgba(0, 0, 0, 0.75)",
@@ -83,8 +83,9 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: "absolute",
-    top: -20,
-    width: 100,
-    height: 100,
+    top: -32,
+    left: -25,
+    width: 142,
+    height: 142,
   },
 });

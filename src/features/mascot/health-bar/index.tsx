@@ -1,16 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 
 import { energyIcon, powerBarBase, powerBarFill } from "@/assets/images/ui";
 
 import type * as Types from "./type";
 
-export const HealthBar = (properties: Types.Properties) => {
-  const { totalValue = 100, value = 100, colors = ["red"], style } = properties;
+const fillPercent = (amount: number, total: number) =>
+  (Math.max(0, Math.min(amount, total)) / total) * 100;
 
-  const initialPercent =
-    (Math.max(0, Math.min(value, totalValue)) / totalValue) * 100;
-  const animatedValue = useRef(new Animated.Value(initialPercent)).current;
+export const HealthBar = (properties: Types.Properties) => {
+  const {
+    totalValue = 100,
+    value = 100,
+    colors = ["red"],
+    change = 0,
+    style,
+  } = properties;
+
+  const animatedValue = useRef(
+    new Animated.Value(
+      change > 0
+        ? fillPercent(value - change, totalValue)
+        : fillPercent(value, totalValue),
+    ),
+  ).current;
   const [fillTrackWidth, setFillTrackWidth] = useState<number | null>(null);
 
   const clipWidth = animatedValue.interpolate({
@@ -18,27 +31,32 @@ export const HealthBar = (properties: Types.Properties) => {
     outputRange: ["0%", "100%"],
   });
 
-  const bars = useMemo(() => {
-    const currentValue = Math.max(0, Math.min(value, totalValue));
-
-    const valuePerBar = totalValue / colors.length;
-    const index = Math.floor(currentValue / valuePerBar);
-
-    const color = colors[Math.max(0, Math.min(index, colors.length - 1))];
-
-    return {
-      color,
-      value: (currentValue / totalValue) * 100,
-    };
-  }, [totalValue, value, colors]);
-
   useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: bars.value,
+    const toPercent = fillPercent(value, totalValue);
+
+    if (change > 0) {
+      const fromPercent = fillPercent(value - change, totalValue);
+      animatedValue.setValue(fromPercent);
+      const animation = Animated.sequence([
+        Animated.delay(1000),
+        Animated.timing(animatedValue, {
+          toValue: toPercent,
+          duration: 650,
+          useNativeDriver: false,
+        }),
+      ]);
+      animation.start();
+      return () => animation.stop();
+    }
+
+    const animation = Animated.timing(animatedValue, {
+      toValue: toPercent,
       duration: 300,
       useNativeDriver: false,
-    }).start();
-  }, [bars.value]);
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [value, change, totalValue]);
 
   return (
     <View

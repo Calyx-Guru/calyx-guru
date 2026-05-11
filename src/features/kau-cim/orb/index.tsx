@@ -8,13 +8,10 @@ import {
   View,
 } from "react-native";
 
-import {
-  kaucimIcon,
-  kaucimOrb,
-  kaucimOrbVortex,
-} from "@/assets/images/kau-cim";
+import { kaucimIcon, kaucimOrbVortex } from "@/assets/images/kau-cim";
 import * as subButtonSet from "@/assets/images/kau-cim/set-2";
 
+import { orbButton } from "@/assets/images/ui";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { SubButton } from "../category";
 import type * as Types from "./type";
@@ -64,9 +61,9 @@ export function KaucimOrb(properties: Types.Properties) {
   const SUB_BUTTON_TARGETS = useMemo(() => {
     const a = 160;
 
-    return ([-0.8, 0, 0.8] as const).map((t) => {
+    return ([-1, 0, 1] as const).map((t) => {
       const x = t * a;
-      const y = 40 + 50 * Math.sqrt(Math.max(0, 1 - t * t));
+      const y = 50 + 50 * Math.sqrt(Math.max(0, 1 - t * t));
 
       return {
         x,
@@ -180,7 +177,7 @@ export function KaucimOrb(properties: Types.Properties) {
         <View style={[styles.orbWrapper]}>
           <Animated.View style={[styles.innerOrb, { opacity: orbOpacity }]}>
             <Image
-              source={kaucimOrb}
+              source={orbButton}
               style={{
                 width: "105%",
                 height: "105%",
@@ -192,11 +189,13 @@ export function KaucimOrb(properties: Types.Properties) {
             />
           </Animated.View>
           {isMenuOpen && (
-            <Image
-              source={kaucimOrbVortex}
-              style={styles.innerVortex}
-              resizeMode="cover"
-            />
+            <View style={styles.innerVortexContainer}>
+              <Image
+                source={kaucimOrbVortex}
+                style={styles.innerVortex}
+                resizeMode="cover"
+              />
+            </View>
           )}
         </View>
 
@@ -240,11 +239,22 @@ const styles = StyleSheet.create({
     borderRadius: "100%",
     overflow: "hidden",
   },
-  innerVortex: {
+  innerVortexContainer: {
     position: "absolute",
-    width: "150%",
-    height: "150%",
+    width: 102,
+    height: 102,
+    borderRadius: "50%",
+    overflow: "hidden",
+    zIndex: 2,
+    marginBottom: 14,
+    marginLeft: 1,
     mixBlendMode: "screen",
+  },
+  innerVortex: {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    mixBlendMode: "multiply",
     zIndex: 2,
   },
   innerOrb: {
@@ -272,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.7)",
     alignItems: "center",
     justifyContent: "center",
-    bottom: "-135%",
+    bottom: -160,
   },
   closeText: {
     color: "#fff",

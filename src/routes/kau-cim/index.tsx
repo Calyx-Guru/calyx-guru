@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { KaucimStoryExperience } from "@/features/kau-cim/story-experience";
@@ -26,6 +26,21 @@ function getKaucimVideoAsset(fortuneLevel: number) {
 }
 
 export function RouteKaucim() {
+  const { lastKaucimConcern } = useAppState();
+  const { rollKaucimResult } = useKaucim();
+  const [isKaucimReady, setIsKaucimReady] = useState(false);
+
+  useEffect(() => {
+    if (lastKaucimConcern) {
+      rollKaucimResult(lastKaucimConcern);
+      setIsKaucimReady(true);
+    }
+  }, []);
+
+  return isKaucimReady ? <KaucimSlideShow /> : null;
+}
+
+function KaucimSlideShow() {
   const { lastKaucimConcern, lastKaucimFresh } = useAppState();
   const { userState } = useUserState();
   const { getKaucimStory } = useKaucim();
@@ -77,7 +92,7 @@ export function RouteKaucim() {
         textParams: { bonus: result.powerChange },
       },
     ];
-  }, [illustrations, story, result, fortuneLevel, stickNumber]);
+  }, []);
 
   if (!concern) {
     console.warn("Invalid state: no concern");

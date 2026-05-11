@@ -54,7 +54,7 @@ export function useKaucim() {
   const { locale } = useAppAppearance();
   const { userState, updateUserState, pushKaucimHistory, unlockKaucimStory } =
     useUserState();
-  const { setKaucimState, deviceId } = useAppState();
+  const { deviceId, setAppState } = useAppState();
   const { profile } = useUserProfile();
   const lastKaucimResults = userState?.lastKaucimResults || {};
 
@@ -142,7 +142,7 @@ export function useKaucim() {
         if (lastKaucimTimestamp >= todayFirstTimestamp) {
           result = lastKaucimResults[concern];
           if (result) {
-            setKaucimState({
+            setAppState({
               lastKaucimConcern: concern,
               lastKaucimFresh: false,
             });
@@ -211,9 +211,10 @@ export function useKaucim() {
         nextLastKaucimResults[concern] = result;
         pushKaucimHistory(result);
         unlockKaucimStory(concern, storyIndex);
-        setKaucimState({
+        setAppState({
           lastKaucimConcern: concern,
           lastKaucimFresh: true,
+          lastPetPowerChange: result.powerChange,
         });
         updateUserState({
           lastKaucimRollTimestamp: todayFirstTimestamp,
@@ -230,7 +231,7 @@ export function useKaucim() {
       getKaucimStoryBundle,
       lastKaucimResults,
       profile,
-      setKaucimState,
+      setAppState,
       userState,
     ],
   );
