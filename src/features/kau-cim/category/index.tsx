@@ -8,6 +8,7 @@ import {
   Text,
 } from "react-native";
 
+import { darkGreenCircleButton } from "@/assets/images/ui";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
@@ -38,10 +39,16 @@ export function SubButton({
 
   return (
     <Pressable onPress={handlePress} style={styles.container}>
-      <Image style={styles.image} source={image} />
-      {!isConcernReadToday(action) && (
-        <Image source={glow} style={styles.glow} resizeMode="cover" />
-      )}
+      <ImageBackground
+        source={darkGreenCircleButton}
+        style={styles.buttonBackground}
+        resizeMode="contain"
+      >
+        <Image style={styles.image} source={image} />
+        {!isConcernReadToday(action) && (
+          <Image source={glow} style={styles.glow} resizeMode="cover" />
+        )}
+      </ImageBackground>
 
       <ImageBackground
         source={tag}
@@ -60,13 +67,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     position: "relative",
   },
+  buttonBackground: {
+    position: "absolute",
+    width: 110,
+    height: 110,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   image: {
-    width: 96,
-    height: 96,
+    width: 64,
+    height: 64,
+    marginBottom: 6,
+    marginRight: 6,
   },
   textContainer: {
     position: "absolute",
-    bottom: -12,
+    bottom: -54,
     alignItems: "center",
     justifyContent: "center",
     width: 82,
@@ -83,8 +99,8 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: "absolute",
-    top: -32,
-    left: -25,
+    top: -18,
+    left: -22,
     width: 142,
     height: 142,
   },

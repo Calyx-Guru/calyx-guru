@@ -1,8 +1,10 @@
+import { redCircleButton } from "@/assets/images/ui";
 import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { useCallback } from "react";
 import {
   Image,
+  ImageBackground,
   ImageSourcePropType,
   Pressable,
   StyleSheet,
@@ -31,7 +33,13 @@ export function SubButton({
 
   return (
     <Pressable onPress={handlePress} style={styles.container}>
-      <Image style={styles.image} source={image} />
+      <ImageBackground
+        source={redCircleButton}
+        style={styles.buttonBackground}
+        resizeMode="contain"
+      >
+        <Image source={image} style={styles.icon} resizeMode="contain" />
+      </ImageBackground>
       <View style={styles.textContainer}>
         <Text style={styles.label}>{t(labelKey)}</Text>
       </View>
@@ -45,9 +53,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     position: "relative",
   },
-  image: {
+  buttonBackground: {
     width: 80,
     height: 80,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  icon: {
+    width: 48,
+    height: 48,
   },
   textContainer: {
     position: "absolute",

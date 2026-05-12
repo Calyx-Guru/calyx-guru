@@ -5,3 +5,4 @@ export { default as health } from "./health.png";
 export { default as love } from "./love.png";
 export { default as tag } from "./tag.png";
 export { default as wealth } from "./wealth.png";
+

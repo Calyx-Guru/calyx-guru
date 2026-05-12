@@ -1,5 +1,4 @@
-import * as subButtonSet from "@/assets/images/kau-cim/set-2";
-import { background, thinGoldFrame } from "@/assets/images/ui";
+import { background } from "@/assets/images/ui";
 import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { useMemo, useState } from "react";
@@ -15,8 +14,25 @@ import {
   View,
 } from "react-native";
 
+import { careerIcon, loveIcon, wealthIcon } from "@/assets/images/kau-cim";
 import { useUserState } from "@/hooks/useUserState";
+import { LinearGradient } from "expo-linear-gradient";
 import { StoryCard } from "./story-card";
+
+const TAB_BAR_BORDER_WIDTH = 4;
+const TAB_BUTTON_BORDER_WIDTH = 2;
+const GOLD_BORDER_GRADIENT = [
+  "#fff4c2",
+  "#f4d76b",
+  "#d6a12d",
+  "#9a6a12",
+] as const;
+const GOLD_TAB_BACKGROUND_GRADIENT = [
+  "#ffe9a3",
+  "#e8c36a",
+  "#c99226",
+  "#8a6314",
+] as const;
 
 const TAB_BUTTON_PROPERTIES: {
   image: ImageSourcePropType;
@@ -24,17 +40,17 @@ const TAB_BUTTON_PROPERTIES: {
   labelKey: string;
 }[] = [
   {
-    image: subButtonSet.wealth,
+    image: wealthIcon,
     action: KAUCIM_CONCERNS.WEALTH,
     labelKey: "Wealth",
   },
   {
-    image: subButtonSet.love,
+    image: loveIcon,
     action: KAUCIM_CONCERNS.LOVE,
     labelKey: "Love",
   },
   {
-    image: subButtonSet.career,
+    image: careerIcon,
     action: KAUCIM_CONCERNS.CAREER,
     labelKey: "Career",
   },
@@ -103,33 +119,59 @@ export function RouteKaucimCollection() {
         showsVerticalScrollIndicator={false}
       />
 
-      <View style={styles.tabBarContent}>
-        <ImageBackground
-          source={thinGoldFrame}
-          style={[styles.tabBarFrame]}
-          resizeMode="stretch"
-        ></ImageBackground>
-        {TAB_BUTTON_PROPERTIES.map((tab) => {
-          const selected = tab.action === selectedConcern;
-          return (
-            <Pressable
-              key={tab.action}
-              onPress={() => setSelectedConcern(tab.action)}
-              style={[styles.tab, selected && styles.tabSelected]}
-              accessibilityRole="tab"
-              accessibilityState={{ selected }}
-              accessibilityLabel={t(tab.labelKey)}
-            >
-              <Image source={tab.image} style={styles.tabImage} />
-              <Text
-                style={[styles.tabLabel, selected && styles.tabLabelSelected]}
+      <LinearGradient
+        colors={GOLD_BORDER_GRADIENT}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.tabBarBorder}
+      >
+        <View style={styles.tabBarContent}>
+          {TAB_BUTTON_PROPERTIES.map((tab) => {
+            const selected = tab.action === selectedConcern;
+            const tabContent = (
+              <>
+                <Image source={tab.image} style={styles.tabImage} />
+                <Text
+                  style={[styles.tabLabel, selected && styles.tabLabelSelected]}
+                >
+                  {t(tab.labelKey)}
+                </Text>
+              </>
+            );
+
+            return (
+              <Pressable
+                key={tab.action}
+                onPress={() => setSelectedConcern(tab.action)}
+                style={styles.tabPressable}
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                accessibilityLabel={t(tab.labelKey)}
               >
-                {t(tab.labelKey)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+                {selected ? (
+                  <LinearGradient
+                    colors={GOLD_BORDER_GRADIENT}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.tabSelectedBorder}
+                  >
+                    <LinearGradient
+                      colors={GOLD_TAB_BACKGROUND_GRADIENT}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.tabSelectedBackground}
+                    >
+                      {tabContent}
+                    </LinearGradient>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.tab}>{tabContent}</View>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -152,36 +194,43 @@ const styles = StyleSheet.create({
   gridList: {
     flex: 1,
   },
-  tabBarFrame: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  tabBarBorder: {
+    padding: TAB_BAR_BORDER_WIDTH,
+    borderRadius: 12,
+    shadowColor: "#0B3C49",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
   tabBarContent: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingVertical: 1,
+    paddingHorizontal: 1,
+    borderRadius: 8,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
-  tab: {
+  tabPressable: {
     flex: 1,
+    marginHorizontal: 0,
+    justifyContent: "center",
+  },
+  tab: {
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 3,
-    paddingVertical: 4,
-    paddingHorizontal: 2,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "transparent",
     backgroundColor: "rgba(11, 60, 73, 0.06)",
   },
-  tabSelected: {
-    borderColor: "#0B3C49",
-    backgroundColor: "rgba(11, 60, 73, 0.12)",
+  tabSelectedBorder: {
+    borderRadius: 8,
+    padding: TAB_BUTTON_BORDER_WIDTH,
+  },
+  tabSelectedBackground: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 1,
+    paddingHorizontal: 1,
+    borderRadius: 6,
   },
   tabImage: {
     width: 42,
@@ -189,7 +238,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "700",
     color: "#ffffff",
     textAlign: "center",

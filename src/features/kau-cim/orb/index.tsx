@@ -8,7 +8,13 @@ import {
   View,
 } from "react-native";
 
-import { kaucimIcon, kaucimOrbVortex } from "@/assets/images/kau-cim";
+import {
+  careerIcon,
+  kaucimIcon,
+  kaucimOrbVortex,
+  loveIcon,
+  wealthIcon,
+} from "@/assets/images/kau-cim";
 import * as subButtonSet from "@/assets/images/kau-cim/set-2";
 
 import { orbButton } from "@/assets/images/ui";
@@ -23,17 +29,17 @@ const SUB_BUTTON_PROPERTIES = [
   //   labelKey: "Family & Friends",
   // },
   {
-    image: subButtonSet.wealth,
+    image: wealthIcon,
     action: KAUCIM_CONCERNS.WEALTH,
     labelKey: "Wealth",
   },
   {
-    image: subButtonSet.love,
+    image: loveIcon,
     action: KAUCIM_CONCERNS.LOVE,
     labelKey: "Love",
   },
   {
-    image: subButtonSet.career,
+    image: careerIcon,
     action: KAUCIM_CONCERNS.CAREER,
     labelKey: "Career",
   },

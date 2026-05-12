@@ -6,7 +6,18 @@ import {
   useRef,
   useState,
 } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Image,
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+import { kaucimCollection } from "@/assets/images/kau-cim";
+import { blueSquareButton } from "@/assets/images/ui";
 
 import { NormalVideo } from "@/components/video/NormalVideo";
 import { TransparentVideo } from "@/components/video/TransparentVideo";
@@ -149,10 +160,6 @@ export function RouteMainMenu() {
         loop={true}
       />
 
-      <View style={styles.bodyWrapper}>
-        <KaucimOrb onAction={onKaucimAction} />
-      </View>
-
       {powerFlyerAmount != null && (
         <View style={styles.powerFlyerOverlay} pointerEvents="none">
           <Animated.Text
@@ -195,18 +202,32 @@ export function RouteMainMenu() {
 
       <Pressable
         style={[
-          styles.debugButton,
+          styles.collectionButton,
           {
-            top: insets.top + 64,
-            left: Math.max(insets.left, 10),
+            bottom: insets.bottom + 60,
+            right: Math.max(insets.right, 0) - 4,
           },
         ]}
         onPress={() => router.push("/kau-cim-collection" as Href)}
         accessibilityRole="button"
         accessibilityLabel="Open kaucim collection screen"
       >
-        <Text style={styles.debugButtonLabel}>Kaucim Collection</Text>
+        <ImageBackground
+          source={blueSquareButton}
+          style={styles.collectionButtonBackground}
+          resizeMode="contain"
+        >
+          <Image
+            source={kaucimCollection}
+            style={styles.collectionButtonIcon}
+            resizeMode="contain"
+          />
+        </ImageBackground>
       </Pressable>
+
+      <View style={styles.bodyWrapper}>
+        <KaucimOrb onAction={onKaucimAction} />
+      </View>
     </View>
   );
 }
@@ -233,6 +254,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: "20%",
+    zIndex: 50,
   },
   powerFlyerOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -272,5 +294,21 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 13,
     fontWeight: "600",
+  },
+  collectionButton: {
+    position: "absolute",
+    zIndex: 50,
+  },
+  collectionButtonBackground: {
+    width: 76,
+    height: 76,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  collectionButtonIcon: {
+    width: 42,
+    height: 42,
+    marginRight: 12,
+    marginBottom: 12,
   },
 });
