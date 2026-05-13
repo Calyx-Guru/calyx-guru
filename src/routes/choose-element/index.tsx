@@ -76,7 +76,7 @@ export function RouteChooseElement(properties: Types.Properties) {
           display: "flex",
         }}
       >
-        <HeadingPrimary>Choose your Element</HeadingPrimary>;
+        <HeadingPrimary>Choose your Element</HeadingPrimary>
       </View>
     );
   };
