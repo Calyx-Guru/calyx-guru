@@ -1,3 +1,4 @@
+import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
 import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
@@ -80,7 +81,9 @@ export default function RootLayout() {
   return (
     <SupabaseAuthProvider>
       <MasterDataProvider>
-        <AppContent />
+        <AnalyticsProvider>
+          <AppContent />
+        </AnalyticsProvider>
       </MasterDataProvider>
     </SupabaseAuthProvider>
   );

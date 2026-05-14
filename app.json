@@ -25,6 +25,7 @@
       "favicon": "./src/assets/images/favicon.png"
     },
     "plugins": [
+      "./scripts/with-async-storage-local-maven.js",
       "./scripts/with-android-release-signing.js",
       "expo-router",
       [
