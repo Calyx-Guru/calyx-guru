@@ -1,4 +1,4 @@
-import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
+import { AnalyticsProvider, AnalyticsScreenTracker } from "@/contexts/AnalyticsContext";
 import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
@@ -63,6 +63,7 @@ function AppContent() {
     <AppAppearanceProvider>
       <SafeAreaView style={styles.container}>
         <View style={[styles.container]}>
+          <AnalyticsScreenTracker />
           <Stack
             screenOptions={{
               headerShown: false,

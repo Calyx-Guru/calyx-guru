@@ -126,7 +126,10 @@ export function ConfirmOverlay(properties: Types.Properties) {
           alignItems: "center",
         }}
       >
-        <ButtonPrimary onPress={() => properties.onConfirm?.(element)}>
+        <ButtonPrimary
+          onPress={() => properties.onConfirm?.(element)}
+          textStyle={{ fontSize: 14 }}
+        >
           {`Confirm Element "${element.toUpperCase()}"`}
         </ButtonPrimary>
       </View>

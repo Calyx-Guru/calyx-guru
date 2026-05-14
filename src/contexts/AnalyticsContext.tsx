@@ -1,11 +1,13 @@
 import * as Amplitude from '@amplitude/analytics-react-native';
 import { Identify, Types } from '@amplitude/analytics-react-native';
+import { usePathname, useSegments } from 'expo-router';
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -41,6 +43,24 @@ type AnalyticsContextValue = {
 };
 
 const noop = () => {};
+
+/** Stable no-op implementations when `EXPO_PUBLIC_AMPLITUDE_API_KEY` is unset. */
+const disabledAnalyticsActions: Pick<
+  AnalyticsContextValue,
+  | 'track'
+  | 'trackScreen'
+  | 'identify'
+  | 'setUserProperties'
+  | 'setUserPropertiesOnce'
+  | 'reset'
+> = {
+  track: noop as AnalyticsContextValue['track'],
+  trackScreen: noop as AnalyticsContextValue['trackScreen'],
+  identify: noop as AnalyticsContextValue['identify'],
+  setUserProperties: noop as AnalyticsContextValue['setUserProperties'],
+  setUserPropertiesOnce: noop as AnalyticsContextValue['setUserPropertiesOnce'],
+  reset: noop as AnalyticsContextValue['reset'],
+};
 
 const defaultInstall: InstallWindow = {
   daySinceInstall: 0,
@@ -203,16 +223,13 @@ export function AnalyticsProvider({
 
   const track = useCallback(
     (eventName: string, eventProperties?: AnalyticsEventProps) => {
-      if (!isEnabled) {
-        return;
-      }
       const cohort = cohortPropsFromInstall(install);
       Amplitude.track(eventName, {
         ...cohort,
         ...eventProperties,
       });
     },
-    [install, isEnabled],
+    [install],
   );
 
   const trackScreen = useCallback(
@@ -225,21 +242,12 @@ export function AnalyticsProvider({
     [track],
   );
 
-  const identify = useCallback(
-    (userId: string | undefined) => {
-      if (!isEnabled) {
-        return;
-      }
-      Amplitude.setUserId(userId);
-    },
-    [isEnabled],
-  );
+  const identify = useCallback((userId: string | undefined) => {
+    Amplitude.setUserId(userId);
+  }, []);
 
   const setUserProperties = useCallback(
     (properties: AnalyticsEventProps) => {
-      if (!isEnabled) {
-        return;
-      }
       const id = new Identify();
       for (const [k, v] of Object.entries(properties)) {
         if (v === undefined || v === null) {
@@ -249,14 +257,11 @@ export function AnalyticsProvider({
       }
       Amplitude.identify(id);
     },
-    [isEnabled],
+    [],
   );
 
   const setUserPropertiesOnce = useCallback(
     (properties: AnalyticsEventProps) => {
-      if (!isEnabled) {
-        return;
-      }
       const id = new Identify();
       for (const [k, v] of Object.entries(properties)) {
         if (v === undefined || v === null) {
@@ -266,19 +271,24 @@ export function AnalyticsProvider({
       }
       Amplitude.identify(id);
     },
-    [isEnabled],
+    [],
   );
 
   const reset = useCallback(() => {
-    if (!isEnabled) {
-      return;
-    }
     Amplitude.reset();
-  }, [isEnabled]);
+  }, []);
 
-  const value = useMemo<AnalyticsContextValue>(
-    () => ({
-      isEnabled,
+  const value = useMemo<AnalyticsContextValue>(() => {
+    if (!isEnabled) {
+      return {
+        isEnabled: false,
+        install: defaultInstall,
+        isInstallReady: true,
+        ...disabledAnalyticsActions,
+      };
+    }
+    return {
+      isEnabled: true,
       install,
       isInstallReady,
       track,
@@ -287,19 +297,18 @@ export function AnalyticsProvider({
       setUserProperties,
       setUserPropertiesOnce,
       reset,
-    }),
-    [
-      identify,
-      install,
-      isEnabled,
-      isInstallReady,
-      reset,
-      setUserProperties,
-      setUserPropertiesOnce,
-      track,
-      trackScreen,
-    ],
-  );
+    };
+  }, [
+    identify,
+    install,
+    isEnabled,
+    isInstallReady,
+    reset,
+    setUserProperties,
+    setUserPropertiesOnce,
+    track,
+    trackScreen,
+  ]);
 
   return (
     <AnalyticsContext.Provider value={value}>
@@ -325,4 +334,73 @@ export function useInstallWindow() {
     () => ({ ...install, isInstallReady }),
     [install, isInstallReady],
   );
+}
+
+function isDebugAnalyticsRoute(
+  pathname: string,
+  segments: readonly string[],
+): boolean {
+  if (segments.some((s) => s === 'debug')) {
+    return true;
+  }
+  const p = pathname.toLowerCase();
+  return p === '/debug' || p.startsWith('/debug/');
+}
+
+function formatRouteScreenTitle(pathname: string): string {
+  const trimmed = (pathname || '/').replace(/\/$/, '') || '/';
+  if (trimmed === '/' || trimmed === '') {
+    return 'Index';
+  }
+  const leaf = trimmed.split('/').filter(Boolean).pop() ?? 'index';
+  return leaf
+    .split('-')
+    .map((w) => (w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+    .join(' ');
+}
+
+/**
+ * Tracks `Screen Viewed` via {@link useAnalytics} for each Expo Router navigation.
+ * Omits the in-app `debug` route. Mount once inside the router tree (e.g. root `app/_layout`).
+ */
+export function AnalyticsScreenTracker() {
+  const pathname = usePathname() ?? '/';
+  const segments = useSegments();
+  const { trackScreen, isEnabled, isInstallReady } = useAnalytics();
+  const lastTrackedRef = useRef<string | null>(null);
+
+  const segmentKey = segments.join('/');
+  const routePath =
+    pathname && pathname.length > 0 ? pathname : `/${segmentKey}`;
+
+  useEffect(() => {
+    if (!isEnabled || !isInstallReady) {
+      return;
+    }
+    if (lastTrackedRef.current === routePath) {
+      return;
+    }
+
+    if (isDebugAnalyticsRoute(routePath, segments)) {
+      lastTrackedRef.current = routePath;
+      return;
+    }
+
+    lastTrackedRef.current = routePath;
+
+    const title = formatRouteScreenTitle(routePath);
+    trackScreen(title, {
+      route_path: routePath,
+      route_segments: segmentKey || undefined,
+    });
+  }, [
+    isEnabled,
+    isInstallReady,
+    routePath,
+    segmentKey,
+    segments,
+    trackScreen,
+  ]);
+
+  return null;
 }

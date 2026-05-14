@@ -3,8 +3,10 @@ import React from "react";
 import {
   GestureResponderEvent,
   ImageBackground,
+  StyleProp,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
 } from "react-native";
 
@@ -12,11 +14,13 @@ interface ButtonPrimaryProps {
   onPress?: (event: GestureResponderEvent) => void;
   children: React.ReactNode;
   disabled?: boolean;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export const ButtonPrimary: React.FC<ButtonPrimaryProps> = ({
   onPress,
   children,
+  textStyle,
   disabled = false,
 }) => {
   return (
@@ -26,7 +30,7 @@ export const ButtonPrimary: React.FC<ButtonPrimaryProps> = ({
         style={[styles.button]}
         resizeMode="contain"
       >
-        <Text style={[styles.text]}>{children}</Text>
+        <Text style={[styles.text, textStyle]}>{children}</Text>
       </ImageBackground>
     </TouchableOpacity>
   );
