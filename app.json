@@ -25,6 +25,7 @@
       "favicon": "./src/assets/images/favicon.png"
     },
     "plugins": [
+      "./scripts/with-android-arm-architectures.js",
       "./scripts/with-android-release-signing.js",
       "expo-router",
       [
@@ -45,7 +46,6 @@
       "expo-image",
       "expo-localization",
       "expo-secure-store",
-      "expo-web-browser",
       "expo-asset"
     ],
     "experiments": {

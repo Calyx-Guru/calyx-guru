@@ -20,7 +20,6 @@ import { kaucimCollection } from "@/assets/images/kau-cim";
 import { blueSquareButton } from "@/assets/images/ui";
 
 import { NormalVideo } from "@/components/video/NormalVideo";
-import { TransparentVideo } from "@/components/video/TransparentVideo";
 
 import { ENV, MAX_PET_POWER } from "@/constants";
 import { CalendarEastern } from "@/features/calendar/eastern";
@@ -31,7 +30,7 @@ import { StatusMessage } from "@/features/mascot/status-message";
 import { useAppState } from "@/hooks/useAppState";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
-import { FIVE_ELEMENTS, KAUCIM_CONCERNS } from "@/types/UserState";
+import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { router, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VIDEOS } from "./constants";
@@ -131,10 +130,8 @@ export function RouteMainMenu() {
     } else {
       petVideo = VIDEOS.mascot.very_bad;
     }
-    const backgroundVideo =
-      VIDEOS.background[profile?.element as FIVE_ELEMENTS];
+
     return {
-      backgroundVideo,
       petVideo,
       petPower,
       petPowerPercentage,
@@ -143,7 +140,7 @@ export function RouteMainMenu() {
 
   return (
     <View style={styles.root}>
-      <NormalVideo url={petState.backgroundVideo} />
+      <NormalVideo url={petState.petVideo} />
 
       <View style={styles.headerWrapper}>
         <HealthBar
@@ -153,12 +150,6 @@ export function RouteMainMenu() {
         />
         <StatusMessage />
       </View>
-
-      <TransparentVideo
-        source={petState.petVideo}
-        style={StyleSheet.absoluteFill}
-        loop={true}
-      />
 
       {powerFlyerAmount != null && (
         <View style={styles.powerFlyerOverlay} pointerEvents="none">

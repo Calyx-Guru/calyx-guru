@@ -133,10 +133,10 @@ const styles = StyleSheet.create({
     aspectRatio: "12/1",
   },
   icon: {
-    width: 54,
-    height: 108,
+    width: 48,
+    height: 72,
     aspectRatio: "5/7",
-    marginLeft: 24,
-    marginTop: 24,
+    marginLeft: 12,
+    marginTop: -8,
   },
 });

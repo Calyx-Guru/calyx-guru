@@ -1,4 +1,4 @@
-export { default as background } from "./background.png";
+export { default as background } from "./background.jpg";
 export { default as bigGoldFrame } from "./big-gold-frame.png";
 export { default as blueButton } from "./blue-button.png";
 export { default as blueRectangle } from "./blue-rectangle.png";
