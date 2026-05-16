@@ -1,12 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  Animated,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Animated, Image, StyleSheet, Text, View } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 
 import {
   careerIcon,
@@ -51,9 +45,10 @@ const SUB_BUTTON_PROPERTIES = [
 ];
 
 export function KaucimOrb(properties: Types.Properties) {
-  const { style, onAction } = properties;
+  const { style, onAction, onMenuOpenChange } = properties;
 
   const orbOpacity = useRef(new Animated.Value(1)).current;
+  const closeButtonAnim = useRef(new Animated.Value(0)).current;
   const fanAnims = useRef<Animated.Value[]>(
     Array.from(
       { length: SUB_BUTTON_PROPERTIES.length },
@@ -62,14 +57,23 @@ export function KaucimOrb(properties: Types.Properties) {
   );
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuAnimationRef = useRef<Animated.CompositeAnimation | null>(null);
   const fanAnimValues = fanAnims.current;
+
+  const stopMenuAnimations = useCallback(() => {
+    menuAnimationRef.current?.stop();
+    menuAnimationRef.current = null;
+    fanAnimValues.forEach((anim) => anim.stopAnimation());
+    closeButtonAnim.stopAnimation();
+    orbOpacity.stopAnimation();
+  }, [closeButtonAnim, fanAnimValues, orbOpacity]);
 
   const SUB_BUTTON_TARGETS = useMemo(() => {
     const a = 160;
 
-    return ([-1, 0, 1] as const).map((t) => {
+    return ([-0.8, 0, 0.8] as const).map((t) => {
       const x = t * a;
-      const y = 50 + 50 * Math.sqrt(Math.max(0, 1 - t * t));
+      const y = 40 + 120 * Math.sqrt(Math.max(0, 1 - t * t));
 
       return {
         x,
@@ -78,170 +82,265 @@ export function KaucimOrb(properties: Types.Properties) {
     });
   }, []);
 
-  const handleAction = useCallback(
-    (action: KAUCIM_CONCERNS) => {
-      setIsMenuOpen(false);
-      onAction?.(action);
-    },
-    [onAction, fanAnimValues, orbOpacity],
-  );
-
   const openMenu = useCallback(() => {
     setIsMenuOpen(true);
+    onMenuOpenChange?.(true);
+    closeButtonAnim.setValue(0);
 
     Animated.timing(orbOpacity, {
       toValue: 0.7,
       duration: 200,
       useNativeDriver: true,
     }).start(() => {
-      Animated.stagger(
-        60,
-        fanAnimValues.map((anim) =>
-          Animated.spring(anim, {
-            toValue: 0.9,
-            friction: 6,
-            tension: 80,
-            useNativeDriver: true,
-          }),
+      Animated.parallel([
+        Animated.stagger(
+          60,
+          fanAnimValues.map((anim) =>
+            Animated.spring(anim, {
+              toValue: 1,
+              friction: 6,
+              tension: 80,
+              // JS driver keeps Pressable hit regions in sync while translate animates (New Arch).
+              useNativeDriver: false,
+            }),
+          ),
         ),
-      ).start();
-    });
-  }, [orbOpacity, fanAnimValues]);
-
-  const closeMenu = useCallback(() => {
-    Animated.stagger(
-      40,
-      [...fanAnimValues].reverse().map((anim) =>
-        Animated.timing(anim, {
-          toValue: 0,
-          duration: 180,
+        Animated.spring(closeButtonAnim, {
+          toValue: 1,
+          friction: 7,
+          tension: 90,
           useNativeDriver: true,
         }),
+      ]).start();
+    });
+  }, [closeButtonAnim, fanAnimValues, onMenuOpenChange, orbOpacity]);
+
+  const closeMenu = useCallback(() => {
+    stopMenuAnimations();
+
+    menuAnimationRef.current = Animated.parallel([
+      Animated.timing(closeButtonAnim, {
+        toValue: 0,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+      Animated.stagger(
+        40,
+        [...fanAnimValues].reverse().map((anim) =>
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: 180,
+            useNativeDriver: false,
+          }),
+        ),
       ),
-    ).start(() => {
+    ]);
+
+    menuAnimationRef.current.start(() => {
+      menuAnimationRef.current = null;
       Animated.timing(orbOpacity, {
         toValue: 1,
         duration: 200,
         useNativeDriver: true,
-      }).start(() => setIsMenuOpen(false));
+      }).start(() => {
+        setIsMenuOpen(false);
+        onMenuOpenChange?.(false);
+      });
     });
-  }, [orbOpacity, fanAnimValues]);
+  }, [
+    closeButtonAnim,
+    fanAnimValues,
+    onMenuOpenChange,
+    orbOpacity,
+    stopMenuAnimations,
+  ]);
+
+  const handleAction = useCallback(
+    (action: KAUCIM_CONCERNS) => {
+      stopMenuAnimations();
+      setIsMenuOpen(false);
+      onMenuOpenChange?.(false);
+      onAction?.(action);
+    },
+    [onAction, onMenuOpenChange, stopMenuAnimations],
+  );
 
   return (
-    <View style={[styles.container, style]}>
-      {isMenuOpen &&
-        SUB_BUTTON_TARGETS.map((target, i) => {
-          const anim = fanAnimValues[i];
-          if (!anim) return null;
-
-          return (
-            <Animated.View
-              key={i}
-              style={[
-                styles.subButtonContainer,
-                {
-                  opacity: anim,
-                  transform: [
-                    {
-                      translateX: anim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, target.x],
-                      }),
-                    },
-                    {
-                      translateY: anim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, target.y],
-                      }),
-                    },
-                    {
-                      scale: anim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.3, 1],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <SubButton
-                image={SUB_BUTTON_PROPERTIES[i].image}
-                tag={subButtonSet.tag}
-                glow={subButtonSet.glow}
-                action={SUB_BUTTON_PROPERTIES[i].action}
-                labelKey={SUB_BUTTON_PROPERTIES[i].labelKey}
-                onPress={() => handleAction(SUB_BUTTON_PROPERTIES[i].action)}
-              />
-            </Animated.View>
-          );
-        })}
-
-      <Pressable
-        onPress={isMenuOpen ? closeMenu : openMenu}
+    <View style={[styles.container, style]} collapsable={false}>
+      <View
         style={styles.orbContainer}
+        pointerEvents={isMenuOpen ? "box-none" : "auto"}
       >
-        <View style={[styles.orbWrapper]}>
-          <Animated.View style={[styles.innerOrb, { opacity: orbOpacity }]}>
-            <Image
-              source={orbButton}
-              style={{
-                width: "105%",
-                height: "105%",
-                position: "absolute",
-                top: "-2.5%",
-                left: "-2.5%",
-              }}
-              resizeMode="cover"
-            />
-          </Animated.View>
-          {isMenuOpen && (
-            <View style={styles.innerVortexContainer}>
+        <Pressable
+          onPress={isMenuOpen ? closeMenu : openMenu}
+          style={styles.orbPressable}
+        >
+          <View style={styles.orbWrapper}>
+            <Animated.View style={[styles.innerOrb, { opacity: orbOpacity }]}>
               <Image
-                source={kaucimOrbVortex}
-                style={styles.innerVortex}
+                source={orbButton}
+                style={{
+                  width: "105%",
+                  height: "105%",
+                  position: "absolute",
+                  top: "-2.5%",
+                  left: "-2.5%",
+                }}
                 resizeMode="cover"
               />
+            </Animated.View>
+            {isMenuOpen && (
+              <View style={styles.innerVortexContainer} pointerEvents="none">
+                <Image
+                  source={kaucimOrbVortex}
+                  style={styles.innerVortex}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+          </View>
+
+          {!isMenuOpen && (
+            <View style={styles.centerIconContainer} pointerEvents="none">
+              <Image
+                source={kaucimIcon}
+                style={styles.centerIconGlow}
+                resizeMode="contain"
+                blurRadius={12}
+              />
+              <Image
+                source={kaucimIcon}
+                style={styles.centerIconImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.mainTagText}>KauCim</Text>
             </View>
           )}
-        </View>
-
-        {!isMenuOpen && (
-          <View style={styles.centerIconContainer} pointerEvents="none">
-            <Image
-              source={kaucimIcon}
-              style={styles.centerIconGlow}
-              resizeMode="contain"
-              blurRadius={12}
-            />
-            <Image
-              source={kaucimIcon}
-              style={styles.centerIconImage}
-              resizeMode="contain"
-            />
-            <Text style={styles.mainTagText}>KauCim</Text>
-          </View>
-        )}
-      </Pressable>
+        </Pressable>
+      </View>
 
       {isMenuOpen && (
-        <Pressable onPress={closeMenu} style={styles.closeWrapper}>
-          <Text style={styles.closeText}>✕</Text>
-        </Pressable>
+        <View style={styles.menuLayer} pointerEvents="box-none">
+          {SUB_BUTTON_TARGETS.map((target, i) => {
+            const anim = fanAnimValues[i];
+            if (!anim) return null;
+
+            const concern = SUB_BUTTON_PROPERTIES[i].action;
+
+            return (
+              <Animated.View
+                key={i}
+                collapsable={false}
+                style={[
+                  styles.subButtonContainer,
+                  {
+                    transform: [
+                      {
+                        translateX: anim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, target.x],
+                        }),
+                      },
+                      {
+                        translateY: anim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, target.y],
+                        }),
+                      },
+                      {
+                        scale: anim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.3, 1],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <Animated.View
+                  pointerEvents="none"
+                  style={[styles.subButtonVisual, { opacity: anim }]}
+                >
+                  <SubButton
+                    displayOnly
+                    image={SUB_BUTTON_PROPERTIES[i].image}
+                    tag={subButtonSet.tag}
+                    glow={subButtonSet.glow}
+                    action={concern}
+                    labelKey={SUB_BUTTON_PROPERTIES[i].labelKey}
+                  />
+                </Animated.View>
+                <Pressable
+                  style={styles.subButtonHitTarget}
+                  onPress={() => handleAction(concern)}
+                  accessibilityRole="button"
+                  accessibilityLabel={SUB_BUTTON_PROPERTIES[i].labelKey}
+                />
+              </Animated.View>
+            );
+          })}
+
+          <Animated.View
+            pointerEvents="box-none"
+            style={[
+              styles.closeWrapper,
+              {
+                opacity: closeButtonAnim,
+                transform: [
+                  {
+                    scale: closeButtonAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.55, 1],
+                    }),
+                  },
+                  {
+                    translateY: closeButtonAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [16, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <Pressable onPress={closeMenu} style={styles.closePressable}>
+              <Text style={styles.closeText}>✕</Text>
+            </Pressable>
+          </Animated.View>
+        </View>
       )}
     </View>
   );
 }
 
+/** Fits fan targets (±160px) plus SubButton layout box — avoids touch clipping. */
+const ORB_MENU_WIDTH = 400;
+const ORB_MENU_HEIGHT = 300;
+
 const styles = StyleSheet.create({
   container: {
     position: "relative",
-    width: 100,
-    height: 100,
+    width: ORB_MENU_WIDTH,
+    height: ORB_MENU_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "visible",
   },
   orbContainer: {
     position: "relative",
+    zIndex: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  orbPressable: {
+    width: 120,
+    height: 120,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
   },
   orbWrapper: {
     width: 120,
@@ -277,24 +376,35 @@ const styles = StyleSheet.create({
   },
   subButtonContainer: {
     position: "absolute",
-    width: 56,
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    top: "60%",
+    width: 142,
+    height: 208,
+    top: "50%",
     left: "50%",
-    marginLeft: -28,
-    marginTop: -20,
+    marginLeft: -71,
+    marginTop: -104,
+  },
+  subButtonVisual: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  subButtonHitTarget: {
+    ...StyleSheet.absoluteFillObject,
   },
   closeWrapper: {
     position: "absolute",
     width: 48,
     height: 48,
+    top: 330,
+    left: "50%",
+    marginLeft: -24,
+    zIndex: 3,
+  },
+  closePressable: {
+    width: "100%",
+    height: "100%",
     borderRadius: 24,
     backgroundColor: "rgba(0,0,0,0.7)",
     alignItems: "center",
     justifyContent: "center",
-    bottom: -160,
   },
   closeText: {
     color: "#fff",

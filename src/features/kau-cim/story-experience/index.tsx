@@ -1,3 +1,4 @@
+import { useNavigation } from "expo-router";
 import { getLocales } from "expo-localization";
 import * as Speech from "expo-speech";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -5,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   Animated,
+  BackHandler,
   Platform,
   Pressable,
   StyleSheet,
@@ -48,6 +50,8 @@ export function KaucimStoryExperience(properties: Types.Properties) {
   } = properties;
 
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const allowNavigationExitRef = useRef(false);
 
   const [phase, setPhase] = useState<Types.Phase>(
     showIntroVideo ? "video" : "slideshow",
@@ -69,6 +73,59 @@ export function KaucimStoryExperience(properties: Types.Properties) {
   const videoEnded = useRef(false);
   const speechUnavailable = useRef(false);
   const narrationVoice = useRef<string | undefined>(undefined);
+
+  const handleSkip = useCallback(() => {
+    if (showResultPopup) {
+      setPhase("result");
+      return;
+    }
+    onResultDismiss();
+  }, [onResultDismiss, showResultPopup]);
+
+  const handleBackExit = useCallback(() => {
+    allowNavigationExitRef.current = true;
+    onResultDismiss();
+  }, [onResultDismiss]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: phase === "result",
+    });
+  }, [navigation, phase]);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        if (phase === "result") {
+          handleBackExit();
+        } else {
+          handleSkip();
+        }
+        return true;
+      },
+    );
+
+    return () => subscription.remove();
+  }, [handleBackExit, handleSkip, phase]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (event) => {
+      if (allowNavigationExitRef.current) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (phase === "result") {
+        handleBackExit();
+      } else {
+        handleSkip();
+      }
+    });
+
+    return unsubscribe;
+  }, [handleBackExit, handleSkip, navigation, phase]);
 
   const lastSlide = useMemo(() => {
     if (slides.length === 0) {
@@ -368,13 +425,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
               right: Math.max(insets.right, 12),
             },
           ]}
-          onPress={() => {
-            if (showResultPopup) {
-              setPhase("result");
-              return;
-            }
-            onResultDismiss();
-          }}
+          onPress={handleSkip}
           accessibilityRole="button"
           accessibilityLabel={
             showResultPopup ? "Skip to result" : "Back to collection"

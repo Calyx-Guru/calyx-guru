@@ -3,10 +3,11 @@ import {
   Image,
   ImageBackground,
   ImageSourcePropType,
-  Pressable,
   StyleSheet,
   Text,
+  View,
 } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 
 import { darkGreenCircleButton } from "@/assets/images/ui";
 import { useKaucim } from "@/hooks/useKaucim";
@@ -19,7 +20,9 @@ type SubButtonProps = {
   glow: ImageSourcePropType;
   action: KAUCIM_CONCERNS;
   labelKey: string;
-  onPress: (action: KAUCIM_CONCERNS) => void;
+  onPress?: (action: KAUCIM_CONCERNS) => void;
+  /** When true, visuals only — parent provides the press target (e.g. during opacity animation). */
+  displayOnly?: boolean;
 };
 
 export function SubButton({
@@ -29,16 +32,17 @@ export function SubButton({
   action,
   labelKey,
   onPress,
+  displayOnly = false,
 }: SubButtonProps) {
   const { t } = useTranslation();
   const { isConcernReadToday } = useKaucim();
 
   const handlePress = useCallback(() => {
-    onPress(action);
+    onPress?.(action);
   }, [action, onPress]);
 
-  return (
-    <Pressable onPress={handlePress} style={styles.container}>
+  const content = (
+    <>
       <ImageBackground
         source={darkGreenCircleButton}
         style={styles.buttonBackground}
@@ -49,7 +53,6 @@ export function SubButton({
           <Image source={glow} style={styles.glow} resizeMode="cover" />
         )}
       </ImageBackground>
-
       <ImageBackground
         source={tag}
         style={styles.textContainer}
@@ -57,35 +60,59 @@ export function SubButton({
       >
         <Text style={styles.label}>{t(labelKey)}</Text>
       </ImageBackground>
+    </>
+  );
+
+  if (displayOnly) {
+    return <View style={styles.container}>{content}</View>;
+  }
+
+  return (
+    <Pressable onPress={handlePress} style={styles.container}>
+      {content}
     </Pressable>
   );
 }
 
+/** Layout box that fits circle + glow overflow + tag below (all children are absolute). */
+const LAYOUT = {
+  width: 142,
+  height: 208,
+  buttonTop: 0,
+  buttonLeft: 16,
+  buttonSize: 110,
+} as const;
+
 const styles = StyleSheet.create({
   container: {
+    width: LAYOUT.width,
+    height: LAYOUT.height,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
   },
   buttonBackground: {
     position: "absolute",
-    width: 110,
-    height: 110,
+    top: LAYOUT.buttonTop,
+    left: LAYOUT.buttonLeft,
+    width: LAYOUT.buttonSize,
+    height: LAYOUT.buttonSize,
     alignItems: "center",
     justifyContent: "center",
   },
   image: {
     width: 64,
     height: 64,
-    marginBottom: 6,
+    marginBottom: 4,
     marginRight: 6,
   },
   textContainer: {
     position: "absolute",
-    bottom: -54,
+    left: 20,
+    top: 85,
     alignItems: "center",
     justifyContent: "center",
-    width: 82,
+    width: 90,
     height: 26,
   },
   label: {

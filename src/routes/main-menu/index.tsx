@@ -48,6 +48,9 @@ export function RouteMainMenu() {
 
   const flyerTranslateY = useRef(new Animated.Value(0)).current;
   const flyerOpacity = useRef(new Animated.Value(1)).current;
+  const chromeOpacity = useRef(new Animated.Value(1)).current;
+
+  const [isKaucimMenuOpen, setIsKaucimMenuOpen] = useState(false);
   /** Must not cancel when lastPetPowerChange drops to 0 after consume — that re-runs this effect. */
   const powerFlyerDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -112,9 +115,21 @@ export function RouteMainMenu() {
   const onKaucimAction = useCallback(
     (concern: KAUCIM_CONCERNS) => {
       setAppState({ lastKaucimConcern: concern });
-      router.replace("/kau-cim");
+      router.push("/kau-cim");
     },
     [profile],
+  );
+
+  const onKaucimMenuOpenChange = useCallback(
+    (open: boolean) => {
+      setIsKaucimMenuOpen(open);
+      Animated.timing(chromeOpacity, {
+        toValue: open ? 0 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    },
+    [chromeOpacity],
   );
 
   const petState = useMemo(() => {
@@ -142,7 +157,7 @@ export function RouteMainMenu() {
     <View style={styles.root}>
       <NormalVideo url={petState.petVideo} />
 
-      <View style={styles.headerWrapper}>
+      <View style={[styles.headerWrapper, { top: 8 }]}>
         <HealthBar
           totalValue={MAX_PET_POWER}
           value={petState.petPower}
@@ -169,55 +184,71 @@ export function RouteMainMenu() {
         </View>
       )}
 
-      <View style={styles.bottomWrapper}>
+      <Animated.View
+        style={[styles.bottomWrapper, { opacity: chromeOpacity }]}
+        pointerEvents={isKaucimMenuOpen ? "none" : "auto"}
+      >
         <CalendarEastern date={new Date("2038-06-26")} />
         <CalendarWestern />
-      </View>
+      </Animated.View>
 
       {ENV.DEBUG_MODE && (
-        <Pressable
+        <Animated.View
+          pointerEvents={isKaucimMenuOpen ? "none" : "box-none"}
           style={[
             styles.debugButton,
             {
               top: insets.top + 8,
               left: Math.max(insets.left, 10),
+              opacity: chromeOpacity,
             },
           ]}
-          onPress={() => router.push("/debug" as Href)}
-          accessibilityRole="button"
-          accessibilityLabel="Open debug screen"
         >
-          <Text style={styles.debugButtonLabel}>Debug</Text>
-        </Pressable>
+          <Pressable
+            onPress={() => router.push("/debug" as Href)}
+            accessibilityRole="button"
+            accessibilityLabel="Open debug screen"
+          >
+            <Text style={styles.debugButtonLabel}>Debug</Text>
+          </Pressable>
+        </Animated.View>
       )}
 
-      <Pressable
+      <Animated.View
+        pointerEvents={isKaucimMenuOpen ? "none" : "box-none"}
         style={[
           styles.collectionButton,
           {
-            bottom: insets.bottom + 60,
+            bottom: 80,
             right: Math.max(insets.right, 0) - 4,
+            opacity: chromeOpacity,
           },
         ]}
-        onPress={() => router.push("/kau-cim-collection" as Href)}
-        accessibilityRole="button"
-        accessibilityLabel="Open kaucim collection screen"
       >
-        <ImageBackground
-          source={blueSquareButton}
-          style={styles.collectionButtonBackground}
-          resizeMode="contain"
+        <Pressable
+          onPress={() => router.push("/kau-cim-collection" as Href)}
+          accessibilityRole="button"
+          accessibilityLabel="Open kaucim collection screen"
         >
-          <Image
-            source={kaucimCollection}
-            style={styles.collectionButtonIcon}
+          <ImageBackground
+            source={blueSquareButton}
+            style={styles.collectionButtonBackground}
             resizeMode="contain"
-          />
-        </ImageBackground>
-      </Pressable>
+          >
+            <Image
+              source={kaucimCollection}
+              style={styles.collectionButtonIcon}
+              resizeMode="contain"
+            />
+          </ImageBackground>
+        </Pressable>
+      </Animated.View>
 
       <View style={styles.bodyWrapper}>
-        <KaucimOrb onAction={onKaucimAction} />
+        <KaucimOrb
+          onAction={onKaucimAction}
+          onMenuOpenChange={onKaucimMenuOpenChange}
+        />
       </View>
     </View>
   );
@@ -230,9 +261,8 @@ const styles = StyleSheet.create({
   },
   headerWrapper: {
     position: "absolute",
-    top: 10,
-    left: 10,
-    right: 10,
+    left: 8,
+    right: 8,
     rowGap: 8,
     alignItems: "center",
     justifyContent: "center",
@@ -244,8 +274,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: "20%",
+    bottom: 100,
     zIndex: 50,
+    overflow: "visible",
   },
   powerFlyerOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -264,16 +295,17 @@ const styles = StyleSheet.create({
   },
   bottomWrapper: {
     position: "absolute",
-    bottom: 10,
-    right: 10,
-    left: 10,
+    bottom: 8,
+    right: 8,
+    left: 8,
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
+    zIndex: 40,
   },
   debugButton: {
     position: "absolute",
-    zIndex: 50,
+    zIndex: 40,
     paddingVertical: 8,
     paddingHorizontal: 12,
     minHeight: 40,
@@ -288,7 +320,7 @@ const styles = StyleSheet.create({
   },
   collectionButton: {
     position: "absolute",
-    zIndex: 50,
+    zIndex: 40,
   },
   collectionButtonBackground: {
     width: 76,

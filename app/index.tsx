@@ -12,8 +12,8 @@ export default function Index() {
   useEffect(() => {
     if (!isLoadingProfile && profile) {
       if (profile?.element) {
-        router.replace("/main-menu");        
-      } else {        
+        router.replace("/main-menu");
+      } else {
         router.replace("/choose-element");
       }
     }
@@ -23,7 +23,8 @@ export default function Index() {
     <View
       style={{
         flex: 1,
-        padding: 16,
+        padding: 0,
+        margin: 0,
         backgroundColor: colors.background,
       }}
     />

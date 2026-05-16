@@ -1,4 +1,7 @@
-import { AnalyticsProvider, AnalyticsScreenTracker } from "@/contexts/AnalyticsContext";
+import {
+  AnalyticsProvider,
+  AnalyticsScreenTracker,
+} from "@/contexts/AnalyticsContext";
 import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
@@ -10,7 +13,8 @@ import { initializeApp } from "@/lib/app/initialization";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabaseAuth } from "../admin/src/hooks/useSupabaseAuth";
 
@@ -35,12 +39,8 @@ function AppContent() {
         ]);
 
         await Promise.all([
-          waitFor(
-            () => !getUserProfileState().isLoading,
-          ),
-          waitFor(
-            () => !getUserStateState().isLoading,
-          ),
+          waitFor(() => !getUserProfileState().isLoading),
+          waitFor(() => !getUserStateState().isLoading),
         ]);
       } catch (error) {
         console.error("Error during app initialization:", error);
@@ -61,18 +61,18 @@ function AppContent() {
 
   return (
     <AppAppearanceProvider>
-      <SafeAreaView style={styles.container}>
-        <View style={[styles.container]}>
-          <AnalyticsScreenTracker />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-        </View>
+      <SafeAreaView
+        style={styles.container}
+        edges={["top", "left", "right", "bottom"]}
+      >
+        <AnalyticsScreenTracker />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="index" />
+        </Stack>
       </SafeAreaView>
     </AppAppearanceProvider>
   );
@@ -80,19 +80,26 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <SupabaseAuthProvider>
-      <MasterDataProvider>
-        <AnalyticsProvider>
-          <AppContent />
-        </AnalyticsProvider>
-      </MasterDataProvider>
-    </SupabaseAuthProvider>
+    <GestureHandlerRootView style={styles.gestureRoot}>
+      <SupabaseAuthProvider>
+        <MasterDataProvider>
+          <AnalyticsProvider>
+            <AppContent />
+          </AnalyticsProvider>
+        </MasterDataProvider>
+      </SupabaseAuthProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  gestureRoot: {
+    flex: 1,
+  },
   container: {
     flex: 1,
+    padding: 0,
+    margin: 0,
     backgroundColor: "#000000",
   },
 });
