@@ -1,7 +1,7 @@
 import { useEventListener } from "expo";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useRef } from "react";
-import { StyleSheet } from "react-native";
+import { AppState, type AppStateStatus, StyleSheet } from "react-native";
 
 interface Properties {
   url: string | number;
@@ -66,6 +66,28 @@ export function NormalVideo(properties: Properties) {
   useEventListener(videoPlayer, "playToEnd", () => {
     onPlayToEndReference.current?.();
   });
+
+  useEffect(() => {
+    const resumePlayback = () => {
+      try {
+        videoPlayer.play();
+      } catch {
+        // Player released after unmount.
+      }
+    };
+
+    const handleAppStateChange = (nextState: AppStateStatus) => {
+      if (nextState === "active") {
+        resumePlayback();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange,
+    );
+    return () => subscription.remove();
+  }, [videoPlayer]);
 
   return (
     <VideoView
