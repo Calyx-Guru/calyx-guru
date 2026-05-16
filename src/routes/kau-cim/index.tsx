@@ -7,8 +7,8 @@ import { KaucimStoryExperience } from "@/features/kau-cim/story-experience";
 import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useUserState } from "@/hooks/useUserState";
-import { FIVE_ELEMENTS } from "@/types/UserState";
 import { pickRandom } from "@/lib/app/helper";
+import { FIVE_ELEMENTS } from "@/types/UserState";
 
 import * as KAUCIM_VIDEOS from "@/assets/videos/kau-cim";
 
@@ -120,25 +120,25 @@ function KaucimSlideShow() {
 
   if (!concern) {
     console.warn("Invalid state: no concern");
-    router.replace("/main-menu");
+    router.back();
     return null;
   }
 
   if (!result) {
     console.warn("Invalid state: no result");
-    router.replace("/main-menu");
+    router.back();
     return null;
   }
 
   if (!illustrations) {
     console.error("No illustration found!");
-    router.replace("/main-menu");
+    router.back();
     return null;
   }
 
   if (!story) {
     console.error("No story found!");
-    router.replace("/main-menu");
+    router.back();
     return null;
   }
 
@@ -162,7 +162,7 @@ function KaucimSlideShow() {
             router.back();
             return;
           }
-          router.replace("/main-menu");
+          router.back();
         }}
       />
     </View>

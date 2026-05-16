@@ -227,6 +227,7 @@ export function RouteMainMenu() {
       >
         <Pressable
           onPress={() => router.push("/kau-cim-collection" as Href)}
+          style={styles.collectionButtonPressable}
           accessibilityRole="button"
           accessibilityLabel="Open kaucim collection screen"
         >
@@ -277,6 +278,7 @@ const styles = StyleSheet.create({
     bottom: 100,
     zIndex: 50,
     overflow: "visible",
+    pointerEvents: "box-none",
   },
   powerFlyerOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -320,11 +322,15 @@ const styles = StyleSheet.create({
   },
   collectionButton: {
     position: "absolute",
-    zIndex: 40,
+    zIndex: 60,
   },
-  collectionButtonBackground: {
+  collectionButtonPressable: {
     width: 76,
     height: 76,
+  },
+  collectionButtonBackground: {
+    width: "100%",
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
