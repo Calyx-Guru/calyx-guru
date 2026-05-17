@@ -10,6 +10,7 @@ import {
 import { useSupabaseAuth } from './hooks/useSupabaseAuth';
 import { KaucimStoriesPage } from './pages/KaucimStoriesPage';
 import { LocalizationPage } from './pages/LocalizationPage';
+import { KAUCIM_CONCERNS } from './types';
 
 export function App() {
   const { user, isLoading } = useSupabaseAuth();
@@ -32,7 +33,13 @@ export function App() {
           <>
             <Route path="/dashboard" element={<Dashboard />} />
             {/* <Route path="/fortune-poems" element={<FortunePoemsPage />} /> */}
-            <Route path="/kaucim-stories" element={<KaucimStoriesPage />} />
+            <Route
+              path="/kaucim-stories"
+              element={
+                <Navigate to={`/kaucim-stories/${KAUCIM_CONCERNS.LOVE}`} replace />
+              }
+            />
+            <Route path="/kaucim-stories/:concern" element={<KaucimStoriesPage />} />
             <Route path="/localization" element={<LocalizationPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Settings />} />

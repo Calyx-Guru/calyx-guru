@@ -3,35 +3,36 @@ import {
   MASTER_DATA_MANIFEST_FILE_NAME,
   STORAGE_BUCKET,
   SUPPORTED_LANGUAGES,
-} from '@/constants';
-import { MasterDataManifest } from '@/types';
-import { LocalizationTranslationType } from '@/types/Localization';
-import { createClient } from '@supabase/supabase-js';
-import { Argument, Command } from 'commander';
-import dotenv from 'dotenv';
-import fs from 'fs/promises';
-import path from 'path';
+} from "@/constants";
+import { MasterDataManifest } from "@/types";
+import { LocalizationTranslationType } from "@/types/Localization";
+import { createClient } from "@supabase/supabase-js";
+import { Argument, Command } from "commander";
+import dotenv from "dotenv";
+import fs from "fs/promises";
+import path from "path";
 
 // Load environment variables from .env and .env.local (local overrides)
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 dotenv.config({
-  path: path.resolve(process.cwd(), '.env.local'),
+  path: path.resolve(process.cwd(), ".env.local"),
   override: true,
 });
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  throw new Error("Missing Supabase environment variables");
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function loginSupabase() {
+  console.log("Logging in to Supabase...");
   await supabase.auth.signInWithPassword({
-    email: process.env.DASHBOARD_ADMIN_EMAIL || '',
-    password: process.env.DASHBOARD_ADMIN_PASSWORD || '',
+    email: process.env.DASHBOARD_ADMIN_EMAIL || "",
+    password: process.env.DASHBOARD_ADMIN_PASSWORD || "",
   });
 }
 
@@ -52,7 +53,7 @@ async function loadManifest(): Promise<MasterDataManifest | null> {
       return manifest;
     }
   } catch (error) {
-    console.error('Error fetching manifest:', error);
+    console.error("Error fetching manifest:", error);
   }
 
   return null;
@@ -62,7 +63,13 @@ async function versionUpManifest(): Promise<MasterDataManifest | null> {
   // Download the manifest to get the current version number (or use a default version if manifest doesn't exist)
   let manifest = await loadManifest();
   if (!manifest) {
-    return null;
+    // Load local manifest
+    const manifestText = await fs.readFile(
+      path.join(process.cwd(), "src", "masterdata", "manifest.json"),
+      "utf-8",
+    );
+    manifest = JSON.parse(manifestText);
+    return manifest;
   }
 
   // Update the manifest version
@@ -82,7 +89,7 @@ async function uploadManifest(updatedManifest: MasterDataManifest) {
       MASTER_DATA_MANIFEST_FILE_NAME,
       JSON.stringify(updatedManifest, null, 2),
       {
-        contentType: 'application/json',
+        contentType: "application/json",
         upsert: true,
       },
     );
@@ -93,14 +100,14 @@ async function upload(): Promise<void> {
 
   const manifest = await versionUpManifest();
   if (!manifest) {
-    console.error('Failed to update manifest version. Aborting upload.');
+    console.error("Failed to update manifest version. Aborting upload.");
     return;
   }
 
   const { version } = manifest.localization;
 
   console.log(
-    'Uploading translation data to Supabase storage, target:',
+    "Uploading translation data to Supabase storage, target:",
     `${LOCALIZATION_FILE_NAME}-${version}.json`,
   );
 
@@ -108,18 +115,18 @@ async function upload(): Promise<void> {
 
   for (const language of SUPPORTED_LANGUAGES) {
     const content = await fs.readFile(
-      path.join(process.cwd(), 'src', 'locales', language, 'translation.json'),
-      'utf-8',
+      path.join(process.cwd(), "src", "locales", language, "translation.json"),
+      "utf-8",
     );
     const translationData = JSON.parse(content);
 
     // traverse through the translation data and flatten it to dot notation keys
-    const flattenObject = (obj: any, prefix = ''): Record<string, string> => {
+    const flattenObject = (obj: any, prefix = ""): Record<string, string> => {
       return Object.keys(obj).reduce(
         (acc, key) => {
           const value = obj[key];
           const newKey = prefix ? `${prefix}.${key}` : key;
-          if (typeof value === 'object' && value !== null) {
+          if (typeof value === "object" && value !== null) {
             Object.assign(acc, flattenObject(value, newKey));
           } else {
             acc[newKey] = value;
@@ -135,12 +142,12 @@ async function upload(): Promise<void> {
         localizationData[key] = {
           key,
           translations: {
-            en: '',
-            ja: '',
-            vi: '',
-            ko: '',
-            'zh-CN': '',
-            'zh-TW': '',
+            en: "",
+            ja: "",
+            vi: "",
+            ko: "",
+            "zh-CN": "",
+            "zh-TW": "",
           },
         };
       }
@@ -158,7 +165,7 @@ async function upload(): Promise<void> {
   const { error } = await supabase.storage
     .from(STORAGE_BUCKET)
     .upload(`${LOCALIZATION_FILE_NAME}-${version}.json`, uploadContent, {
-      contentType: 'application/json',
+      contentType: "application/json",
       upsert: true,
     });
 
@@ -167,7 +174,7 @@ async function upload(): Promise<void> {
   }
 
   await uploadManifest(manifest);
-  console.log('✓ Successfully uploaded localization data and updated manifest');
+  console.log("✓ Successfully uploaded localization data and updated manifest");
 }
 
 async function download(): Promise<void> {
@@ -179,7 +186,7 @@ async function download(): Promise<void> {
   }
 
   console.log(
-    'Downloading translation data from Supabase storage, target:',
+    "Downloading translation data from Supabase storage, target:",
     `${LOCALIZATION_FILE_NAME}-${version}.json`,
   );
 
@@ -188,7 +195,7 @@ async function download(): Promise<void> {
     .download(`${LOCALIZATION_FILE_NAME}-${version}.json`);
 
   if (error) {
-    console.error('Error downloading localization data:', error);
+    console.error("Error downloading localization data:", error);
     throw error;
   }
 
@@ -200,7 +207,7 @@ async function download(): Promise<void> {
     const languageData: any = {};
     for (const item of localizationData) {
       // break the dot notation keys into nested objects
-      const keys = item.key.split('.');
+      const keys = item.key.split(".");
       let current = languageData;
       for (let i = 0; i < keys.length - 1; i++) {
         const key = keys[i];
@@ -215,15 +222,15 @@ async function download(): Promise<void> {
     // Write the language-specific data to a file
     const languageFilePath = path.join(
       process.cwd(),
-      'src',
-      'locales',
+      "src",
+      "locales",
       language,
-      'translation.json',
+      "translation.json",
     );
     await fs.writeFile(
       languageFilePath,
       JSON.stringify(languageData, null, 2),
-      'utf-8',
+      "utf-8",
     );
     console.log(
       `✓ Downloaded translations for ${language} to ${languageFilePath}`,
@@ -234,29 +241,29 @@ async function download(): Promise<void> {
 const program = new Command();
 
 program
-  .name('sync-translation')
+  .name("sync-translation")
   .description(
-    'Sync translation data from Supabase storage to local src/masterdata folder',
+    "Sync translation data from Supabase storage to local src/masterdata folder",
   )
-  .version('1.0.0');
+  .version("1.0.0");
 
 program
   .addArgument(
-    new Argument('<action>', 'Action to perform')
-      .choices(['download', 'upload'])
-      .default('download'),
+    new Argument("<action>", "Action to perform")
+      .choices(["download", "upload"])
+      .default("download"),
   )
   .action(async (action: string) => {
     try {
-      if (action === 'download') {
+      if (action === "download") {
         await download();
-      } else if (action === 'upload') {
+      } else if (action === "upload") {
         await upload();
       } else {
         throw new Error(`Unknown action: ${action}`);
       }
     } catch (error) {
-      console.error('Error syncing translation data:', error);
+      console.error("Error syncing translation data:", error);
     }
   });
 

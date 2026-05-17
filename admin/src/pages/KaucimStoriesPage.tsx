@@ -1,4 +1,4 @@
-import { KaucimConcernSelector } from '@/components/KaucimConcernSelector';
+import { formatKaucimConcernLabel, isKaucimConcern } from '@/components/KaucimConcernSelector';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { TableLayout } from '@/components/layout/TableLayout';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import type { MasterDataManifest } from '@/types/MasterDataManifest';
 import Handsontable from 'handsontable';
 import { Plus } from 'lucide-react';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
 
 const PAGE_STATE_PREFIX = 'kaucimStories';
 
@@ -39,19 +40,31 @@ const KAUCIM_STORIES_DEFAULT_COLUMN_WIDTHS = [
 
 interface KaucimStoriesPageState {
   selectedLanguage: LanguageKey;
-  selectedConcern: KAUCIM_CONCERNS;
   /** Persisted Handsontable column widths (px), same order as columns */
   columnWidths?: number[];
 }
 
 export function KaucimStoriesPage() {
+  const { concern: concernParam } = useParams<{ concern: string }>();
+
+  if (!isKaucimConcern(concernParam)) {
+    return <Navigate to={`/kaucim-stories/${KAUCIM_CONCERNS.LOVE}`} replace />;
+  }
+
+  return <KaucimStoriesPageContent selectedConcern={concernParam} />;
+}
+
+function KaucimStoriesPageContent({
+  selectedConcern,
+}: {
+  selectedConcern: KAUCIM_CONCERNS;
+}) {
   const hotTableRef = useRef(null);
   const hotInstanceRef = useRef<any>(null);
   const [pageState, setPageState] = usePageState<KaucimStoriesPageState>(
     PAGE_STATE_PREFIX,
     {
       selectedLanguage: 'en',
-      selectedConcern: KAUCIM_CONCERNS.LOVE,
     },
   );
   const {
@@ -85,17 +98,9 @@ export function KaucimStoriesPage() {
           }}
           disabled={loading}
         />
-        <KaucimConcernSelector
-          value={pageState.selectedConcern}
-          onValueChange={(value) => {
-            setTableUpdateTimestamp(Date.now());
-            updatePageState({ selectedConcern: value as KAUCIM_CONCERNS });
-          }}
-          disabled={loading}
-        />
       </div>
     ),
-    [loading],
+    [loading, pageState.selectedLanguage, updatePageState],
   );
 
   // -- Effects --
@@ -103,11 +108,11 @@ export function KaucimStoriesPage() {
   // Load stories when language or concern changes
   useEffect(() => {
     if (manifest) {
-      loadStories(pageState.selectedConcern, pageState.selectedLanguage);
+      loadStories(selectedConcern, pageState.selectedLanguage);
     } else {
       setLoading(true);
     }
-  }, [pageState.selectedLanguage, pageState.selectedConcern, manifest]);
+  }, [pageState.selectedLanguage, selectedConcern, manifest]);
 
   // Initialize Handsontable on mount
   useEffect(() => {
@@ -365,17 +370,17 @@ export function KaucimStoriesPage() {
         ...manifest,
         kaucimStories: {
           ...manifest.kaucimStories,
-          [pageState.selectedConcern]: {
+          [selectedConcern]: {
             [pageState.selectedLanguage]:
-              (manifest.kaucimStories?.[pageState.selectedConcern]?.[pageState.selectedLanguage] ||
+              (manifest.kaucimStories?.[selectedConcern]?.[pageState.selectedLanguage] ||
                 0) + 1,
           },
         },
       };
 
       const version =
-        updatedManifest.kaucimStories?.[pageState.selectedConcern]?.[pageState.selectedLanguage] || 1;
-      const fileName = makeFilePath(pageState.selectedConcern, pageState.selectedLanguage, version);
+        updatedManifest.kaucimStories?.[selectedConcern]?.[pageState.selectedLanguage] || 1;
+      const fileName = makeFilePath(selectedConcern, pageState.selectedLanguage, version);
 
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
@@ -400,8 +405,8 @@ export function KaucimStoriesPage() {
       setLoading(true);
 
       const version =
-        manifest.kaucimStories?.[pageState.selectedConcern]?.[pageState.selectedLanguage] || 1;
-      const fileName = makeFilePath(pageState.selectedConcern, pageState.selectedLanguage, version);
+        manifest.kaucimStories?.[selectedConcern]?.[pageState.selectedLanguage] || 1;
+      const fileName = makeFilePath(selectedConcern, pageState.selectedLanguage, version);
 
       // Sort storyLines by stickNumber
       const sortedStoryLines = Array.from(storyLines).sort((a, b) => a.stickNumber - b.stickNumber);
@@ -428,13 +433,13 @@ export function KaucimStoriesPage() {
     <TableLayout
       loading={loading}
       error={error}
-      title="Kaucim Stories"
+      title={`Kaucim Stories — ${formatKaucimConcernLabel(selectedConcern)}`}
       headerContent={headerContent}
       cardTitle={languageKeyToLabel(pageState.selectedLanguage)}
       cardDescription={
         <>
           Version:{' '}
-          {manifest?.kaucimStories?.[pageState.selectedConcern]?.[pageState.selectedLanguage] || 1 || '-'}
+          {manifest?.kaucimStories?.[selectedConcern]?.[pageState.selectedLanguage] || 1 || '-'}
           {!loading && <span> ({storyLines.length} stories)</span>}
         </>
       }
@@ -447,7 +452,7 @@ export function KaucimStoriesPage() {
       </div>}
       rows={storyLines}
       hotTableRef={hotTableRef}
-      refresh={() => loadStories(pageState.selectedConcern, pageState.selectedLanguage)}
+      refresh={() => loadStories(selectedConcern, pageState.selectedLanguage)}
       versionUp={versionUpData}
       addRow={addRow}
       saveData={saveData}
