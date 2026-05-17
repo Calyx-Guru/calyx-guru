@@ -12,6 +12,7 @@ import {
 import * as subButtonSet from "@/assets/images/kau-cim/set-2";
 
 import { orbButton } from "@/assets/images/ui";
+import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { SubButton } from "../category";
 import type * as Types from "./type";
@@ -46,7 +47,7 @@ const SUB_BUTTON_PROPERTIES = [
 
 export function KaucimOrb(properties: Types.Properties) {
   const { style, onAction, onMenuOpenChange } = properties;
-
+  const { t } = useTranslation();
   const orbOpacity = useRef(new Animated.Value(1)).current;
   const closeButtonAnim = useRef(new Animated.Value(0)).current;
   const fanAnims = useRef<Animated.Value[]>(
@@ -213,7 +214,9 @@ export function KaucimOrb(properties: Types.Properties) {
                 style={styles.centerIconImage}
                 resizeMode="contain"
               />
-              <Text style={styles.mainTagText}>KauCim</Text>
+              <Text style={styles.mainTagText}>
+                {t("mainMenu.button.kaucim")}
+              </Text>
             </View>
           )}
         </Pressable>

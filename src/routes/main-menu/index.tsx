@@ -157,7 +157,7 @@ export function RouteMainMenu() {
     <View style={styles.root}>
       <NormalVideo url={petState.petVideo} />
 
-      <View style={[styles.headerWrapper, { top: 8 }]}>
+      <View style={[styles.headerWrapper, { top: 16 }]}>
         <HealthBar
           totalValue={MAX_PET_POWER}
           value={petState.petPower}
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   bottomWrapper: {
     position: "absolute",
-    bottom: 8,
+    bottom: 16,
     right: 8,
     left: 8,
     flexDirection: "row",

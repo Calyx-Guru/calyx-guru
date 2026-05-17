@@ -1,11 +1,8 @@
-import { DEFAULT_LANGUAGE, STORAGE_LOCALE_STORE_KEY } from '@/constants';
-import {
-  initializeI18n,
-  mapDeviceLocaleToLanguageKey,
-} from '@/lib/i18n/config';
+import { DEFAULT_LANGUAGE } from '@/constants';
+import { loadStoredAppearance } from '@/lib/appearanceStorage';
+import { initializeI18n } from '@/lib/i18n/config';
 import { ensureFonts } from '@/theme/fonts';
 import { LanguageKey } from '@/types';
-import { storage } from '@/lib/storage';
 
 /**
  * Initialize the entire app
@@ -26,12 +23,8 @@ export async function initializeApp(): Promise<void> {
  */
 async function initializeLocale(): Promise<void> {
   try {
-    // Get saved locale or auto-detect device language
-    const savedLocale = await storage.getItem(STORAGE_LOCALE_STORE_KEY);
-    const locale: LanguageKey =
-      (savedLocale as LanguageKey) ||
-      mapDeviceLocaleToLanguageKey() ||
-      undefined;
+    const { locale: savedLocale } = await loadStoredAppearance();
+    const locale: LanguageKey = savedLocale || DEFAULT_LANGUAGE;
 
     // Load fonts and initialize i18n in parallel
     await Promise.all([

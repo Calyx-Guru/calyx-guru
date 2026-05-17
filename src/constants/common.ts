@@ -12,8 +12,7 @@ export const SUPPORTED_LANGUAGES: LanguageKey[] = [
   "ja",
 ];
 
-export const STORAGE_THEME_STORE_KEY = "appearance_theme";
-export const STORAGE_LOCALE_STORE_KEY = "appearance_locale";
+export const STORAGE_THEME_KEY = "appearance";
 export const STORAGE_ANALYTICS_FIRST_OPEN_AT_KEY = "analytics_first_open_at";
 
 export const STORAGE_BUCKET = "fortune_data";

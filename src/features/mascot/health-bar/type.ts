@@ -6,4 +6,5 @@ export interface Properties {
   change?: number;
   colors?: string[];
   style?: StyleProp<ViewStyle>;
+  onSettingsPress?: () => void;
 }

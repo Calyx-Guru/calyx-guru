@@ -11,6 +11,11 @@
     "settings": "Settings",
     "language": "Language"
   },
+  "mainMenu": {
+    "button": {
+      "kaucim": "Kau Cim"
+    }
+  },
   "petStatus": {
     "veryGood": {
       "0": "Calyx experiences a profound sense of tranquility as she drifts through a sanctuary of fragrant, moonlit blossoms.",

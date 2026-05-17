@@ -1,12 +1,19 @@
-import React, { createContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Appearance, Platform } from 'react-native';
 
+import { DEFAULT_LANGUAGE } from '@/constants';
 import {
-  DEFAULT_LANGUAGE,
-  STORAGE_LOCALE_STORE_KEY,
-  STORAGE_THEME_STORE_KEY,
-} from '@/constants';
-import { storage } from '@/lib/storage';
+  DEFAULT_STORED_APPEARANCE,
+  loadStoredAppearance,
+  saveStoredAppearance,
+  type StoredAppearance,
+} from '@/lib/appearanceStorage';
 import {
   initializeI18n,
   mapDeviceLocaleToLanguageKey,
@@ -64,25 +71,23 @@ export function AppAppearanceProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
-  const [locale, setLocaleState] = useState<LanguageKey>(DEFAULT_LANGUAGE);
+  const [appearance, setAppearance] = useState<StoredAppearance>(
+    DEFAULT_STORED_APPEARANCE,
+  );
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
+  const { themeMode, locale } = appearance;
   const systemTheme = Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
 
   useEffect(() => {
-    storage.multiGet([
-      STORAGE_THEME_STORE_KEY,
-      STORAGE_LOCALE_STORE_KEY,
-    ]).then((entries) => {
-      const theme = entries[0][1];
-      const loc = entries[1][1];
-      const savedLocale =
-        (loc as LanguageKey) ||
-        mapDeviceLocaleToLanguageKey() ||
-        DEFAULT_LANGUAGE;
-      setThemeModeState((theme as ThemeMode) || 'system');
-      setLocaleState(savedLocale);
+    loadStoredAppearance().then((stored) => {
+      setAppearance({
+        themeMode: stored.themeMode,
+        locale:
+          stored.locale ||
+          mapDeviceLocaleToLanguageKey() ||
+          DEFAULT_LANGUAGE,
+      });
     });
   }, []);
 
@@ -107,6 +112,23 @@ export function AppAppearanceProvider({
     };
   }, [layout.textSpacingMultiplier]);
 
+  const setThemeMode = useCallback(async (mode: ThemeMode) => {
+    setAppearance((prev) => {
+      const next = { ...prev, themeMode: mode };
+      void saveStoredAppearance(next);
+      return next;
+    });
+  }, []);
+
+  const setLocale = useCallback(async (loc: LanguageKey) => {
+    setAppearance((prev) => {
+      const next = { ...prev, locale: loc };
+      void saveStoredAppearance(next);
+      return next;
+    });
+    await initializeI18n(loc);
+  }, []);
+
   const value = useMemo<AppAppearance>(
     () => ({
       platform: Platform.OS,
@@ -123,18 +145,21 @@ export function AppAppearanceProvider({
       lineHeightScale: layout.lineHeightScale,
       fontsLoaded,
 
-      setThemeMode: async (mode) => {
-        setThemeModeState(mode);
-        await storage.setItem(STORAGE_THEME_STORE_KEY, mode);
-      },
-
-      setLocale: async (loc) => {
-        setLocaleState(loc);
-        await storage.setItem(STORAGE_LOCALE_STORE_KEY, loc);
-        await initializeI18n(loc);
-      },
+      setThemeMode,
+      setLocale,
     }),
-    [locale, resolvedTheme, fontsLoaded],
+    [
+      locale,
+      themeMode,
+      resolvedTheme,
+      resolvedFontRegistry,
+      langKey,
+      resolvedSpacing,
+      layout.lineHeightScale,
+      fontsLoaded,
+      setThemeMode,
+      setLocale,
+    ],
   );
 
   useEffect(() => {

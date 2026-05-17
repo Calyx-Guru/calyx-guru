@@ -1,7 +1,20 @@
-import { useEffect, useRef, useState } from "react";
-import { Animated, ImageBackground, StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router, type Href } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 
-import { energyIcon, powerBarBase, powerBarFill } from "@/assets/images/ui";
+import {
+  circleBlueButton,
+  energyIcon,
+  powerBarBase,
+  powerBarFill,
+} from "@/assets/images/ui";
 
 import type * as Types from "./type";
 
@@ -15,7 +28,16 @@ export const HealthBar = (properties: Types.Properties) => {
     colors = ["red"],
     change = 0,
     style,
+    onSettingsPress,
   } = properties;
+
+  const handleSettingsPress = useCallback(() => {
+    if (onSettingsPress) {
+      onSettingsPress();
+      return;
+    }
+    router.push("/settings" as Href);
+  }, [onSettingsPress]);
 
   const animatedValue = useRef(
     new Animated.Value(
@@ -59,13 +81,7 @@ export const HealthBar = (properties: Types.Properties) => {
   }, [value, change, totalValue]);
 
   return (
-    <View
-      style={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
+    <View style={styles.row}>
       <ImageBackground
         source={powerBarBase}
         style={[styles.empty, style]}
@@ -93,13 +109,41 @@ export const HealthBar = (properties: Types.Properties) => {
           resizeMode="cover"
         />
       </ImageBackground>
+
+      <Pressable
+        onPress={handleSettingsPress}
+        style={styles.settingsPressable}
+        accessibilityRole="button"
+        accessibilityLabel="Open settings"
+      >
+        <ImageBackground
+          source={circleBlueButton}
+          style={styles.settingsButton}
+          resizeMode="contain"
+        >
+          <Ionicons
+            name="settings-sharp"
+            size={22}
+            color="#ffffff"
+            style={styles.settingsIcon}
+          />
+        </ImageBackground>
+      </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  row: {
+    width: "100%",
+    maxWidth: 456,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   empty: {
-    width: 400,
+    flex: 1,
+    maxWidth: 400,
     borderRadius: 16,
     aspectRatio: 6,
     overflow: "hidden",
@@ -138,5 +182,19 @@ const styles = StyleSheet.create({
     aspectRatio: "5/7",
     marginLeft: 12,
     marginTop: -8,
+  },
+  settingsPressable: {
+    flexShrink: 0,
+  },
+  settingsButton: {
+    width: 54,
+    height: 54,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  settingsIcon: {
+    width: 22,
+    height: 22,
+    marginBottom: 4,
   },
 });
