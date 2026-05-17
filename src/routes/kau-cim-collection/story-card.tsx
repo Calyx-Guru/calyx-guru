@@ -8,7 +8,6 @@ import {
 import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useUserState } from "@/hooks/useUserState";
-import { pickRandom } from "@/lib/app/helper";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,6 +20,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image as RNImage,
 } from "react-native";
 import { ILLUSTRATIONS } from "../kau-cim/constants";
 
@@ -88,15 +88,25 @@ export function StoryCard({
     }
     return !userState.kaucimStoryUnlocks?.[concern]?.[stickNumber];
   }, [userState, concern, stickNumber]);
-  const omenImage = useMemo(() => {
+  const omenImageSource = useMemo(() => {
     const illustrations = concern ? ILLUSTRATIONS[concern] : undefined;
     if (!illustrations) {
       return undefined;
     }
-    const imageFunc = pickRandom(
-      illustrations.omen[stickNumber % illustrations.omen.length],
-    );
-    return imageFunc ? imageFunc() : undefined;
+    const imageFunc = illustrations.omen[stickNumber]?.[0];
+    if (!imageFunc) {
+      return undefined;
+    }
+    const module = imageFunc();
+    const resolved = RNImage.resolveAssetSource(module);
+    if (!resolved?.uri) {
+      return undefined;
+    }
+    // Unique cacheKey per stick — prevents expo-image reusing the wrong asset when FlatList recycles cells.
+    return {
+      uri: resolved.uri,
+      cacheKey: `${concern}-omen-${stickNumber}`,
+    };
   }, [concern, stickNumber]);
   const story = useMemo(() => {
     return getKaucimStory(concern, stickNumber, 0);
@@ -120,13 +130,7 @@ export function StoryCard({
       },
     });
     router.push("/kau-cim");
-  }, [
-    concern,
-    findKaucimResultForStick,
-    isLocked,
-    setAppState,
-    stickNumber,
-  ]);
+  }, [concern, findKaucimResultForStick, isLocked, setAppState, stickNumber]);
 
   const buttonImage = useMemo(() => {
     switch (Number(story.fortuneLevel)) {
@@ -162,9 +166,7 @@ export function StoryCard({
         accessibilityRole="button"
         accessibilityState={{ disabled: isLocked }}
         accessibilityLabel={
-          isLocked
-            ? `Locked story ${stickNumber}`
-            : `Open story ${stickNumber}`
+          isLocked ? `Locked story ${stickNumber}` : `Open story ${stickNumber}`
         }
       >
         <LinearGradient
@@ -174,35 +176,37 @@ export function StoryCard({
           style={styles.cardBorder}
         >
           <View style={styles.card}>
-          {omenImage ? (
-            <View style={styles.omenImageContainer}>
-              <Image
-                source={omenImage}
-                style={[styles.omenImage, isLocked && styles.omenImageLocked]}
-                contentFit="cover"
-              />
-              {isLocked ? (
-                <>
-                  {Platform.OS !== "web" ? (
-                    <View
-                      style={styles.omenLockedDesaturate}
-                      pointerEvents="none"
-                    />
-                  ) : null}
-                  <View style={styles.omenLockedWash} pointerEvents="none" />
-                </>
-              ) : null}
+            {omenImageSource ? (
+              <View style={styles.omenImageContainer}>
+                <Image
+                  key={`${concern}-omen-${stickNumber}`}
+                  source={omenImageSource}
+                  style={[styles.omenImage, isLocked && styles.omenImageLocked]}
+                  contentFit="cover"
+                  recyclingKey={`${concern}-omen-${stickNumber}`}
+                />
+                {isLocked ? (
+                  <>
+                    {Platform.OS !== "web" ? (
+                      <View
+                        style={styles.omenLockedDesaturate}
+                        pointerEvents="none"
+                      />
+                    ) : null}
+                    <View style={styles.omenLockedWash} pointerEvents="none" />
+                  </>
+                ) : null}
+              </View>
+            ) : null}
+            <View style={styles.stickBadge}>
+              <ImageBackground
+                source={buttonImage}
+                style={styles.stickBadgeImage}
+                resizeMode="cover"
+              >
+                <Text style={styles.stickNumber}>{stickNumber}</Text>
+              </ImageBackground>
             </View>
-          ) : null}
-          <View style={styles.stickBadge}>
-            <ImageBackground
-              source={buttonImage}
-              style={styles.stickBadgeImage}
-              resizeMode="cover"
-            >
-              <Text style={styles.stickNumber}>{stickNumber}</Text>
-            </ImageBackground>
-          </View>
           </View>
         </LinearGradient>
       </Pressable>
