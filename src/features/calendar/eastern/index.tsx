@@ -5,12 +5,14 @@ import { ImageBackground, StyleSheet, Text, View } from "react-native";
 
 import { calendarBook } from "@/assets/images/calendars";
 import * as ZODIACS from "@/assets/images/zodiacs/set-1";
+import { useTranslation } from "@/hooks/useTranslation";
 import { createDate } from "@/lib/app/time";
 
 import type * as Types from "./type";
 
 export function CalendarEastern(properties: Types.Properties) {
   const { date = createDate(), width = 60 } = properties;
+  const { t } = useTranslation();
 
   const lunarDate = toLunar(date.getTime());
   const zodiac = getZodiac(date.getTime());
@@ -37,8 +39,11 @@ export function CalendarEastern(properties: Types.Properties) {
         style={[styles.calendarWrapper, { width }]}
         resizeMode="cover"
       >
-        <Text style={[styles.zodiacText, { fontSize: width / 7 }]}>
-          {lunarDate?.lMonth} 月 {lunarDate?.lDay}
+        <Text style={[styles.zodiacText, { fontSize: width / 8 }]}>
+          {t("calendar.eastern.date", {
+            month: lunarDate?.lMonth,
+            day: lunarDate?.lDay,
+          })}
         </Text>
         {zodiacImage && (
           <Image
@@ -70,7 +75,7 @@ const styles = StyleSheet.create({
     aspectRatio: "6/7",
   },
   zodiacText: {
-    marginTop: "12.5%",
+    marginTop: "15%",
     color: "#ffffff",
     textTransform: "uppercase",
   },

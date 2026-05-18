@@ -1,4 +1,4 @@
-import { LanguageKey } from '@/types';
+import { LanguageKey } from "@/types";
 
 export type LayoutProfileType = {
   textSpacingMultiplier: number;
@@ -10,11 +10,11 @@ export const layoutProfiles: Record<LanguageKey, LayoutProfileType> = {
     textSpacingMultiplier: 1.0,
     lineHeightScale: 1.0,
   },
-  'zh-CN': {
+  "zh-CN": {
     textSpacingMultiplier: 1.0,
     lineHeightScale: 1.0,
   },
-  'zh-TW': {
+  "zh-TW": {
     textSpacingMultiplier: 1.0,
     lineHeightScale: 1.0,
   },
@@ -22,7 +22,7 @@ export const layoutProfiles: Record<LanguageKey, LayoutProfileType> = {
     textSpacingMultiplier: 1.0,
     lineHeightScale: 1.0,
   },
-  kr: {
+  ko: {
     textSpacingMultiplier: 1.0,
     lineHeightScale: 1.0,
   },

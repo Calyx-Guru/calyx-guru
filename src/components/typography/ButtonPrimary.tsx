@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#ffffff",
     textAlign: "center",
-    marginBottom: 14,
+    marginBottom: 24,
     textShadowColor: "#000000",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,

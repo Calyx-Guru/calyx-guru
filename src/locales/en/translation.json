@@ -119,5 +119,31 @@
       "dateFormatInvalid": "Please use YYYY-MM-DD format",
       "signUpFailed": "Sign up failed. Please try again."
     }
+  },
+  "choose_element": {
+    "heading": {
+      "title": "Choose your Element"
+    },
+    "stage": {
+      "help_me_choose": "Help me choose"
+    },
+    "confirm_overlay": {
+      "title": "Confirm Your Element Selection",
+      "desc_p1": "You have selected the",
+      "desc_p2": ".This element determines your unique cosmic connections and luck.",
+      "desc_p3": "Once confirmed, you cannot change it later",
+      "desc_p4": ".But you can",
+      "desc_p5": "reset as another element",
+      "desc_p6": "from your settings menu to start over.",
+      "confirm_button_prefix": "Confirm Element"
+    }
+  },
+  "calendar": {
+    "eastern": {
+      "date": "{{month}}/{{day}}"
+    },
+    "western": {
+      "date": "{{month}} {{day}}"
+    }
   }
 }

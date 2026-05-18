@@ -188,7 +188,7 @@ export function RouteMainMenu() {
         style={[styles.bottomWrapper, { opacity: chromeOpacity }]}
         pointerEvents={isKaucimMenuOpen ? "none" : "auto"}
       >
-        <CalendarEastern date={new Date("2038-06-26")} />
+        <CalendarEastern />
         <CalendarWestern />
       </Animated.View>
 

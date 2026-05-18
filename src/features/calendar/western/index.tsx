@@ -1,14 +1,21 @@
 import { calendarBook } from "@/assets/images/calendars";
+import { useTranslation } from "@/hooks/useTranslation";
 import { createDate } from "@/lib/app/time";
 import { ImageBackground, StyleSheet, Text } from "react-native";
 import type * as Types from "./type";
 
 export function CalendarWestern(properties: Types.Properties) {
   const { date = createDate(), width = 60 } = properties;
+  const { t, i18n } = useTranslation();
 
-  const year = date.getFullYear();
-  const monthName = date.toLocaleDateString("en", { month: "short" });
   const dayNumber = date.getDate();
+  const year = date.getFullYear();
+  const monthName =
+    i18n.language === "en"
+      ? date.toLocaleDateString(i18n.language, {
+          month: "short",
+        })
+      : date.getMonth() + 1;
 
   return (
     <ImageBackground
@@ -17,9 +24,12 @@ export function CalendarWestern(properties: Types.Properties) {
       resizeMode="cover"
     >
       <Text style={[styles.monthText, { fontSize: width / 7 }]}>{year}</Text>
-      <Text
-        style={[styles.dayNumber, { fontSize: width / 5 }]}
-      >{`${dayNumber} ${monthName}`}</Text>
+      <Text style={[styles.dayNumber, { fontSize: width / 6 }]}>
+        {t("calendar.western.date", {
+          day: dayNumber,
+          month: monthName,
+        })}
+      </Text>
     </ImageBackground>
   );
 }
@@ -36,7 +46,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   dayNumber: {
-    marginTop: "25%",
+    marginTop: "30%",
     color: "#b20606",
     fontWeight: "bold",
   },

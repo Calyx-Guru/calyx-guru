@@ -10,7 +10,7 @@ import { StyleSheet, Text } from "react-native";
 import type * as Types from "./type";
 
 export const StatusMessage = (properties: Types.Properties) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { deviceId } = useAppState();
   const { userState } = useUserState();
   const petPower = userState?.petPower ?? 0;
@@ -19,6 +19,7 @@ export const StatusMessage = (properties: Types.Properties) => {
   const message = useMemo(() => {
     const rngIndex = STATUS_MESSAGE_RNG_INDEX;
     const rndIndex = getRandomInt(deviceId, rngIndex, createDate(), 0, 8);
+
     if (petPowerPercentage >= 0.75) {
       return t(`petStatus.veryGood.${rndIndex}`);
     } else if (petPowerPercentage >= 0.5) {
@@ -28,7 +29,7 @@ export const StatusMessage = (properties: Types.Properties) => {
     } else {
       return t(`petStatus.veryBad.${rndIndex}`);
     }
-  }, [petPowerPercentage, deviceId]);
+  }, [petPowerPercentage, deviceId, i18n.language]);
 
   return (
     <FramePrimary3 style={styles.frameWrapper}>
@@ -40,7 +41,7 @@ export const StatusMessage = (properties: Types.Properties) => {
 const styles = StyleSheet.create({
   frameWrapper: {
     width: 400,
-    height: 120,
+    height: 180,
   },
   text: {
     margin: 24,

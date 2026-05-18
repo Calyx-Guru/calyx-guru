@@ -14,6 +14,7 @@ import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
 import { FramePrimary2 } from "@/components/typography/FramePrimary2";
 import { HeadingPrimary } from "@/components/typography/HeadingPrimary";
 import { INITIAL_PET_POWER } from "@/constants";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import { createDate } from "@/lib/app/time";
@@ -30,6 +31,7 @@ export function RouteChooseElement(properties: Types.Properties) {
   const [element, setElement] = useState<ElementName | null>(null);
   const { updateProfile } = useUserProfile();
   const { updateUserState } = useUserState();
+  const { t } = useTranslation();
 
   function onDateChange(event: Types.DateTimePickerEvent, selectedDate?: Date) {
     setShowDatePicker(false);
@@ -76,7 +78,7 @@ export function RouteChooseElement(properties: Types.Properties) {
           display: "flex",
         }}
       >
-        <HeadingPrimary>Choose your Element</HeadingPrimary>
+        <HeadingPrimary>{t("choose_element.heading.title")}</HeadingPrimary>
       </View>
     );
   };
@@ -147,7 +149,8 @@ export function RouteChooseElement(properties: Types.Properties) {
           }
         >
           {stage === "choose-birthday" && "I will choose myself"}
-          {stage === "choose-element" && "Help me choose"}
+          {stage === "choose-element" &&
+            t("choose_element.stage.help_me_choose")}
         </ButtonPrimary>
       </View>
     );
@@ -170,7 +173,7 @@ export function RouteChooseElement(properties: Types.Properties) {
             handleSelectElement(element);
           }}
         >
-          Help me choose
+          {t("choose_element.stage.help_me_choose")}
         </ButtonPrimary>
       </View>
     );

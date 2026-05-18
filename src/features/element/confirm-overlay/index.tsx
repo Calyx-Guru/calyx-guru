@@ -13,11 +13,13 @@ import { ELEMENTS } from "../constants";
 
 import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
 import { FramePrimary } from "@/components/typography/FramePrimary";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useEffect, useMemo } from "react";
 import type * as Types from "./type";
 
 export function ConfirmOverlay(properties: Types.Properties) {
   const { element } = properties;
+  const { t } = useTranslation();
 
   const animation = useMemo(() => {
     return {
@@ -66,9 +68,11 @@ export function ConfirmOverlay(properties: Types.Properties) {
   const renderHeader = () => (
     <FramePrimary style={styles.frameWrapper}>
       <View style={styles.headerWrapper}>
-        <Text style={styles.headerTitle}>Confirm Your Element Selection</Text>
+        <Text style={styles.headerTitle}>
+          {t("choose_element.confirm_overlay.title")}
+        </Text>
         <Text style={styles.headerDescription}>
-          You have selected the &nbsp;
+          {t("choose_element.confirm_overlay.desc_p1")}&nbsp;
           <Text
             style={[
               styles.headerDescriptionHighlight,
@@ -77,15 +81,15 @@ export function ConfirmOverlay(properties: Types.Properties) {
           >
             {element.toUpperCase()}
           </Text>
-          .This element determines your unique cosmic connections and luck.
+          {t("choose_element.confirm_overlay.desc_p2")}
           <Text style={styles.headerDescriptionBold}>
-            Once confirmed, you cannot change it later
+            {t("choose_element.confirm_overlay.desc_p3")}
           </Text>
-          .But you can &nbsp;
+          {t("choose_element.confirm_overlay.desc_p4")}&nbsp;
           <Text style={styles.headerDescriptionBold}>
-            reset as another element
+            {t("choose_element.confirm_overlay.desc_p5")}
           </Text>
-          &nbsp; from your settings menu to start over.
+          &nbsp;{t("choose_element.confirm_overlay.desc_p6")}
         </Text>
       </View>
     </FramePrimary>
@@ -130,7 +134,7 @@ export function ConfirmOverlay(properties: Types.Properties) {
           onPress={() => properties.onConfirm?.(element)}
           textStyle={{ fontSize: 14 }}
         >
-          {`Confirm Element "${element.toUpperCase()}"`}
+          {`${t("choose_element.confirm_overlay.confirm_button_prefix")} "${element.toUpperCase()}"`}
         </ButtonPrimary>
       </View>
     </View>
