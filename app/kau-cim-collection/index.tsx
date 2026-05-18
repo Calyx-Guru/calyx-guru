@@ -1,12 +1,14 @@
 import { Stack, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { useTranslation } from "@/hooks/useTranslation";
 import { RouteKaucimCollection } from "@/routes/kau-cim-collection";
 
 const HEADER_BAR_HEIGHT = 48;
 
 function CollectionHeader() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.header}>
@@ -19,7 +21,7 @@ function CollectionHeader() {
         <Text style={styles.backLabel}>‹</Text>
       </Pressable>
       <Text style={styles.title} numberOfLines={1}>
-        Kau Cim Collection
+        {t("kau_cim_collection.header.title")}
       </Text>
       <View style={styles.backButton} />
     </View>

@@ -21,27 +21,27 @@ const SUB_BUTTON_PROPERTIES = [
   // {
   //   image: subButtonSet.familyFriend,
   //   action: KAUCIM_CONCERNS.FAMILY,
-  //   labelKey: "Family & Friends",
+  //   labelKey: "kau_cim.category.family",
   // },
   {
     image: wealthIcon,
     action: KAUCIM_CONCERNS.WEALTH,
-    labelKey: "Wealth",
+    labelKey: "kau_cim.category.wealth",
   },
   {
     image: loveIcon,
     action: KAUCIM_CONCERNS.LOVE,
-    labelKey: "Love",
+    labelKey: "kau_cim.category.love",
   },
   {
     image: careerIcon,
     action: KAUCIM_CONCERNS.CAREER,
-    labelKey: "Career",
+    labelKey: "kau_cim.category.career",
   },
   // {
   //   image: subButtonSet.health,
   //   action: KAUCIM_CONCERNS.HEALTH,
-  //   labelKey: "Health",
+  //   labelKey: "kau_cim.category.health",
   // },
 ];
 

@@ -145,5 +145,19 @@
     "western": {
       "date": "{{month}}월 {{day}}일"
     }
+  },
+  "kau_cim_collection": {
+    "header": {
+      "title": "제비뽑기 컬렉션"
+    }
+  },
+  "kau_cim": {
+    "category": {
+      "wealth": "재물운",
+      "love": "연애운",
+      "career": "직업운",
+      "family": "가족・친구",
+      "health": "건강"
+    }
   }
 }

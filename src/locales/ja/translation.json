@@ -145,5 +145,19 @@
     "western": {
       "date": "{{month}}月{{day}}日"
     }
+  },
+  "kau_cim_collection": {
+    "header": {
+      "title": "おみくじコレクション"
+    }
+  },
+  "kau_cim": {
+    "category": {
+      "wealth": "財運",
+      "love": "恋愛",
+      "career": "仕事",
+      "family": "家族・友人",
+      "health": "健康"
+    }
   }
 }

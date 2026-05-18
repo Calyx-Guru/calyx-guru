@@ -145,5 +145,19 @@
     "western": {
       "date": "{{month}} {{day}}"
     }
+  },
+  "kau_cim_collection": {
+    "header": {
+      "title": "Kau Cim Collection"
+    }
+  },
+  "kau_cim": {
+    "category": {
+      "wealth": "Wealth",
+      "love": "Love",
+      "career": "Career",
+      "family": "Family & Friends",
+      "health": "Health"
+    }
   }
 }

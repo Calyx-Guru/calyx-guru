@@ -145,5 +145,19 @@
     "western": {
       "date": "{{month}}月{{day}}日"
     }
+  },
+  "kau_cim_collection": {
+    "header": {
+      "title": "签文收藏"
+    }
+  },
+  "kau_cim": {
+    "category": {
+      "wealth": "财富",
+      "love": "爱情",
+      "career": "事业",
+      "family": "亲友",
+      "health": "健康"
+    }
   }
 }

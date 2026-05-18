@@ -145,5 +145,19 @@
     "western": {
       "date": "{{day}} Tháng {{month}}"
     }
+  },
+  "kau_cim_collection": {
+    "header": {
+      "title": "Bộ sưu tập Quẻ xăm"
+    }
+  },
+  "kau_cim": {
+    "category": {
+      "wealth": "Tài lộc",
+      "love": "Tình duyên",
+      "career": "Sự nghiệp",
+      "family": "Gia đình & Bạn bè",
+      "health": "Sức khỏe"
+    }
   }
 }
