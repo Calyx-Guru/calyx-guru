@@ -1,4 +1,3 @@
-import { getLocales } from "expo-localization";
 import * as Speech from "expo-speech";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,24 +11,33 @@ import {
 } from "@/features/kau-cim/story-experience/constants";
 
 import { CrossfadeImage } from "@/components/image/CrossfadeImage";
+import { useAppAppearance } from "@/contexts/AppAppearanceContext";
+import type { ResolveNarrationVoice } from "@/hooks/useNarrationVoice";
+import {
+  delayUntilMinSpeechElapsed,
+  estimateSpeechDurationMs,
+  NARRATION_SPEECH_RATE,
+  SPEECH_SAFETY_BUFFER_MS,
+} from "@/lib/speech/speechTiming";
 import { CaptionText } from "../typography/CaptionText";
 
 interface Properties {
   slides: Kaucim.Slide[];
+  resolveNarrationVoice: ResolveNarrationVoice;
   onEnded?: () => void;
 }
 
 export function StoryTeller(properties: Properties) {
-  const { slides } = properties;
+  const { slides, resolveNarrationVoice } = properties;
 
   const insets = useSafeAreaInsets();
+  const { locale } = useAppAppearance();
 
   const [slideIndex, setSlideIndex] = useState(0);
   const [sentenceIndex, setSentenceIndex] = useState(0);
   const [crossfading, setCrossfading] = useState(false);
   const captionOpacity = useRef(new Animated.Value(1)).current;
   const speechUnavailable = useRef(false);
-  const narrationVoice = useRef<string | undefined>(undefined);
 
   const slidesData = useMemo(
     () =>
@@ -43,53 +51,6 @@ export function StoryTeller(properties: Properties) {
   );
 
   const currentSlide = slidesData[slideIndex];
-
-  const resolveNarrationVoice = useCallback(async () => {
-    if (narrationVoice.current !== undefined) {
-      return narrationVoice.current;
-    }
-
-    const locales = getLocales();
-    const preferredTag = locales[0]?.languageTag?.toLowerCase();
-    const preferredLanguage = locales[0]?.languageCode?.toLowerCase();
-
-    const voices = await Speech.getAvailableVoicesAsync();
-    if (!voices.length) {
-      narrationVoice.current = "";
-      return undefined;
-    }
-
-    const byLanguage = voices.filter((voice) => {
-      const voiceLanguage = voice.language?.toLowerCase() ?? "";
-      if (preferredTag != null && voiceLanguage === preferredTag) {
-        return true;
-      }
-      if (preferredLanguage != null && voiceLanguage.startsWith(preferredLanguage)) {
-        return true;
-      }
-      return false;
-    });
-
-    const candidates = byLanguage.length > 0 ? byLanguage : voices;
-
-    const scored = candidates
-      .map((voice) => {
-        const id = `${voice.identifier ?? ""} ${voice.name ?? ""}`.toLowerCase();
-        let score = 0;
-
-        if (id.includes("neural")) score += 5;
-        if (id.includes("enhanced") || id.includes("premium")) score += 4;
-        if (id.includes("natural") || id.includes("studio")) score += 3;
-        if (id.includes("wavenet")) score += 3;
-        if (id.includes("narrator")) score += 2;
-
-        return { voice, score };
-      })
-      .sort((a, b) => b.score - a.score);
-
-    narrationVoice.current = scored[0]?.voice.identifier ?? "";
-    return narrationVoice.current || undefined;
-  }, []);
 
   const advance = useCallback(() => {
     if (crossfading) {
@@ -144,7 +105,16 @@ export function StoryTeller(properties: Properties) {
 
     let disposed = false;
     let holdTimer: ReturnType<typeof setTimeout> | null = null;
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
     let fadeStarted = false;
+    let speechCompletionScheduled = false;
+
+    const clearSafetyTimer = () => {
+      if (safetyTimer != null) {
+        clearTimeout(safetyTimer);
+        safetyTimer = null;
+      }
+    };
 
     const startFade = (delayMs: number) => {
       if (disposed || fadeStarted) {
@@ -177,6 +147,8 @@ export function StoryTeller(properties: Properties) {
     if (!spokenLine || speechUnavailable.current) {
       runDefaultTiming();
     } else {
+      const minSpeechMs = estimateSpeechDurationMs(spokenLine, locale);
+
       void (async () => {
         try {
           await Speech.stop();
@@ -186,22 +158,43 @@ export function StoryTeller(properties: Properties) {
             return;
           }
 
+          const speechStartedAt = Date.now();
+
+          const completeSpeech = () => {
+            if (disposed || fadeStarted || speechCompletionScheduled) {
+              return;
+            }
+
+            speechCompletionScheduled = true;
+            clearSafetyTimer();
+            void (async () => {
+              await delayUntilMinSpeechElapsed(
+                spokenLine,
+                locale,
+                speechStartedAt,
+              );
+              if (!disposed) {
+                startFade(0);
+              }
+            })();
+          };
+
           Speech.speak(spokenLine, {
             voice,
-            rate: 0.93,
+            rate: NARRATION_SPEECH_RATE,
             pitch: 1.0,
-            onDone: () => startFade(0),
-            onStopped: () => startFade(0),
+            onDone: completeSpeech,
             onError: () => {
               speechUnavailable.current = true;
+              clearSafetyTimer();
               runDefaultTiming();
             },
           });
 
-          // Safety fallback in case the underlying TTS engine never calls completion callbacks.
-          holdTimer = setTimeout(() => {
-            startFade(0);
-          }, Math.max(holdDurationMs, spokenLine.length * 60));
+          safetyTimer = setTimeout(
+            completeSpeech,
+            minSpeechMs + SPEECH_SAFETY_BUFFER_MS,
+          );
         } catch {
           speechUnavailable.current = true;
           runDefaultTiming();
@@ -211,6 +204,7 @@ export function StoryTeller(properties: Properties) {
 
     return () => {
       disposed = true;
+      clearSafetyTimer();
       if (holdTimer != null) {
         clearTimeout(holdTimer);
       }
@@ -227,6 +221,7 @@ export function StoryTeller(properties: Properties) {
     currentSlide,
     captionOpacity,
     resolveNarrationVoice,
+    locale,
   ]);
 
   return (

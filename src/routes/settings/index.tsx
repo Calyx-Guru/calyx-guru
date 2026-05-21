@@ -1,6 +1,6 @@
-import { SUPPORTED_LANGUAGES } from "@/constants";
+import { LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES } from "@/constants";
 import { useAppAppearance } from "@/contexts/AppAppearanceContext";
-import type { LanguageKey, ThemeMode } from "@/types";
+import type { ThemeMode } from "@/types";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const THEME_OPTIONS: ThemeMode[] = ["system", "light", "dark"];
@@ -19,10 +19,12 @@ export function RouteSettings() {
         {SUPPORTED_LANGUAGES.map((lang) => (
           <Pressable
             key={lang}
-            onPress={() => setLocale(lang as LanguageKey)}
+            onPress={() => setLocale(lang)}
             style={[styles.option, locale === lang && styles.optionSelected]}
           >
-            <Text style={styles.optionLabel}>{lang}</Text>
+            <Text style={styles.optionLabel}>
+              {LANGUAGE_NATIVE_LABELS[lang]}
+            </Text>
           </Pressable>
         ))}
       </View>

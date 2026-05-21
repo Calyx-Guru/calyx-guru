@@ -1,8 +1,8 @@
 import { useNavigation } from "expo-router";
-import { getLocales } from "expo-localization";
 import * as Speech from "expo-speech";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type * as Types from "./type";
 
 import {
   Animated,
@@ -17,7 +17,16 @@ import {
 
 import { StoryResult } from "@/components/slide-show/StoryResult";
 import { StoryTeller } from "@/components/slide-show/StoryTeller";
+import { CaptionText } from "@/components/typography/CaptionText";
 import { NormalVideo } from "@/components/video/NormalVideo";
+import { useAppAppearance } from "@/contexts/AppAppearanceContext";
+import { useNarrationVoice } from "@/hooks/useNarrationVoice";
+import {
+  delayUntilMinSpeechElapsed,
+  estimateSpeechDurationMs,
+  NARRATION_SPEECH_RATE,
+  SPEECH_SAFETY_BUFFER_MS,
+} from "@/lib/speech/speechTiming";
 
 import {
   expandPlaceholders,
@@ -25,11 +34,7 @@ import {
   prefetchImageModule,
   VERDICT_SUBTITLE_FADE_DURATION_MS,
   VERDICT_SUBTITLE_FADE_IN_AFTER_SEC,
-  VERDICT_SUBTITLE_FADE_OUT_BEFORE_END_SEC,
 } from "./constants";
-
-import { CaptionText } from "@/components/typography/CaptionText";
-import type * as Types from "./type";
 
 if (
   Platform.OS === "android" &&
@@ -52,6 +57,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const allowNavigationExitRef = useRef(false);
+  const { locale } = useAppAppearance();
 
   const [phase, setPhase] = useState<Types.Phase>(
     showIntroVideo ? "video" : "slideshow",
@@ -72,7 +78,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
   const verdictSpeechDone = useRef(false);
   const videoEnded = useRef(false);
   const speechUnavailable = useRef(false);
-  const narrationVoice = useRef<string | undefined>(undefined);
+  const resolveNarrationVoice = useNarrationVoice(locale);
 
   const handleSkip = useCallback(() => {
     if (showResultPopup) {
@@ -162,55 +168,6 @@ export function KaucimStoryExperience(properties: Types.Properties) {
     proceedToSlideshowWhenReady();
   }, [proceedToSlideshowWhenReady]);
 
-  const resolveNarrationVoice = useCallback(async () => {
-    if (narrationVoice.current !== undefined) {
-      return narrationVoice.current;
-    }
-
-    const locales = getLocales();
-    const preferredTag = locales[0]?.languageTag?.toLowerCase();
-    const preferredLanguage = locales[0]?.languageCode?.toLowerCase();
-
-    const voices = await Speech.getAvailableVoicesAsync();
-    if (!voices.length) {
-      narrationVoice.current = "";
-      return undefined;
-    }
-
-    const byLanguage = voices.filter((voice) => {
-      const voiceLanguage = voice.language?.toLowerCase() ?? "";
-      if (preferredTag != null && voiceLanguage === preferredTag) {
-        return true;
-      }
-      if (
-        preferredLanguage != null &&
-        voiceLanguage.startsWith(preferredLanguage)
-      ) {
-        return true;
-      }
-      return false;
-    });
-
-    const candidates = byLanguage.length > 0 ? byLanguage : voices;
-    const scored = candidates
-      .map((voice) => {
-        const id = `${voice.identifier ?? ""} ${voice.name ?? ""}`.toLowerCase();
-        let score = 0;
-
-        if (id.includes("neural")) score += 5;
-        if (id.includes("enhanced") || id.includes("premium")) score += 4;
-        if (id.includes("natural") || id.includes("studio")) score += 3;
-        if (id.includes("wavenet")) score += 3;
-        if (id.includes("narrator")) score += 2;
-
-        return { voice, score };
-      })
-      .sort((a, b) => b.score - a.score);
-
-    narrationVoice.current = scored[0]?.voice.identifier ?? "";
-    return narrationVoice.current || undefined;
-  }, []);
-
   const speakVerdict = useCallback(async () => {
     const spokenVerdict = verdict.trim();
     if (!spokenVerdict || verdictSpoken.current) {
@@ -229,33 +186,50 @@ export function KaucimStoryExperience(properties: Types.Properties) {
     try {
       await Speech.stop();
       const voice = await resolveNarrationVoice();
+      const minSpeechMs = estimateSpeechDurationMs(spokenVerdict, locale);
+      const speechStartedAt = Date.now();
+      let verdictCompletionScheduled = false;
+      let verdictSafetyTimer: ReturnType<typeof setTimeout> | null = null;
+
+      const clearVerdictSafetyTimer = () => {
+        if (verdictSafetyTimer != null) {
+          clearTimeout(verdictSafetyTimer);
+          verdictSafetyTimer = null;
+        }
+      };
+
+      const finishVerdictSpeech = () => {
+        if (verdictCompletionScheduled) {
+          return;
+        }
+
+        verdictCompletionScheduled = true;
+        clearVerdictSafetyTimer();
+        void (async () => {
+          await delayUntilMinSpeechElapsed(
+            spokenVerdict,
+            locale,
+            speechStartedAt,
+          );
+          verdictSpeechDone.current = true;
+          verdictHidden.current = true;
+          verdictOpacity.stopAnimation();
+          Animated.timing(verdictOpacity, {
+            toValue: 0,
+            duration: VERDICT_SUBTITLE_FADE_DURATION_MS,
+            useNativeDriver: true,
+          }).start();
+          proceedToSlideshowWhenReady();
+        })();
+      };
+
       Speech.speak(spokenVerdict, {
         voice,
-        rate: 0.93,
+        rate: NARRATION_SPEECH_RATE,
         pitch: 1.0,
-        onDone: () => {
-          verdictSpeechDone.current = true;
-          verdictHidden.current = true;
-          verdictOpacity.stopAnimation();
-          Animated.timing(verdictOpacity, {
-            toValue: 0,
-            duration: VERDICT_SUBTITLE_FADE_DURATION_MS,
-            useNativeDriver: true,
-          }).start();
-          proceedToSlideshowWhenReady();
-        },
-        onStopped: () => {
-          verdictSpeechDone.current = true;
-          verdictHidden.current = true;
-          verdictOpacity.stopAnimation();
-          Animated.timing(verdictOpacity, {
-            toValue: 0,
-            duration: VERDICT_SUBTITLE_FADE_DURATION_MS,
-            useNativeDriver: true,
-          }).start();
-          proceedToSlideshowWhenReady();
-        },
+        onDone: finishVerdictSpeech,
         onError: () => {
+          clearVerdictSafetyTimer();
           speechUnavailable.current = true;
           verdictSpeechDone.current = true;
           verdictHidden.current = true;
@@ -264,6 +238,11 @@ export function KaucimStoryExperience(properties: Types.Properties) {
           proceedToSlideshowWhenReady();
         },
       });
+
+      verdictSafetyTimer = setTimeout(
+        finishVerdictSpeech,
+        minSpeechMs + SPEECH_SAFETY_BUFFER_MS,
+      );
       verdictSpoken.current = true;
     } catch {
       speechUnavailable.current = true;
@@ -273,7 +252,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
       verdictOpacity.setValue(0);
       proceedToSlideshowWhenReady();
     }
-  }, [proceedToSlideshowWhenReady, resolveNarrationVoice, verdict]);
+  }, [locale, proceedToSlideshowWhenReady, resolveNarrationVoice, verdict]);
 
   function onTimeUpdate(currentTime: number, duration: number) {
     if (!(duration > 0)) {
@@ -398,6 +377,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
       {phase === "slideshow" && imagesReady && (
         <StoryTeller
           slides={slides}
+          resolveNarrationVoice={resolveNarrationVoice}
           onEnded={() => {
             if (showResultPopup) {
               setPhase("result");
