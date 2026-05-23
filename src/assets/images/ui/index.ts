@@ -16,6 +16,7 @@ export { default as orbButton } from "./orb-button.png";
 export { default as powerBarBase } from "./power-bar-base.png";
 export { default as powerBarFill } from "./power-bar-fill.png";
 export { default as redCircleButton } from "./red-circle-button.png";
+export { default as redSeal } from "./red-seal.png";
 export { default as redSquareButton } from "./red-square-button.png";
 export { default as ribbon } from "./ribbon.png";
 export { default as thinGoldFrame } from "./thin-gold-frame.png";

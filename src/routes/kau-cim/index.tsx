@@ -88,22 +88,26 @@ function KaucimSlideShow() {
       return [];
     }
 
-    const verdictIllustration = pickRandom(
+    const omenIllustration = pickRandom(
       illustrations.omen[stickNumber % illustrations.omen.length],
     );
-    const actionIllustration = pickRandom(
-      illustrations.action[stickNumber % illustrations.action.length],
-    );
-    const concludeIllustration = pickRandom(
-      illustrations.conclude[stickNumber % illustrations.conclude.length],
-    );
+    const actionIllustration =
+      pickRandom(
+        illustrations.action[stickNumber % illustrations.action.length],
+      ) ?? omenIllustration;
+    const concludeIllustration =
+      pickRandom(
+        illustrations.conclude[stickNumber % illustrations.conclude.length],
+      ) ??
+      actionIllustration ??
+      omenIllustration;
     const openingText = kaucimReplay
       ? [story.verdict.trim(), story.omen.trim()].filter(Boolean).join("\n\n")
       : story.omen;
 
     return [
       {
-        image: verdictIllustration(),
+        image: omenIllustration(),
         text: openingText,
       },
       {
@@ -156,12 +160,7 @@ function KaucimSlideShow() {
             !kaucimReplay && lastKaucimFresh ? result.powerChange : 0,
         }}
         onResultDismiss={() => {
-          const replayedFromCollection = Boolean(kaucimReplay);
           setAppState({ kaucimReplay: null });
-          if (replayedFromCollection) {
-            router.back();
-            return;
-          }
           router.back();
         }}
       />

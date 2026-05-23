@@ -80,18 +80,22 @@ export function KaucimStoryExperience(properties: Types.Properties) {
   const speechUnavailable = useRef(false);
   const resolveNarrationVoice = useNarrationVoice(locale);
 
+  const dismissAndExit = useCallback(() => {
+    allowNavigationExitRef.current = true;
+    onResultDismiss();
+  }, [onResultDismiss]);
+
   const handleSkip = useCallback(() => {
     if (showResultPopup) {
       setPhase("result");
       return;
     }
-    onResultDismiss();
-  }, [onResultDismiss, showResultPopup]);
+    dismissAndExit();
+  }, [dismissAndExit, showResultPopup]);
 
   const handleBackExit = useCallback(() => {
-    allowNavigationExitRef.current = true;
-    onResultDismiss();
-  }, [onResultDismiss]);
+    dismissAndExit();
+  }, [dismissAndExit]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -383,7 +387,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
               setPhase("result");
               return;
             }
-            onResultDismiss();
+            dismissAndExit();
           }}
         />
       )}
@@ -393,7 +397,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
             ...summary,
             ...lastSlide,
           }}
-          onDismiss={onResultDismiss}
+          onDismiss={dismissAndExit}
         />
       )}
       {showSkipButton && (
