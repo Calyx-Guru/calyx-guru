@@ -23,13 +23,12 @@ export const FramePrimary3: React.FC<FramePrimaryProps> = ({
     <View style={style}>
       <View
         style={{
-          width: "100%",
-          height: "100%",
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: 10,
+          left: 10,
+          right: 10,
+          bottom: 10,
+          borderRadius: 12,
           backgroundColor: "#000000",
           opacity: 0.7,
         }}

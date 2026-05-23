@@ -1,4 +1,5 @@
 import { getDeviceIdAsync } from '@/lib/app/helper';
+import { getLocalDayStartMs } from '@/lib/app/time';
 
 /**
  * Milliseconds since Unix epoch at 00:00:00.000 UTC for the calendar day of `utcTime`.
@@ -78,24 +79,24 @@ const RNG_KEY_SEED = 0x9e3779b9;
 
 function dailyRngKey(
   deviceId: string,
-  utcDayStartMs: number,
+  dayStartMs: number,
   index: number,
 ): string {
-  // Delimiters avoid ambiguous concatenation; day is numeric ms at UTC midnight.
-  return `${deviceId}\u0000${utcDayStartMs}\u0000${index}`;
+  // Delimiters avoid ambiguous concatenation; day is numeric ms at local midnight.
+  return `${deviceId}\u0000${dayStartMs}\u0000${index}`;
 }
 
 /**
- * Deterministic uniform float in [0, 1), same for the same device, UTC day, and index.
- * Uses a daily sub-key (UTC midnight of the day containing `utcTime`) and MurmurHash3.
+ * Deterministic uniform float in [0, 1), same for the same device, local calendar day, and index.
+ * Uses a daily sub-key (local midnight of the day containing `time`) and MurmurHash3.
  */
 export function getDailyRandom01Sync(
   deviceId: string,
   index: number,
-  utcTime: Date | number,
+  time: Date | number,
 ): number {
   assertNonNegativeInteger(index, 'index');
-  const dayStart = getUtcDayStartMs(utcTime);
+  const dayStart = getLocalDayStartMs(time);
   const h = murmur3_x86_32(dailyRngKey(deviceId, dayStart, index), RNG_KEY_SEED);
   return h / 4294967296;
 }
@@ -105,19 +106,19 @@ export function getDailyRandom01Sync(
  */
 export async function getRandom(
   index: number,
-  utcTime: Date | number,
+  time: Date | number,
 ): Promise<number> {
   const deviceId = await getDeviceIdAsync();
-  return getDailyRandom01Sync(deviceId, index, utcTime);
+  return getDailyRandom01Sync(deviceId, index, time);
 }
 
 function dailyRngKeySalted(
   deviceId: string,
-  utcDayStartMs: number,
+  dayStartMs: number,
   index: number,
   salt: number,
 ): string {
-  return `${deviceId}\u0000${utcDayStartMs}\u0000${index}\u0001${salt}`;
+  return `${deviceId}\u0000${dayStartMs}\u0000${index}\u0001${salt}`;
 }
 
 /**
@@ -126,7 +127,7 @@ function dailyRngKeySalted(
 export function getDailyRandomIntSync(
   deviceId: string,
   index: number,
-  utcTime: Date | number,
+  time: Date | number,
   min: number,
   max: number,
 ): number {
@@ -140,7 +141,7 @@ export function getDailyRandomIntSync(
     throw new RangeError('no integers in [min, max]');
   }
   const span = hi - lo + 1;
-  const dayStart = getUtcDayStartMs(utcTime);
+  const dayStart = getLocalDayStartMs(time);
   const space = 4294967296;
   const limit = space - (space % span);
 
@@ -164,9 +165,9 @@ export function getDailyRandomIntSync(
 export function getRandomInt(
   deviceId: string,
   index: number,
-  utcTime: Date | number,
+  time: Date | number,
   min: number,
   max: number,
 ): number {
-  return getDailyRandomIntSync(deviceId, index, utcTime, min, max);
+  return getDailyRandomIntSync(deviceId, index, time, min, max);
 }

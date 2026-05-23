@@ -3,6 +3,7 @@ import { MAX_PET_POWER, STATUS_MESSAGE_RNG_INDEX } from "@/constants";
 import { useAppState } from "@/hooks/useAppState";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUserState } from "@/hooks/useUserState";
+import { useTodayFirstTimestamp } from "@/hooks/useTodayFirstTimestamp";
 import { getRandomInt } from "@/lib/app/rng";
 import { createDate } from "@/lib/app/time";
 import { useMemo } from "react";
@@ -15,6 +16,7 @@ export const StatusMessage = (properties: Types.Properties) => {
   const { userState } = useUserState();
   const petPower = userState?.petPower ?? 0;
   const petPowerPercentage = Math.min(1, petPower / MAX_PET_POWER);
+  const todayFirstTimestamp = useTodayFirstTimestamp();
 
   const message = useMemo(() => {
     const rngIndex = STATUS_MESSAGE_RNG_INDEX;
@@ -29,7 +31,7 @@ export const StatusMessage = (properties: Types.Properties) => {
     } else {
       return t(`petStatus.veryBad.${rndIndex}`);
     }
-  }, [petPowerPercentage, deviceId, i18n.language]);
+  }, [petPowerPercentage, deviceId, i18n.language, todayFirstTimestamp]);
 
   return (
     <FramePrimary3 style={styles.frameWrapper}>
@@ -40,8 +42,8 @@ export const StatusMessage = (properties: Types.Properties) => {
 
 const styles = StyleSheet.create({
   frameWrapper: {
-    width: 400,
-    height: 180,
+    width: "100%",
+    aspectRatio: 2,
   },
   text: {
     margin: 24,

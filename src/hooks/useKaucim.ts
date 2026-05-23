@@ -76,7 +76,7 @@ export function useKaucim() {
 
       return 0;
     },
-    [profile?.element],
+    [deviceId],
   );
 
   const isConcernReadToday = useCallback(

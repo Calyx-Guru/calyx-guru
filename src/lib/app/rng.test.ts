@@ -8,7 +8,6 @@ import {
   getDailyRandom01Sync,
   getDailyRandomIntSync,
   getRandom,
-  getUtcDayStartMs,
 } from '@/lib/app/rng';
 
 /** Fixed device id so the grid is reproducible and independent of native modules. */
@@ -77,14 +76,23 @@ describe('getDailyRandom01Sync — 1000 days × 100 indices', () => {
     expect(bad).toBeUndefined();
   });
 
-  it('matches the same draw when utcTime falls anywhere on that UTC calendar day', () => {
-    const t = Date.UTC(2024, 5, 15, 8, 30, 0, 0);
-    const a = getDailyRandom01Sync(DEVICE, 42, t);
-    const b = getDailyRandom01Sync(DEVICE, 42, getUtcDayStartMs(t));
+  it('matches the same draw when time falls anywhere on that local calendar day', () => {
+    const morning = new Date(2024, 5, 15, 8, 30, 0, 0);
+    const evening = new Date(2024, 5, 15, 22, 15, 0, 0);
+    const a = getDailyRandom01Sync(DEVICE, 42, morning);
+    const b = getDailyRandom01Sync(DEVICE, 42, evening);
     expect(a).toBe(b);
   });
 
-  it('is deterministic for the same triple (deviceId, index, utcTime)', () => {
+  it('changes across local calendar midnights', () => {
+    const dayA = new Date(2024, 5, 15, 12, 0, 0, 0);
+    const dayB = new Date(2024, 5, 16, 12, 0, 0, 0);
+    expect(getDailyRandom01Sync(DEVICE, 0, dayA)).not.toBe(
+      getDailyRandom01Sync(DEVICE, 0, dayB),
+    );
+  });
+
+  it('is deterministic for the same triple (deviceId, index, time)', () => {
     const t = GRID_EPOCH_UTC + 333 * DAY_MS;
     const first = getDailyRandom01Sync(DEVICE, 77, t);
     expect(getDailyRandom01Sync(DEVICE, 77, t)).toBe(first);

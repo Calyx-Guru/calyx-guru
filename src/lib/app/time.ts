@@ -24,6 +24,20 @@ export function createDate(date: number = Date.now()): Date {
   return new Date(date + debugTimeOffset);
 }
 
+/** Local calendar day start (00:00:00.000 in the device timezone). */
+export function getLocalDayStartMs(time: Date | number = Date.now()): number {
+  const d = createDate(typeof time === "number" ? time : time.getTime());
+  return new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate(),
+    0,
+    0,
+    0,
+    0,
+  ).getTime();
+}
+
 export function getTodayFirstTimestamp(): number {
-  return Math.floor(createDate().setHours(0, 0, 0, 0) / 86400000) * 86400000;
+  return getLocalDayStartMs();
 }
