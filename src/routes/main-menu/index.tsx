@@ -12,12 +12,13 @@ import {
   ImageBackground,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 
+import { Ionicons } from "@expo/vector-icons";
+
 import { kaucimCollection } from "@/assets/images/kau-cim";
-import { blueSquareButton } from "@/assets/images/ui";
+import { blueSquareButton, circleBlueButton } from "@/assets/images/ui";
 
 import { NormalVideo } from "@/components/video/NormalVideo";
 
@@ -120,6 +121,10 @@ export function RouteMainMenu() {
     [profile],
   );
 
+  const handleSettingsPress = useCallback(() => {
+    router.push("/settings" as Href);
+  }, []);
+
   const onKaucimMenuOpenChange = useCallback(
     (open: boolean) => {
       setIsKaucimMenuOpen(open);
@@ -155,14 +160,41 @@ export function RouteMainMenu() {
 
   return (
     <View style={styles.root}>
-      <NormalVideo url={petState.petVideo} bottomCropPx={36} />
+      <NormalVideo
+        url={petState.petVideo}
+        topCropPx={8}
+        bottomCropPx={36}
+      />
 
-      <View style={[styles.headerWrapper, { top: 16 }]}>
-        <HealthBar
-          totalValue={MAX_PET_POWER}
-          value={petState.petPower}
-          change={petPowerGainChange ?? lastPetPowerChange}
-        />
+      <View style={[styles.headerWrapper, { top: 8 }]}>
+        <View style={styles.headerBarRow}>
+          <HealthBar
+            style={styles.healthBar}
+            totalValue={MAX_PET_POWER}
+            value={petState.petPower}
+            change={petPowerGainChange ?? lastPetPowerChange}
+            barHeight={42}
+          />
+          <Pressable
+            onPress={handleSettingsPress}
+            style={styles.settingsPressable}
+            accessibilityRole="button"
+            accessibilityLabel="Open settings"
+          >
+            <ImageBackground
+              source={circleBlueButton}
+              style={styles.settingsButton}
+              resizeMode="contain"
+            >
+              <Ionicons
+                name="settings-sharp"
+                size={22}
+                color="#ffffff"
+                style={styles.settingsIcon}
+              />
+            </ImageBackground>
+          </Pressable>
+        </View>
         <StatusMessage />
       </View>
 
@@ -240,12 +272,35 @@ const styles = StyleSheet.create({
   },
   headerWrapper: {
     position: "absolute",
+    top: 0,
     left: 8,
     right: 8,
     rowGap: 8,
     alignItems: "center",
     justifyContent: "center",
-    width: "auto",
+  },
+  headerBarRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  healthBar: {
+    flex: 1,
+  },
+  settingsPressable: {
+    flexShrink: 0,
+  },
+  settingsButton: {
+    width: 54,
+    height: 54,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  settingsIcon: {
+    width: 22,
+    height: 22,
+    marginBottom: 4,
   },
   bodyWrapper: {
     alignItems: "center",

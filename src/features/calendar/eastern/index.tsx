@@ -83,10 +83,10 @@ const styles = StyleSheet.create({
     aspectRatio: "6/7",
   },
   dateSection: {
-    marginTop: "10%",
+    marginTop: "2%",
     alignSelf: "stretch",
     alignItems: "center",
-    marginHorizontal: "8%",
+    marginHorizontal: "2%",
   },
   dateBackdrop: {
     ...StyleSheet.absoluteFill,

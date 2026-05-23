@@ -10,6 +10,8 @@ interface Properties {
   contentFit?: "cover" | "contain" | "fill";
   /** Extra height below the viewport; clipped to hide bottom watermarks. */
   bottomCropPx?: number;
+  /** Extra height above the viewport; clipped to hide the top edge (e.g. under a header bar). */
+  topCropPx?: number;
   onPlayToEnd?: () => void;
   /** Fired on an interval while the clip plays (see `timeUpdateEventIntervalSec`). */
   onTimeUpdate?: (currentTime: number, duration: number) => void;
@@ -24,6 +26,7 @@ export function NormalVideo(properties: Properties) {
     muted = true,
     contentFit = "cover",
     bottomCropPx = 0,
+    topCropPx = 0,
     onPlayToEnd,
     onTimeUpdate,
     timeUpdateEventIntervalSec = 0,
@@ -105,14 +108,20 @@ export function NormalVideo(properties: Properties) {
     />
   );
 
-  if (bottomCropPx <= 0) {
+  if (topCropPx <= 0 && bottomCropPx <= 0) {
     return videoView;
   }
 
   return (
     <View style={styles.cropRoot}>
       <View style={styles.crop}>
-        <View style={[styles.bleed, { bottom: -bottomCropPx }]}>
+        <View
+          style={[
+            styles.bleed,
+            topCropPx > 0 && { top: -topCropPx },
+            bottomCropPx > 0 && { bottom: -bottomCropPx },
+          ]}
+        >
           {videoView}
         </View>
       </View>

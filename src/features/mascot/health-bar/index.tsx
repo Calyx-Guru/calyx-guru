@@ -1,20 +1,20 @@
-import { Ionicons } from "@expo/vector-icons";
-import { router, type Href } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   ImageBackground,
-  Pressable,
   StyleSheet,
-  View,
+  View
 } from "react-native";
 
 import {
-  circleBlueButton,
-  energyIcon,
-  powerBarBase,
-  powerBarFill,
+  powerBarBaseCenter,
+  powerBarBaseLeft,
+  powerBarBaseLeftStretch,
+  powerBarBaseRight,
+  powerBarBaseRightStretch,
+  powerBarFill
 } from "@/assets/images/ui";
+import { ThreePartSliceImage } from "@/components/image/ThreePartSliceImage";
 
 import type * as Types from "./type";
 
@@ -25,19 +25,11 @@ export const HealthBar = (properties: Types.Properties) => {
   const {
     totalValue = 100,
     value = 100,
-    colors = ["red"],
+    colors = ["white"],
     change = 0,
     style,
-    onSettingsPress,
+    barHeight = 42,
   } = properties;
-
-  const handleSettingsPress = useCallback(() => {
-    if (onSettingsPress) {
-      onSettingsPress();
-      return;
-    }
-    router.push("/settings" as Href);
-  }, [onSettingsPress]);
 
   const animatedValue = useRef(
     new Animated.Value(
@@ -81,14 +73,10 @@ export const HealthBar = (properties: Types.Properties) => {
   }, [value, change, totalValue]);
 
   return (
-    <View style={styles.row}>
-      <ImageBackground
-        source={powerBarBase}
-        style={[styles.empty, style]}
-        resizeMode="stretch"
-      >
+    <View style={[styles.empty, style, { height: barHeight }]}>
+        <View style={styles.barBackground} />
         <View
-          style={styles.valueTrack}
+          style={[styles.valueTrack]}
           onLayout={(event) => {
             setFillTrackWidth(event.nativeEvent.layout.width);
           }}
@@ -97,58 +85,55 @@ export const HealthBar = (properties: Types.Properties) => {
             {fillTrackWidth != null ? (
               <ImageBackground
                 source={powerBarFill}
-                style={[styles.valueFill, { width: fillTrackWidth }]}
+                style={[
+                  styles.valueFill,
+                  {
+                    width: fillTrackWidth,
+                    height: barHeight,
+                  },
+                ]}
                 resizeMode="stretch"
               />
             ) : null}
           </Animated.View>
         </View>
-        <ImageBackground
-          source={energyIcon}
-          style={[styles.icon]}
-          resizeMode="cover"
+        <ThreePartSliceImage
+          style={[styles.barBase, { height: "100%" }]}
+          leftSource={powerBarBaseLeft}
+          leftStretchSource={powerBarBaseLeftStretch}
+          centerSource={powerBarBaseCenter}
+          rightStretchSource={powerBarBaseRightStretch}
+          rightSource={powerBarBaseRight}
         />
-      </ImageBackground>
-
-      <Pressable
-        onPress={handleSettingsPress}
-        style={styles.settingsPressable}
-        accessibilityRole="button"
-        accessibilityLabel="Open settings"
-      >
-        <ImageBackground
-          source={circleBlueButton}
-          style={styles.settingsButton}
-          resizeMode="contain"
-        >
-          <Ionicons
-            name="settings-sharp"
-            size={22}
-            color="#ffffff"
-            style={styles.settingsIcon}
-          />
-        </ImageBackground>
-      </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  row: {
-    width: "100%",
-    maxWidth: 456,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   empty: {
     flex: 1,
-    maxWidth: 400,
+    maxWidth: "100%",
     borderRadius: 16,
-    aspectRatio: 6,
     overflow: "hidden",
     display: "flex",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  barBackground: {
+    ...StyleSheet.absoluteFill,
+    top: 4,
+    left: 4,
+    right: 4,
+    bottom: 4,
+    backgroundColor: "#000000",
+    opacity: 0.6,
+    borderRadius: 16,
+    zIndex: 0,
+  },
+  barBase: {
+    width: "100%",
+    height: "100%",
+    zIndex: 2,
   },
   valueTrack: {
     position: "absolute",
@@ -156,7 +141,8 @@ const styles = StyleSheet.create({
     left: 4,
     right: 4,
     bottom: 4,
-    opacity: 0.8,
+    opacity: 1,
+    zIndex: 1,
   },
   valueClip: {
     height: "100%",
@@ -182,19 +168,5 @@ const styles = StyleSheet.create({
     aspectRatio: "5/7",
     marginLeft: 12,
     marginTop: -8,
-  },
-  settingsPressable: {
-    flexShrink: 0,
-  },
-  settingsButton: {
-    width: 54,
-    height: 54,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  settingsIcon: {
-    width: 22,
-    height: 22,
-    marginBottom: 4,
   },
 });
