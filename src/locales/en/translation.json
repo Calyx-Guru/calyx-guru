@@ -140,10 +140,12 @@
   },
   "calendar": {
     "eastern": {
-      "date": "{{month}}/{{day}}"
+      "month": "{{month}}",
+      "day": "{{day}}"
     },
     "western": {
-      "date": "{{month}} {{day}}"
+      "month": "{{month}}",
+      "day": "{{day}}"
     }
   },
   "kau_cim_collection": {

@@ -1,13 +1,15 @@
 import { useEventListener } from "expo";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useRef } from "react";
-import { AppState, type AppStateStatus, StyleSheet } from "react-native";
+import { AppState, type AppStateStatus, StyleSheet, View } from "react-native";
 
 interface Properties {
   url: string | number;
   loop?: boolean;
   muted?: boolean;
   contentFit?: "cover" | "contain" | "fill";
+  /** Extra height below the viewport; clipped to hide bottom watermarks. */
+  bottomCropPx?: number;
   onPlayToEnd?: () => void;
   /** Fired on an interval while the clip plays (see `timeUpdateEventIntervalSec`). */
   onTimeUpdate?: (currentTime: number, duration: number) => void;
@@ -21,6 +23,7 @@ export function NormalVideo(properties: Properties) {
     loop = true,
     muted = true,
     contentFit = "cover",
+    bottomCropPx = 0,
     onPlayToEnd,
     onTimeUpdate,
     timeUpdateEventIntervalSec = 0,
@@ -89,7 +92,7 @@ export function NormalVideo(properties: Properties) {
     return () => subscription.remove();
   }, [videoPlayer]);
 
-  return (
+  const videoView = (
     <VideoView
       style={StyleSheet.absoluteFill}
       player={videoPlayer}
@@ -101,4 +104,34 @@ export function NormalVideo(properties: Properties) {
       }}
     />
   );
+
+  if (bottomCropPx <= 0) {
+    return videoView;
+  }
+
+  return (
+    <View style={styles.cropRoot}>
+      <View style={styles.crop}>
+        <View style={[styles.bleed, { bottom: -bottomCropPx }]}>
+          {videoView}
+        </View>
+      </View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  cropRoot: {
+    flex: 1,
+  },
+  crop: {
+    flex: 1,
+    overflow: "hidden",
+  },
+  bleed: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+});

@@ -140,10 +140,12 @@
   },
   "calendar": {
     "eastern": {
-      "date": "Mùng {{day}} T{{month}}"
+      "month": "T{{month}}",
+      "day": "Mùng {{day}}"
     },
     "western": {
-      "date": "{{day}} Tháng {{month}}"
+      "month": "Tháng {{month}}",
+      "day": "{{day}}"
     }
   },
   "kau_cim_collection": {

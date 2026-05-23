@@ -356,6 +356,7 @@ export function KaucimStoryExperience(properties: Types.Properties) {
             loop={false}
             muted={false}
             contentFit="cover"
+            bottomCropPx={64}
             timeUpdateEventIntervalSec={0.08}
             onTimeUpdate={onTimeUpdate}
             onPlayToEnd={onPlayToEnd}
@@ -429,7 +430,7 @@ const styles = StyleSheet.create({
   },
   videoShell: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#000000",
   },
   flashOverlay: {
     ...StyleSheet.absoluteFill,

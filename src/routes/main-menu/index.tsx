@@ -21,7 +21,7 @@ import { blueSquareButton } from "@/assets/images/ui";
 
 import { NormalVideo } from "@/components/video/NormalVideo";
 
-import { ENV, MAX_PET_POWER } from "@/constants";
+import { MAX_PET_POWER } from "@/constants";
 import { CalendarEastern } from "@/features/calendar/eastern";
 import { CalendarWestern } from "@/features/calendar/western";
 import { KaucimOrb } from "@/features/kau-cim/orb";
@@ -155,7 +155,7 @@ export function RouteMainMenu() {
 
   return (
     <View style={styles.root}>
-      <NormalVideo url={petState.petVideo} />
+      <NormalVideo url={petState.petVideo} bottomCropPx={36} />
 
       <View style={[styles.headerWrapper, { top: 16 }]}>
         <HealthBar
@@ -192,34 +192,12 @@ export function RouteMainMenu() {
         <CalendarWestern />
       </Animated.View>
 
-      {ENV.DEBUG_MODE && (
-        <Animated.View
-          pointerEvents={isKaucimMenuOpen ? "none" : "box-none"}
-          style={[
-            styles.debugButton,
-            {
-              top: insets.top + 8,
-              left: Math.max(insets.left, 10),
-              opacity: chromeOpacity,
-            },
-          ]}
-        >
-          <Pressable
-            onPress={() => router.push("/debug" as Href)}
-            accessibilityRole="button"
-            accessibilityLabel="Open debug screen"
-          >
-            <Text style={styles.debugButtonLabel}>Debug</Text>
-          </Pressable>
-        </Animated.View>
-      )}
-
       <Animated.View
         pointerEvents={isKaucimMenuOpen ? "none" : "box-none"}
         style={[
           styles.collectionButton,
           {
-            bottom: 80,
+            bottom: 90,
             right: Math.max(insets.right, 0) - 4,
             opacity: chromeOpacity,
           },
@@ -305,28 +283,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     zIndex: 40,
   },
-  debugButton: {
-    position: "absolute",
-    zIndex: 40,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    minHeight: 40,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.45)",
-    borderRadius: 8,
-  },
-  debugButtonLabel: {
-    color: "#ffffff",
-    fontSize: 13,
-    fontWeight: "600",
-  },
   collectionButton: {
     position: "absolute",
     zIndex: 60,
   },
   collectionButtonPressable: {
-    width: 76,
-    height: 76,
+    width: 84,
+    height: 84,
   },
   collectionButtonBackground: {
     width: "100%",
@@ -335,8 +298,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   collectionButtonIcon: {
-    width: 42,
-    height: 42,
+    width: 50,
+    height: 50,
     marginRight: 12,
     marginBottom: 12,
   },

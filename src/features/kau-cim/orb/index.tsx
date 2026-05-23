@@ -49,6 +49,8 @@ export function KaucimOrb(properties: Types.Properties) {
   const { style, onAction, onMenuOpenChange } = properties;
   const { t } = useTranslation();
   const orbOpacity = useRef(new Animated.Value(1)).current;
+  /** 0 = menu closed, 1 = menu open — drives vortex / circle / center icon fades. */
+  const menuBlend = useRef(new Animated.Value(0)).current;
   const closeButtonAnim = useRef(new Animated.Value(0)).current;
   const fanAnims = useRef<Animated.Value[]>(
     Array.from(
@@ -67,7 +69,18 @@ export function KaucimOrb(properties: Types.Properties) {
     fanAnimValues.forEach((anim) => anim.stopAnimation());
     closeButtonAnim.stopAnimation();
     orbOpacity.stopAnimation();
-  }, [closeButtonAnim, fanAnimValues, orbOpacity]);
+    menuBlend.stopAnimation();
+  }, [closeButtonAnim, fanAnimValues, menuBlend, orbOpacity]);
+
+  const innerOrbCircleOpacity = menuBlend.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.6, 0],
+  });
+  const innerVortexOpacity = menuBlend;
+  const centerIconOpacity = menuBlend.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
 
   const SUB_BUTTON_TARGETS = useMemo(() => {
     const a = 160;
@@ -88,11 +101,18 @@ export function KaucimOrb(properties: Types.Properties) {
     onMenuOpenChange?.(true);
     closeButtonAnim.setValue(0);
 
-    Animated.timing(orbOpacity, {
-      toValue: 0.7,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
+    Animated.parallel([
+      Animated.timing(orbOpacity, {
+        toValue: 0.7,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(menuBlend, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
       Animated.parallel([
         Animated.stagger(
           60,
@@ -114,12 +134,17 @@ export function KaucimOrb(properties: Types.Properties) {
         }),
       ]).start();
     });
-  }, [closeButtonAnim, fanAnimValues, onMenuOpenChange, orbOpacity]);
+  }, [closeButtonAnim, fanAnimValues, menuBlend, onMenuOpenChange, orbOpacity]);
 
   const closeMenu = useCallback(() => {
     stopMenuAnimations();
 
     menuAnimationRef.current = Animated.parallel([
+      Animated.timing(menuBlend, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
       Animated.timing(closeButtonAnim, {
         toValue: 0,
         duration: 160,
@@ -151,6 +176,7 @@ export function KaucimOrb(properties: Types.Properties) {
   }, [
     closeButtonAnim,
     fanAnimValues,
+    menuBlend,
     onMenuOpenChange,
     orbOpacity,
     stopMenuAnimations,
@@ -159,11 +185,23 @@ export function KaucimOrb(properties: Types.Properties) {
   const handleAction = useCallback(
     (action: KAUCIM_CONCERNS) => {
       stopMenuAnimations();
+      menuBlend.setValue(0);
+      orbOpacity.setValue(1);
+      closeButtonAnim.setValue(0);
+      fanAnimValues.forEach((anim) => anim.setValue(0));
       setIsMenuOpen(false);
       onMenuOpenChange?.(false);
       onAction?.(action);
     },
-    [onAction, onMenuOpenChange, stopMenuAnimations],
+    [
+      closeButtonAnim,
+      fanAnimValues,
+      menuBlend,
+      onAction,
+      onMenuOpenChange,
+      orbOpacity,
+      stopMenuAnimations,
+    ],
   );
 
   return (
@@ -178,47 +216,59 @@ export function KaucimOrb(properties: Types.Properties) {
         >
           <View style={styles.orbWrapper}>
             <Animated.View style={[styles.innerOrb, { opacity: orbOpacity }]}>
+              <Animated.View
+                style={[
+                  styles.innerOrbCircle,
+                  { opacity: innerOrbCircleOpacity },
+                ]}
+                pointerEvents="none"
+              />
               <Image
                 source={orbButton}
                 style={{
                   width: "105%",
                   height: "105%",
-                  position: "absolute",
-                  top: "-2.5%",
-                  left: "-2.5%",
                 }}
                 resizeMode="cover"
               />
             </Animated.View>
-            {isMenuOpen && (
-              <View style={styles.innerVortexContainer} pointerEvents="none">
-                <Image
-                  source={kaucimOrbVortex}
-                  style={styles.innerVortex}
-                  resizeMode="cover"
-                />
-              </View>
-            )}
+            <Animated.View
+              style={[
+                styles.innerVortexContainer,
+                { opacity: innerVortexOpacity },
+              ]}
+              pointerEvents="none"
+            >
+              <Image
+                source={kaucimOrbVortex}
+                style={styles.innerVortex}
+                resizeMode="cover"
+              />
+            </Animated.View>
           </View>
 
-          {!isMenuOpen && (
-            <View style={styles.centerIconContainer} pointerEvents="none">
-              <Image
-                source={kaucimIcon}
-                style={styles.centerIconGlow}
-                resizeMode="contain"
-                blurRadius={12}
-              />
-              <Image
-                source={kaucimIcon}
-                style={styles.centerIconImage}
-                resizeMode="contain"
-              />
-              <Text style={styles.mainTagText}>
-                {t("mainMenu.button.kaucim")}
-              </Text>
-            </View>
-          )}
+          <Animated.View
+            style={[
+              styles.centerIconContainer,
+              { opacity: centerIconOpacity },
+            ]}
+            pointerEvents="none"
+          >
+            <Image
+              source={kaucimIcon}
+              style={styles.centerIconGlow}
+              resizeMode="contain"
+              blurRadius={12}
+            />
+            <Image
+              source={kaucimIcon}
+              style={styles.centerIconImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.mainTagText}>
+              {t("mainMenu.button.kaucim")}
+            </Text>
+          </Animated.View>
         </Pressable>
       </View>
 
@@ -355,14 +405,24 @@ const styles = StyleSheet.create({
   },
   innerVortexContainer: {
     position: "absolute",
-    width: 102,
-    height: 102,
+    width: 104,
+    height: 104,
     borderRadius: "50%",
     overflow: "hidden",
     zIndex: 2,
-    marginBottom: 14,
-    marginLeft: 1,
+    marginBottom: 10,
+    marginLeft: 8,
     mixBlendMode: "screen",
+  },
+  innerOrbCircle: {
+    position: "absolute",
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: "#000000",
+    zIndex: 2,
+    marginTop: 5,
+    marginLeft: 12,
   },
   innerVortex: {
     position: "relative",
@@ -425,8 +485,9 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   centerIconImage: {
-    width: 54,
-    height: 54,
+    width: 64,
+    height: 64,
+    marginLeft: 10,
     marginBottom: 0,
   },
   centerIconGlow: {

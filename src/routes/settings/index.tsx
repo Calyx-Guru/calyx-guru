@@ -1,6 +1,7 @@
-import { LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES } from "@/constants";
+import { ENV, LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES } from "@/constants";
 import { useAppAppearance } from "@/contexts/AppAppearanceContext";
 import type { ThemeMode } from "@/types";
+import { router, type Href } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const THEME_OPTIONS: ThemeMode[] = ["system", "light", "dark"];
@@ -28,6 +29,20 @@ export function RouteSettings() {
           </Pressable>
         ))}
       </View>
+
+      {ENV.DEBUG_MODE && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Developer</Text>
+          <Pressable
+            onPress={() => router.push("/debug" as Href)}
+            style={styles.option}
+            accessibilityRole="button"
+            accessibilityLabel="Open debug screen"
+          >
+            <Text style={styles.optionLabel}>Debug</Text>
+          </Pressable>
+        </View>
+      )}
     </ScrollView>
   );
 }
