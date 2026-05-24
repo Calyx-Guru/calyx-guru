@@ -17,23 +17,14 @@ import {
 import { careerIcon, loveIcon, wealthIcon } from "@/assets/images/kau-cim";
 import { useUserState } from "@/hooks/useUserState";
 import { LinearGradient } from "expo-linear-gradient";
+import {
+  HEADER_BAR_BORDER_GRADIENT,
+  TAB_SELECTED_BACKGROUND_GRADIENT,
+} from "./constants";
 import { StoryCard } from "./story-card";
 
 const TAB_BAR_BORDER_WIDTH = 4;
 const TAB_BUTTON_BORDER_WIDTH = 2;
-const GOLD_BORDER_GRADIENT = [
-  "#fff4c2",
-  "#f4d76b",
-  "#d6a12d",
-  "#9a6a12",
-] as const;
-const GOLD_TAB_BACKGROUND_GRADIENT = [
-  "#ffe9a3",
-  "#e8c36a",
-  "#c99226",
-  "#8a6314",
-] as const;
-
 const TAB_BUTTON_PROPERTIES: {
   image: ImageSourcePropType;
   action: KAUCIM_CONCERNS;
@@ -120,7 +111,7 @@ export function RouteKaucimCollection() {
       />
 
       <LinearGradient
-        colors={GOLD_BORDER_GRADIENT}
+        colors={HEADER_BAR_BORDER_GRADIENT}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.tabBarBorder}
@@ -150,13 +141,13 @@ export function RouteKaucimCollection() {
               >
                 {selected ? (
                   <LinearGradient
-                    colors={GOLD_BORDER_GRADIENT}
+                    colors={HEADER_BAR_BORDER_GRADIENT}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.tabSelectedBorder}
                   >
                     <LinearGradient
-                      colors={GOLD_TAB_BACKGROUND_GRADIENT}
+                      colors={TAB_SELECTED_BACKGROUND_GRADIENT}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={styles.tabSelectedBackground}
@@ -196,7 +187,6 @@ const styles = StyleSheet.create({
   },
   tabBarBorder: {
     padding: TAB_BAR_BORDER_WIDTH,
-    borderRadius: 12,
     shadowColor: "#0B3C49",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
@@ -208,7 +198,6 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
     paddingHorizontal: 1,
     borderRadius: 8,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   tabPressable: {
     flex: 1,

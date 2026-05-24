@@ -17,50 +17,15 @@ import {
   ImageBackground,
   Platform,
   Pressable,
+  Image as RNImage,
   StyleSheet,
   Text,
   View,
-  Image as RNImage,
 } from "react-native";
 import { ILLUSTRATIONS } from "../kau-cim/constants";
+import { HEADER_BAR_BORDER_GRADIENT } from "./constants";
 
 const CARD_BORDER_WIDTH = 4;
-const GOLD_BORDER_GRADIENT = [
-  "#fff4c2",
-  "#f4d76b",
-  "#d6a12d",
-  "#9a6a12",
-] as const;
-const RED_BORDER_GRADIENT = [
-  "#ffc2c2",
-  "#ff8c8c",
-  "#ff5656",
-  "#ff2020",
-] as const;
-const GREEN_BORDER_GRADIENT = [
-  "#c2ffc2",
-  "#8cff8c",
-  "#56ff56",
-  "#20ff20",
-] as const;
-const BLUE_BORDER_GRADIENT = [
-  "#c2c2ff",
-  "#8c8cff",
-  "#5656ff",
-  "#2020ff",
-] as const;
-const DARK_GREY_BORDER_GRADIENT = [
-  "#c8c8c8",
-  "#a0a0a0",
-  "#787878",
-  "#505050",
-] as const;
-const LIGHT_GREY_BORDER_GRADIENT = [
-  "#e0e0e0",
-  "#b8b8b8",
-  "#909090",
-  "#686868",
-] as const;
 
 type StoryCardProps = {
   concern: KAUCIM_CONCERNS;
@@ -170,7 +135,7 @@ export function StoryCard({
         }
       >
         <LinearGradient
-          colors={GOLD_BORDER_GRADIENT}
+          colors={HEADER_BAR_BORDER_GRADIENT}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.cardBorder}

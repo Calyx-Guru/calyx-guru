@@ -51,17 +51,20 @@ function KaucimSlideShow() {
     useAppState();
   const { userState } = useUserState();
   const { getKaucimStory } = useKaucim();
+  /** Survives `kaucimReplay` being cleared on exit so skip/back does not re-render invalid. */
+  const [replaySelection] = useState(() => kaucimReplay);
+  const isReplay = replaySelection != null;
 
-  const concern = kaucimReplay?.concern ?? lastKaucimConcern;
+  const concern = replaySelection?.concern ?? lastKaucimConcern;
   const lastKaucimResults = userState?.lastKaucimResults || {};
-  const result = kaucimReplay
+  const result = replaySelection
     ? {
-        concern: kaucimReplay.concern,
-        stickNumber: kaucimReplay.stickNumber,
-        storyIndex: kaucimReplay.storyIndex,
-        powerChange: kaucimReplay.powerChange,
+        concern: replaySelection.concern,
+        stickNumber: replaySelection.stickNumber,
+        storyIndex: replaySelection.storyIndex,
+        powerChange: replaySelection.powerChange,
         element:
-          userState?.lastKaucimResults[kaucimReplay.concern]?.element ??
+          userState?.lastKaucimResults[replaySelection.concern]?.element ??
           FIVE_ELEMENTS.EARTH,
         currentPower: userState?.petPower ?? 0,
         timestamp: 0,
@@ -101,7 +104,7 @@ function KaucimSlideShow() {
       ) ??
       actionIllustration ??
       omenIllustration;
-    const openingText = kaucimReplay
+    const openingText = isReplay
       ? [story.verdict.trim(), story.omen.trim()].filter(Boolean).join("\n\n")
       : story.omen;
 
@@ -120,29 +123,39 @@ function KaucimSlideShow() {
         textParams: { bonus: result.powerChange },
       },
     ];
-  }, [illustrations, kaucimReplay, result, stickNumber, story]);
+  }, [illustrations, isReplay, result, stickNumber, story]);
 
-  if (!concern) {
-    console.warn("Invalid state: no concern");
-    router.back();
-    return null;
-  }
+  const isInvalid = !concern || !result || !illustrations || !story;
 
-  if (!result) {
-    console.warn("Invalid state: no result");
-    router.back();
-    return null;
-  }
+  useEffect(() => {
+    if (!concern) {
+      console.warn("Invalid state: no concern");
+      router.back();
+      return;
+    }
+    if (!result) {
+      console.warn("Invalid state: no result");
+      router.back();
+      return;
+    }
+    if (!illustrations) {
+      console.error("No illustration found!");
+      router.back();
+      return;
+    }
+    if (!story) {
+      console.error("No story found!");
+      router.back();
+    }
+  }, [concern, illustrations, result, story]);
 
-  if (!illustrations) {
-    console.error("No illustration found!");
-    router.back();
-    return null;
-  }
+  useEffect(() => {
+    return () => {
+      setAppState({ kaucimReplay: null });
+    };
+  }, [setAppState]);
 
-  if (!story) {
-    console.error("No story found!");
-    router.back();
+  if (isInvalid) {
     return null;
   }
 
@@ -152,15 +165,13 @@ function KaucimSlideShow() {
         video={video}
         verdict={story.verdict}
         slides={slideShow}
-        showIntroVideo={!kaucimReplay}
-        showResultPopup={!kaucimReplay}
+        showIntroVideo={!isReplay}
+        showResultPopup={!isReplay}
         summary={{
           title: story.title,
-          powerChange:
-            !kaucimReplay && lastKaucimFresh ? result.powerChange : 0,
+          powerChange: !isReplay && lastKaucimFresh ? result.powerChange : 0,
         }}
         onResultDismiss={() => {
-          setAppState({ kaucimReplay: null });
           router.back();
         }}
       />

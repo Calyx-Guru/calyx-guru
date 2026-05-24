@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import { Animated, Image, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Easing, Image, StyleSheet, Text, View } from "react-native";
 import { Pressable } from "react-native-gesture-handler";
 
 import {
@@ -16,6 +16,10 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { SubButton } from "../category";
 import type * as Types from "./type";
+
+const GLOW_BLUR_MIN = 6;
+const GLOW_BLUR_MAX = 20;
+const GLOW_BLUR_LOOP_MS = 2800;
 
 const SUB_BUTTON_PROPERTIES = [
   // {
@@ -82,12 +86,47 @@ export function KaucimOrb(properties: Types.Properties) {
     outputRange: [1, 0],
   });
 
+  const glowBlurAnim = useRef(new Animated.Value(0)).current;
+  const [glowBlurRadius, setGlowBlurRadius] = useState(GLOW_BLUR_MIN);
+
+  useEffect(() => {
+    const listenerId = glowBlurAnim.addListener(({ value }) => {
+      setGlowBlurRadius(
+        Math.round(GLOW_BLUR_MIN + value * (GLOW_BLUR_MAX - GLOW_BLUR_MIN)),
+      );
+    });
+
+    glowBlurAnim.setValue(0);
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowBlurAnim, {
+          toValue: 1,
+          duration: GLOW_BLUR_LOOP_MS / 2,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowBlurAnim, {
+          toValue: 0,
+          duration: GLOW_BLUR_LOOP_MS / 2,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: false,
+        }),
+      ]),
+    );
+    animation.start();
+
+    return () => {
+      glowBlurAnim.removeListener(listenerId);
+      animation.stop();
+    };
+  }, [glowBlurAnim]);
+
   const SUB_BUTTON_TARGETS = useMemo(() => {
     const a = 160;
 
-    return ([-0.8, 0, 0.8] as const).map((t) => {
+    return ([-0.85, 0, 0.85] as const).map((t) => {
       const x = t * a;
-      const y = 40 + 120 * Math.sqrt(Math.max(0, 1 - t * t));
+      const y = 40 + 70 * Math.sqrt(Math.max(0, 1 - t * t));
 
       return {
         x,
@@ -248,17 +287,14 @@ export function KaucimOrb(properties: Types.Properties) {
           </View>
 
           <Animated.View
-            style={[
-              styles.centerIconContainer,
-              { opacity: centerIconOpacity },
-            ]}
+            style={[styles.centerIconContainer, { opacity: centerIconOpacity }]}
             pointerEvents="none"
           >
             <Image
               source={kaucimIcon}
               style={styles.centerIconGlow}
               resizeMode="contain"
-              blurRadius={12}
+              blurRadius={glowBlurRadius}
             />
             <Image
               source={kaucimIcon}
@@ -443,14 +479,12 @@ const styles = StyleSheet.create({
     height: 208,
     top: "50%",
     left: "50%",
-    marginLeft: -71,
-    marginTop: -104,
   },
   subButtonVisual: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   subButtonHitTarget: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   closeWrapper: {
     position: "absolute",
@@ -497,7 +531,8 @@ const styles = StyleSheet.create({
     tintColor: "#FFFFFF",
     opacity: 0.9,
     transform: [{ scale: 1.08 }],
-    marginBottom: 30,
+    marginLeft: 8,
+    marginBottom: 32,
   },
   mainTagText: {
     color: "#FFFFFF",

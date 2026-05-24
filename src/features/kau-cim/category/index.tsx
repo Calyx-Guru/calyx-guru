@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Pressable } from "react-native-gesture-handler";
 
-import { darkGreenCircleButton } from "@/assets/images/ui";
+import { circleBlueButton } from "@/assets/images/ui";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
@@ -44,9 +44,9 @@ export function SubButton({
   const content = (
     <>
       <ImageBackground
-        source={darkGreenCircleButton}
+        source={circleBlueButton}
         style={styles.buttonBackground}
-        resizeMode="contain"
+        resizeMode="stretch"
       >
         <Image style={styles.image} source={image} />
         {!isConcernReadToday(action) && (
@@ -78,8 +78,8 @@ export function SubButton({
 const LAYOUT = {
   width: 142,
   height: 208,
-  buttonTop: 0,
-  buttonLeft: 16,
+  buttonTop: -55,
+  buttonLeft: -55,
   buttonSize: 110,
 } as const;
 
@@ -103,13 +103,11 @@ const styles = StyleSheet.create({
   image: {
     width: 64,
     height: 64,
-    marginBottom: 4,
-    marginRight: 6,
   },
   textContainer: {
     position: "absolute",
-    left: 20,
-    top: 85,
+    left: -45,
+    top: 35,
     alignItems: "center",
     justifyContent: "center",
     width: 90,
@@ -126,8 +124,8 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: "absolute",
-    top: -18,
-    left: -22,
+    top: -15,
+    left: -18,
     width: 142,
     height: 142,
   },

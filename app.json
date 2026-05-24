@@ -40,7 +40,19 @@
           }
         }
       ],
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./src/assets/fonts/roboto-latin/Roboto-Regular.ttf",
+            "./src/assets/fonts/roboto-latin/Roboto-Medium.ttf",
+            "./src/assets/fonts/roboto-latin/Roboto-Bold.ttf",
+            "./src/assets/fonts/cormorant-sc-latin/CormorantSC-Bold.ttf",
+            "./src/assets/fonts/zcool-xiao-wei-simplified-chinese/ZCOOLXiaoWei-Regular.ttf",
+            "./src/assets/fonts/uoq-mun-then-khung-traditional-chinese/UoqMunThenKhung-Regular.ttf"
+          ]
+        }
+      ],
       "@react-native-community/datetimepicker",
       "expo-video",
       "expo-image",

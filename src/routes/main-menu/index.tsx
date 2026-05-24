@@ -160,11 +160,7 @@ export function RouteMainMenu() {
 
   return (
     <View style={styles.root}>
-      <NormalVideo
-        url={petState.petVideo}
-        topCropPx={8}
-        bottomCropPx={36}
-      />
+      <NormalVideo url={petState.petVideo} topCropPx={8} bottomCropPx={36} />
 
       <View style={[styles.headerWrapper, { top: 8 }]}>
         <View style={styles.headerBarRow}>
@@ -229,8 +225,8 @@ export function RouteMainMenu() {
         style={[
           styles.collectionButton,
           {
-            bottom: 90,
-            right: Math.max(insets.right, 0) - 4,
+            bottom: 100,
+            right: 2,
             opacity: chromeOpacity,
           },
         ]}
@@ -300,7 +296,6 @@ const styles = StyleSheet.create({
   settingsIcon: {
     width: 22,
     height: 22,
-    marginBottom: 4,
   },
   bodyWrapper: {
     alignItems: "center",
@@ -355,7 +350,5 @@ const styles = StyleSheet.create({
   collectionButtonIcon: {
     width: 50,
     height: 50,
-    marginRight: 12,
-    marginBottom: 12,
   },
 });

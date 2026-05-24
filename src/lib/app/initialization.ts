@@ -26,16 +26,9 @@ async function initializeLocale(): Promise<void> {
     const { locale: savedLocale } = await loadStoredAppearance();
     const locale: LanguageKey = savedLocale || DEFAULT_LANGUAGE;
 
-    // Load fonts and initialize i18n in parallel
-    await Promise.all([
-      ensureFonts(DEFAULT_LANGUAGE),
-      initializeI18n(DEFAULT_LANGUAGE),
-      ensureFonts(locale),
-      initializeI18n(locale),
-    ]);
+    await Promise.all([ensureFonts(locale), initializeI18n(locale)]);
   } catch (error) {
     console.error('Locale initialization error:', error);
-    // Fallback to default language
     await Promise.all([
       ensureFonts(DEFAULT_LANGUAGE),
       initializeI18n(DEFAULT_LANGUAGE),

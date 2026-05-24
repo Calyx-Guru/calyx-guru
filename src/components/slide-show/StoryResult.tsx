@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Animated,
+  Easing,
   Image,
   ImageBackground,
   Pressable,
@@ -13,6 +15,10 @@ import { bigGoldFrame, blueRectangle, ribbon } from "@/assets/images/ui";
 import { formatPowerChangeLine } from "@/features/kau-cim/story-experience/constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const RIBBON_WIDTH = 400;
+const RIBBON_SHINE_WIDTH = 72;
+const RIBBON_SHINE_LOOP_MS = 1600;
+
 interface Properties {
   summary: Kaucim.Summary;
   onDismiss: () => void;
@@ -23,6 +29,7 @@ export function StoryResult(properties: Properties) {
 
   const insets = useSafeAreaInsets();
   const appearProgress = useRef(new Animated.Value(0)).current;
+  const ribbonShineProgress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     appearProgress.setValue(0);
@@ -33,6 +40,47 @@ export function StoryResult(properties: Properties) {
       useNativeDriver: true,
     }).start();
   }, [appearProgress, summary.title, summary.description]);
+
+  useEffect(() => {
+    ribbonShineProgress.setValue(0.2);
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(ribbonShineProgress, {
+          toValue: 0.8,
+          duration: RIBBON_SHINE_LOOP_MS,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.delay(RIBBON_SHINE_LOOP_MS * 2),
+      ]),
+      { resetBeforeIteration: true },
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [ribbonShineProgress]);
+
+  const ribbonShineTranslateX = useMemo(
+    () =>
+      ribbonShineProgress.interpolate({
+        inputRange: [0.2, 0.8],
+        outputRange: [
+          RIBBON_WIDTH * 0.2 - RIBBON_SHINE_WIDTH * 0.5,
+          RIBBON_WIDTH * 0.8 - RIBBON_SHINE_WIDTH * 0.5,
+        ],
+        extrapolate: "clamp",
+      }),
+    [ribbonShineProgress],
+  );
+
+  const ribbonShineOpacity = useMemo(
+    () =>
+      ribbonShineProgress.interpolate({
+        inputRange: [0.2, 0.5, 0.8],
+        outputRange: [0, 1, 0],
+        extrapolate: "clamp",
+      }),
+    [ribbonShineProgress],
+  );
 
   const frameOpacity = appearProgress.interpolate({
     inputRange: [0, 0.2, 1],
@@ -77,18 +125,48 @@ export function StoryResult(properties: Properties) {
       <View style={styles.resultOverlayRoot} />
 
       <View
-        style={[styles.ribbonHeader, { paddingTop: insets.top }]}
+        style={[styles.ribbonHeader, { paddingTop: 8 }]}
         pointerEvents="box-none"
       >
-        <ImageBackground
-          source={ribbon}
-          style={styles.ribbonBackground}
-          resizeMode="stretch"
-        >
-          <Text style={styles.resultTitle} numberOfLines={3}>
-            {summary.title}
-          </Text>
-        </ImageBackground>
+        <View style={styles.ribbonClip}>
+          <ImageBackground
+            source={ribbon}
+            style={styles.ribbonBackground}
+            resizeMode="stretch"
+          >
+            <Text style={styles.resultTitle} numberOfLines={3}>
+              {summary.title}
+            </Text>
+          </ImageBackground>
+          <View pointerEvents="none" style={styles.ribbonShineOverlay}>
+            <Animated.View
+              style={[
+                styles.ribbonShine,
+                {
+                  opacity: ribbonShineOpacity,
+                  transform: [
+                    { translateX: ribbonShineTranslateX },
+                    { rotate: "18deg" },
+                  ],
+                },
+              ]}
+            >
+              <LinearGradient
+                colors={[
+                  "rgba(255,255,255,0)",
+                  "rgba(255,248,210,0.35)",
+                  "rgba(255,255,255,0.8)",
+                  "rgba(255,248,210,0.35)",
+                  "rgba(255,255,255,0)",
+                ]}
+                locations={[0, 0.38, 0.5, 0.62, 1]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={styles.ribbonShineGradient}
+              />
+            </Animated.View>
+          </View>
+        </View>
       </View>
 
       <View style={[styles.resultFrameTouchable, { ...insets, top: "auto" }]}>
@@ -156,13 +234,32 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
   },
-  ribbonBackground: {
+  ribbonClip: {
     alignSelf: "center",
-    width: 400,
+    width: RIBBON_WIDTH,
     height: 60,
+    overflow: "hidden",
+  },
+  ribbonBackground: {
+    width: "100%",
+    height: "100%",
     justifyContent: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 32,
+  },
+  ribbonShineOverlay: {
+    ...StyleSheet.absoluteFill,
+    bottom: 10,
+    overflow: "hidden",
+  },
+  ribbonShine: {
+    position: "absolute",
+    top: -8,
+    left: 0,
+    width: RIBBON_SHINE_WIDTH,
+    height: 76,
+  },
+  ribbonShineGradient: {
+    width: RIBBON_SHINE_WIDTH,
+    height: "100%",
   },
   resultFrameTouchable: {
     position: "absolute",

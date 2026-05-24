@@ -19,7 +19,6 @@ export { default as powerBarBaseLeftStretch } from "./power-bar-base-left-stretc
 export { default as powerBarBaseLeft } from "./power-bar-base-left.png";
 export { default as powerBarBaseRightStretch } from "./power-bar-base-right-stretch.png";
 export { default as powerBarBaseRight } from "./power-bar-base-right.png";
-export { default as powerBarBase } from "./power-bar-base.png";
 export { default as powerBarFill } from "./power-bar-fill.png";
 export { default as redCircleButton } from "./red-circle-button.png";
 export { default as redSeal } from "./red-seal.png";

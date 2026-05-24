@@ -122,21 +122,47 @@ const fontMap: Record<string, number> = {
 };
 
 const loaded = new Set<string>();
+const loadPromises = new Map<string, Promise<void>>();
+const failedFonts = new Set<string>();
 
 export async function loadFont(name: string, source: number) {
-  if (loaded.has(name)) return;
+  if (loaded.has(name) || failedFonts.has(name)) {
+    return;
+  }
 
-  loaded.add(name);
-  await loadAsync({ [name]: source });
+  const inFlight = loadPromises.get(name);
+  if (inFlight) {
+    await inFlight;
+    return;
+  }
+
+  const promise = loadAsync({ [name]: source })
+    .then(() => {
+      loaded.add(name);
+    })
+    .catch((error) => {
+      failedFonts.add(name);
+      console.warn(`Failed to load font "${name}":`, error);
+    })
+    .finally(() => {
+      loadPromises.delete(name);
+    });
+
+  loadPromises.set(name, promise);
+  await promise;
 }
 
 export async function ensureFonts(language: LanguageKey) {
   if (!language) return;
   const registry = fontRegistry[language];
-  for (const [key, name] of Object.entries(registry)) {
-    const source = fontMap[name];
-    if (source) {
-      await loadFont(name, source);
-    }
-  }
+  const fontNames = new Set(Object.values(registry));
+
+  await Promise.all(
+    [...fontNames].map(async (name) => {
+      const source = fontMap[name];
+      if (source) {
+        await loadFont(name, source);
+      }
+    }),
+  );
 }
