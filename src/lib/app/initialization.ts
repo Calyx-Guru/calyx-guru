@@ -1,5 +1,6 @@
 import { DEFAULT_LANGUAGE } from '@/constants';
 import { loadStoredAppearance } from '@/lib/appearanceStorage';
+import { ensureIconFonts } from '@/lib/app/loadIconFonts';
 import { initializeI18n } from '@/lib/i18n/config';
 import { ensureFonts } from '@/theme/fonts';
 import { LanguageKey } from '@/types';
@@ -26,10 +27,15 @@ async function initializeLocale(): Promise<void> {
     const { locale: savedLocale } = await loadStoredAppearance();
     const locale: LanguageKey = savedLocale || DEFAULT_LANGUAGE;
 
-    await Promise.all([ensureFonts(locale), initializeI18n(locale)]);
+    await Promise.all([
+      ensureIconFonts(),
+      ensureFonts(locale),
+      initializeI18n(locale),
+    ]);
   } catch (error) {
     console.error('Locale initialization error:', error);
     await Promise.all([
+      ensureIconFonts(),
       ensureFonts(DEFAULT_LANGUAGE),
       initializeI18n(DEFAULT_LANGUAGE),
     ]);

@@ -68,9 +68,16 @@ export function SubButton({
   }
 
   return (
-    <Pressable onPress={handlePress} style={styles.container}>
+    <View style={styles.container}>
       {content}
-    </Pressable>
+      <Pressable
+        onPress={handlePress}
+        style={styles.hitTarget}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={t(labelKey)}
+      />
+    </View>
   );
 }
 
@@ -81,6 +88,16 @@ const LAYOUT = {
   buttonTop: -55,
   buttonLeft: -55,
   buttonSize: 110,
+  tagTop: 35,
+  tagHeight: 26,
+} as const;
+
+/** Touch bounds aligned to circle + label (container origin = orb center when fanning). */
+export const SUB_BUTTON_HIT_BOUNDS = {
+  top: LAYOUT.buttonTop,
+  left: LAYOUT.buttonLeft,
+  width: LAYOUT.buttonSize,
+  height: LAYOUT.tagTop + LAYOUT.tagHeight - LAYOUT.buttonTop,
 } as const;
 
 const styles = StyleSheet.create({
@@ -90,6 +107,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+  },
+  hitTarget: {
+    position: "absolute",
+    top: SUB_BUTTON_HIT_BOUNDS.top,
+    left: SUB_BUTTON_HIT_BOUNDS.left,
+    width: SUB_BUTTON_HIT_BOUNDS.width,
+    height: SUB_BUTTON_HIT_BOUNDS.height,
   },
   buttonBackground: {
     position: "absolute",
@@ -107,11 +131,11 @@ const styles = StyleSheet.create({
   textContainer: {
     position: "absolute",
     left: -45,
-    top: 35,
+    top: LAYOUT.tagTop,
     alignItems: "center",
     justifyContent: "center",
     width: 90,
-    height: 26,
+    height: LAYOUT.tagHeight,
   },
   label: {
     color: "#fff",

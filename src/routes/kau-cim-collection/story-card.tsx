@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   omenImageLocked: {
-    opacity: 0.28,
+    opacity: 0.15,
   },
   omenLockedDesaturate: {
     ...StyleSheet.absoluteFill,
@@ -218,7 +218,8 @@ const styles = StyleSheet.create({
   },
   omenLockedWash: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(255, 255, 255, 0.62)",
+    backgroundColor: "#000",
+    opacity: 0.6,
   },
   stickBadge: {
     position: "absolute",

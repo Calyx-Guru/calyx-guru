@@ -1,11 +1,7 @@
-import { ribbon } from "@/assets/images/ui";
 import React from "react";
-import {
-  GestureResponderEvent,
-  ImageBackground,
-  StyleSheet,
-  Text,
-} from "react-native";
+import { GestureResponderEvent, StyleSheet } from "react-native";
+
+import { RibbonHeading } from "@/components/typography/RibbonHeading";
 
 interface ButtonPrimaryProps {
   onPress?: (event: GestureResponderEvent) => void;
@@ -15,29 +11,21 @@ interface ButtonPrimaryProps {
 
 export const HeadingPrimary: React.FC<ButtonPrimaryProps> = ({ children }) => {
   return (
-    <ImageBackground
-      source={ribbon}
-      style={[styles.heading]}
-      resizeMode="stretch"
-    >
-      <Text style={[styles.text]}>{children}</Text>
-    </ImageBackground>
+    <RibbonHeading style={styles.heading} textStyle={styles.text}>
+      {children}
+    </RibbonHeading>
   );
 };
 
 const styles = StyleSheet.create({
   heading: {
-    justifyContent: "center",
-    alignItems: "stretch",
     width: "100%",
-    height: "auto",
     aspectRatio: 7,
   },
   text: {
     fontSize: 16,
     fontWeight: "600",
     color: "#ffffff",
-    textAlign: "center",
     textShadowColor: "#000000",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,

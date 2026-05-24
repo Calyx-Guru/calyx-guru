@@ -31,7 +31,7 @@ export const FramePrimary: React.FC<FramePrimaryProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          opacity: 0.7,
+          opacity: 0.4,
         }}
         resizeMode="stretch"
       ></ImageBackground>

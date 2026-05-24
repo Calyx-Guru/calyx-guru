@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   backdropWrapper: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#444444",
   },
   frameWrapper: {
     marginTop: 36,

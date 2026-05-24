@@ -14,7 +14,7 @@ import * as subButtonSet from "@/assets/images/kau-cim/set-2";
 import { orbButton } from "@/assets/images/ui";
 import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
-import { SubButton } from "../category";
+import { SUB_BUTTON_HIT_BOUNDS, SubButton } from "../category";
 import type * as Types from "./type";
 
 const GLOW_BLUR_MIN = 6;
@@ -361,6 +361,7 @@ export function KaucimOrb(properties: Types.Properties) {
                 </Animated.View>
                 <Pressable
                   style={styles.subButtonHitTarget}
+                  hitSlop={8}
                   onPress={() => handleAction(concern)}
                   accessibilityRole="button"
                   accessibilityLabel={SUB_BUTTON_PROPERTIES[i].labelKey}
@@ -484,7 +485,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
   },
   subButtonHitTarget: {
-    ...StyleSheet.absoluteFill,
+    position: "absolute",
+    top: SUB_BUTTON_HIT_BOUNDS.top,
+    left: SUB_BUTTON_HIT_BOUNDS.left,
+    width: SUB_BUTTON_HIT_BOUNDS.width,
+    height: SUB_BUTTON_HIT_BOUNDS.height,
   },
   closeWrapper: {
     position: "absolute",

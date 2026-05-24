@@ -1,3 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useFonts } from "expo-font";
 import {
   useCallback,
   useEffect,
@@ -14,8 +16,6 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-
-import { Ionicons } from "@expo/vector-icons";
 
 import { kaucimCollection } from "@/assets/images/kau-cim";
 import { blueSquareButton, circleBlueButton } from "@/assets/images/ui";
@@ -37,6 +37,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VIDEOS } from "./constants";
 
 export function RouteMainMenu() {
+  const [ioniconsReady] = useFonts(Ionicons.font);
   const insets = useSafeAreaInsets();
   const { profile } = useUserProfile();
   const { userState } = useUserState();
@@ -182,12 +183,14 @@ export function RouteMainMenu() {
               style={styles.settingsButton}
               resizeMode="contain"
             >
-              <Ionicons
-                name="settings-sharp"
-                size={22}
-                color="#ffffff"
-                style={styles.settingsIcon}
-              />
+              {ioniconsReady ? (
+                <Ionicons
+                  name="settings-sharp"
+                  size={22}
+                  color="#ffffff"
+                  style={styles.settingsIcon}
+                />
+              ) : null}
             </ImageBackground>
           </Pressable>
         </View>
@@ -309,7 +312,7 @@ const styles = StyleSheet.create({
     pointerEvents: "box-none",
   },
   powerFlyerOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 40,
     alignItems: "center",
     justifyContent: "center",
