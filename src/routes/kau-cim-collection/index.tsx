@@ -1,7 +1,8 @@
 import { background } from "@/assets/images/ui";
 import { useTranslation } from "@/hooks/useTranslation";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
-import { useMemo, useState } from "react";
+import { usePrefetchKaucimOmenImages } from "@/hooks/useKaucimIllustration";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -12,6 +13,7 @@ import {
   Text,
   useWindowDimensions,
   View,
+  type ViewToken,
 } from "react-native";
 
 import { careerIcon, loveIcon, wealthIcon } from "@/assets/images/kau-cim";
@@ -68,6 +70,37 @@ export function RouteKaucimCollection() {
     return inner / numColumns;
   }, [windowWidth, numColumns]);
 
+  const [visibleStickNumbers, setVisibleStickNumbers] = useState<number[]>([]);
+  const visibleSticksRef = useRef("");
+
+  useEffect(() => {
+    visibleSticksRef.current = "";
+    setVisibleStickNumbers([]);
+  }, [selectedConcern]);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const sticks = viewableItems
+        .map((token) => token.item as { stickNumber: number } | undefined)
+        .filter((item): item is { stickNumber: number } => item != null)
+        .map((item) => item.stickNumber)
+        .sort((a, b) => a - b);
+      const nextKey = sticks.join(",");
+      if (nextKey === visibleSticksRef.current) {
+        return;
+      }
+      visibleSticksRef.current = nextKey;
+      setVisibleStickNumbers(sticks);
+    },
+  ).current;
+
+  const viewabilityConfigCallbackPairs = useRef([
+    {
+      viewabilityConfig: { itemVisiblePercentThreshold: 40 },
+      onViewableItemsChanged,
+    },
+  ]).current;
+
   const gridData = useMemo(() => {
     const concernUnlocks = userState?.kaucimStoryUnlocks?.[selectedConcern];
 
@@ -86,6 +119,31 @@ export function RouteKaucimCollection() {
     });
   }, [selectedConcern, userState?.kaucimStoryUnlocks]);
 
+  usePrefetchKaucimOmenImages({
+    concern: selectedConcern,
+    stickNumbers: visibleStickNumbers,
+  });
+
+  const renderStoryCard = useCallback(
+    ({
+      item,
+      index,
+    }: {
+      item: { key: string; stickNumber: number };
+      index: number;
+    }) => (
+      <StoryCard
+        concern={selectedConcern}
+        stickNumber={item.stickNumber}
+        width={cardWidth}
+        index={index}
+        numColumns={numColumns}
+        gap={CARD_GAP}
+      />
+    ),
+    [cardWidth, numColumns, selectedConcern],
+  );
+
   return (
     <View style={styles.root}>
       <ImageBackground source={background} style={styles.rootBackground} />
@@ -95,16 +153,12 @@ export function RouteKaucimCollection() {
         data={gridData}
         numColumns={numColumns}
         keyExtractor={(item) => item.key}
-        renderItem={({ item, index }) => (
-          <StoryCard
-            concern={selectedConcern}
-            stickNumber={item.stickNumber}
-            width={cardWidth}
-            index={index}
-            numColumns={numColumns}
-            gap={CARD_GAP}
-          />
-        )}
+        renderItem={renderStoryCard}
+        initialNumToRender={numColumns * 4}
+        maxToRenderPerBatch={numColumns * 3}
+        windowSize={5}
+        removeClippedSubviews
+        viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
         columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
         contentContainerStyle={styles.gridContent}
         showsVerticalScrollIndicator={false}

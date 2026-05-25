@@ -3,6 +3,7 @@ import {
   AnalyticsScreenTracker,
 } from "@/contexts/AnalyticsContext";
 import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
+import { KaucimIllustrationProvider } from "@/contexts/KaucimIllustrationContext";
 import { PushNotificationProvider } from "@/contexts/PushNotificationContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
@@ -86,9 +87,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={styles.gestureRoot}>
       <SupabaseAuthProvider>
         <MasterDataProvider>
-          <AnalyticsProvider>
-            <AppContent />
-          </AnalyticsProvider>
+          <KaucimIllustrationProvider>
+            <AnalyticsProvider>
+              <AppContent />
+            </AnalyticsProvider>
+          </KaucimIllustrationProvider>
         </MasterDataProvider>
       </SupabaseAuthProvider>
     </GestureHandlerRootView>

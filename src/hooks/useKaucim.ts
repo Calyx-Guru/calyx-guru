@@ -4,11 +4,16 @@ import { useAppState } from "@/hooks/useAppState";
 import { getRandomInt } from "@/lib/app/rng";
 import { createDate, getTodayFirstTimestamp } from "@/lib/app/time";
 import {
+  computeKaucimPowerChange,
+  KAUCIM_POWER_CALCULATION_CONFIG_KEY,
+  parseKaucimPowerCalculation,
+} from "@/lib/kaucim/powerChange";
+import {
   FIVE_ELEMENTS,
   KAUCIM_CONCERNS,
   KaucimResult,
 } from "@/types/UserState";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useMasterData } from "./useMasterData";
 import { useUserProfile } from "./useUserProfile";
 import { useUserState } from "./useUserState";
@@ -50,7 +55,7 @@ export const KAUCIM_CONCERNS_META = {
 };
 
 export function useKaucim() {
-  const { getKaucimStoryBundle } = useMasterData();
+  const { getKaucimStoryBundle, getAppConfigValue } = useMasterData();
   const { locale } = useAppAppearance();
   const { userState, updateUserState, pushKaucimHistory, unlockKaucimStory } =
     useUserState();
@@ -58,25 +63,21 @@ export function useKaucim() {
   const { profile } = useUserProfile();
   const lastKaucimResults = userState?.lastKaucimResults || {};
 
+  const powerCalculation = useMemo(
+    () =>
+      parseKaucimPowerCalculation(
+        getAppConfigValue(KAUCIM_POWER_CALCULATION_CONFIG_KEY),
+      ),
+    [getAppConfigValue],
+  );
+
   const getPowerChange = useCallback(
     (fortuneLevel: number, rngSeed: number) => {
-      const num = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);
-      switch (fortuneLevel) {
-        case 1:
-          return -(10 + Math.ceil((15 * num) / 100));
-        case 2:
-          return -(5 + Math.ceil((10 * num) / 100));
-        case 3:
-          return 0;
-        case 4:
-          return 5 + Math.ceil((5 * num) / 100);
-        case 5:
-          return 10 + Math.ceil((10 * num) / 100);
-      }
-
-      return 0;
+      const roll = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);
+      if (!powerCalculation) return 0;
+      return computeKaucimPowerChange(fortuneLevel, roll, powerCalculation);
     },
-    [deviceId],
+    [deviceId, powerCalculation],
   );
 
   const isConcernReadToday = useCallback(
@@ -232,9 +233,14 @@ export function useKaucim() {
     [
       deviceId,
       getKaucimStoryBundle,
+      getPowerChange,
       lastKaucimResults,
+      locale,
       profile,
+      pushKaucimHistory,
       setAppState,
+      unlockKaucimStory,
+      updateUserState,
       userState,
     ],
   );

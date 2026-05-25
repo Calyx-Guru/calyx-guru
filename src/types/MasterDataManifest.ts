@@ -2,6 +2,10 @@ import type { LanguageKey } from './common';
 import { KAUCIM_CONCERNS } from './UserState';
 
 export interface MasterDataManifest {
+  appConfig: {
+    lastUpdated: string;
+    version: number;
+  };
   localization: {
     lastUpdated: string;
     version: number;

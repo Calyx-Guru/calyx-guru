@@ -8,7 +8,7 @@ import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useUserState } from "@/hooks/useUserState";
-import { pickRandom } from "@/lib/app/helper";
+import { useKaucimStoryImages } from "@/hooks/useKaucimIllustration";
 import { FIVE_ELEMENTS } from "@/types/UserState";
 
 import * as KAUCIM_VIDEOS from "@/assets/videos/kau-cim";
@@ -88,44 +88,38 @@ function KaucimSlideShow() {
     [story, fortuneLevel],
   );
 
+  const { images: storyImages } = useKaucimStoryImages({
+      concern: concern ?? undefined,
+      stickNumber,
+      illustrations,
+      enabled: Boolean(illustrations && story && result),
+    });
+
   const slideShow = useMemo<Kaucim.Slide[]>(() => {
-    if (!illustrations || !story || !result) {
+    if (!storyImages || !story || !result) {
       return [];
     }
 
-    const omenIllustration = pickRandom(
-      illustrations.omen[stickNumber % illustrations.omen.length],
-    );
-    const actionIllustration =
-      pickRandom(
-        illustrations.action[stickNumber % illustrations.action.length],
-      ) ?? omenIllustration;
-    const concludeIllustration =
-      pickRandom(
-        illustrations.conclude[stickNumber % illustrations.conclude.length],
-      ) ??
-      actionIllustration ??
-      omenIllustration;
     const openingText = isReplay
       ? [story.verdict.trim(), story.omen.trim()].filter(Boolean).join("\n\n")
       : story.omen;
 
     return [
       {
-        image: omenIllustration(),
+        image: storyImages.omen,
         text: openingText,
       },
       {
-        image: actionIllustration(),
+        image: storyImages.action,
         text: story.action,
       },
       {
-        image: concludeIllustration(),
+        image: storyImages.conclude,
         text: story.conclusion,
         textParams: { bonus: result.powerChange },
       },
     ];
-  }, [illustrations, isReplay, result, stickNumber, story]);
+  }, [isReplay, result, story, storyImages]);
 
   const isInvalid = !concern || !result || !illustrations || !story;
 

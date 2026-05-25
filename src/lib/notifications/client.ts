@@ -16,16 +16,36 @@ type NotificationsModule = typeof ExpoNotifications;
 let notificationsModule: NotificationsModule | null = null;
 let initialized = false;
 
+function isNotificationsModuleUsable(
+  mod: NotificationsModule | null | undefined,
+): mod is NotificationsModule {
+  return (
+    mod != null &&
+    typeof mod.setNotificationHandler === "function" &&
+    typeof mod.getPermissionsAsync === "function"
+  );
+}
+
 async function getNotifications(): Promise<NotificationsModule | null> {
   if (!isPushNotificationAvailable()) {
     return null;
   }
 
-  if (!notificationsModule) {
-    notificationsModule = await import("expo-notifications");
+  if (isNotificationsModuleUsable(notificationsModule)) {
+    return notificationsModule;
   }
 
-  return notificationsModule;
+  try {
+    const mod = await import("expo-notifications");
+    if (!isNotificationsModuleUsable(mod)) {
+      return null;
+    }
+    notificationsModule = mod;
+    return mod;
+  } catch {
+    notificationsModule = null;
+    return null;
+  }
 }
 
 export type NotificationPermissionStatus =

@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom';
 import { useSupabaseAuth } from './hooks/useSupabaseAuth';
 import { KaucimStoriesPage } from './pages/KaucimStoriesPage';
+import { AppConfigPage } from './pages/AppConfigPage';
 import { LocalizationPage } from './pages/LocalizationPage';
 import { KAUCIM_CONCERNS } from './types';
 
@@ -41,6 +42,7 @@ export function App() {
             />
             <Route path="/kaucim-stories/:concern" element={<KaucimStoriesPage />} />
             <Route path="/localization" element={<LocalizationPage />} />
+            <Route path="/app-config" element={<AppConfigPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Settings />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

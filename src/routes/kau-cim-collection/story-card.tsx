@@ -12,17 +12,16 @@ import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useKaucimOmenImageSource } from "@/hooks/useKaucimIllustration";
+import { memo, useCallback, useMemo } from "react";
 import {
   ImageBackground,
   Platform,
   Pressable,
-  Image as RNImage,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { ILLUSTRATIONS } from "../kau-cim/constants";
 import { HEADER_BAR_BORDER_GRADIENT } from "./constants";
 
 const CARD_BORDER_WIDTH = 4;
@@ -36,7 +35,7 @@ type StoryCardProps = {
   gap?: number;
 };
 
-export function StoryCard({
+export const StoryCard = memo(function StoryCard({
   concern,
   stickNumber,
   width,
@@ -53,26 +52,10 @@ export function StoryCard({
     }
     return !userState.kaucimStoryUnlocks?.[concern]?.[stickNumber];
   }, [userState, concern, stickNumber]);
-  const omenImageSource = useMemo(() => {
-    const illustrations = concern ? ILLUSTRATIONS[concern] : undefined;
-    if (!illustrations) {
-      return undefined;
-    }
-    const imageFunc = illustrations.omen[stickNumber]?.[0];
-    if (!imageFunc) {
-      return undefined;
-    }
-    const module = imageFunc();
-    const resolved = RNImage.resolveAssetSource(module);
-    if (!resolved?.uri) {
-      return undefined;
-    }
-    // Unique cacheKey per stick — prevents expo-image reusing the wrong asset when FlatList recycles cells.
-    return {
-      uri: resolved.uri,
-      cacheKey: `${concern}-omen-${stickNumber}`,
-    };
-  }, [concern, stickNumber]);
+  const { illustration: omenIllustration } = useKaucimOmenImageSource({
+    concern,
+    stickNumber,
+  });
   const story = useMemo(() => {
     return getKaucimStory(concern, stickNumber, 0);
   }, [concern, stickNumber]);
@@ -141,14 +124,14 @@ export function StoryCard({
           style={styles.cardBorder}
         >
           <View style={styles.card}>
-            {omenImageSource ? (
+            {omenIllustration ? (
               <View style={styles.omenImageContainer}>
                 <Image
-                  key={`${concern}-omen-${stickNumber}`}
-                  source={omenImageSource}
+                  key={omenIllustration.cacheKey}
+                  source={omenIllustration.module}
                   style={[styles.omenImage, isLocked && styles.omenImageLocked]}
                   contentFit="cover"
-                  recyclingKey={`${concern}-omen-${stickNumber}`}
+                  recyclingKey={omenIllustration.cacheKey}
                 />
                 {isLocked ? (
                   <>
@@ -177,7 +160,7 @@ export function StoryCard({
       </Pressable>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   cardCell: {

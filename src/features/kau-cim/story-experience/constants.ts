@@ -1,5 +1,3 @@
-import { Image } from "react-native";
-
 export const FLASH_BEFORE_END_SEC = 0.38;
 
 /** Verdict subtitle: fade in after playback passes this mark (seconds). */
@@ -139,14 +137,7 @@ export function splitForReadableLines(
   );
 }
 
-export function prefetchImageModule(source: ImageModule): Promise<boolean> {
-  const resolved = Image.resolveAssetSource(source);
-  const uri = resolved?.uri;
-  if (!uri) {
-    return Promise.resolve(true);
-  }
-  return Image.prefetch(uri);
-}
+export { prefetchImageUri as prefetchImageModule } from "@/lib/kaucim/illustrationCache";
 
 export function splitOnSentencePunctuation(body: string): string[] {
   const normalized = body.replace(/\s+/g, " ").trim();

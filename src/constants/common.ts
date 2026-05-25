@@ -29,6 +29,7 @@ export const STORAGE_BUCKET = "fortune_data";
 export const MASTER_DATA_MANIFEST_FILE_NAME = "manifest.json";
 export const FORTUNE_POEMS_STORAGE_FOLDER = "fortune_poems";
 export const LOCALIZATION_FILE_NAME = "localization";
+export const APP_CONFIG_FILE_NAME = "appConfig";
 
 // TODO: Get these from server
 export const MAX_PET_POWER = 200;

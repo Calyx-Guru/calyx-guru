@@ -10,6 +10,7 @@ import {
   Home,
   Languages,
   Settings,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -31,6 +32,11 @@ const navItems: NavItem[] = [
     title: "Localization",
     href: "/localization",
     icon: Languages,
+  },
+  {
+    title: "App Config",
+    href: "/app-config",
+    icon: SlidersHorizontal,
   },
   {
     title: "Settings",

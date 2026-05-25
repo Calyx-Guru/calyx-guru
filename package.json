@@ -18,7 +18,9 @@
     "admin:build": "cd admin && tsc -b && vite build",
     "admin:lint": "cd admin && eslint .",
     "admin:preview": "cd admin && vite preview",
-    "optimize:images": "tsx tools/OptimizeImages.ts"
+    "optimize:images": "tsx tools/OptimizeImages.ts",
+    "sync:app-config": "tsx tools/SyncAppConfig.ts",
+    "sync:translation": "tsx tools/SyncTranslation.ts"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "^1.5.53",
