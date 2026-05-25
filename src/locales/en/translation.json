@@ -16,6 +16,31 @@
       "kaucim": "Kau Cim"
     }
   },
+  "pushNotifications": {
+    "dailyStatus": {
+      "title": "Calyx Guru"
+    },
+    "dailyCheckIn": {
+      "title": "Calyx Guru",
+      "body": "Take a moment with Calyx on the main menu today."
+    },
+    "dailyEngagement": {
+      "title": "Calyx Guru",
+      "body": "Your companion is waiting. Open Calyx Guru this evening."
+    },
+    "weeklyReturn": {
+      "title": "Calyx Guru",
+      "body": "A new week with Calyx begins — visit the main menu for your fortune and status."
+    },
+    "lowPower": {
+      "title": "Calyx needs you",
+      "body": "Your companion's power is low. Visit the main menu to restore balance."
+    },
+    "kaucimReminder": {
+      "title": "Daily Kau Cim",
+      "body": "You still have a fortune reading waiting today."
+    }
+  },
   "petStatus": {
     "veryGood": {
       "0": "Calyx experiences a profound sense of tranquility as she drifts through a sanctuary of fragrant, moonlit blossoms.",

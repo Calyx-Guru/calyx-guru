@@ -23,18 +23,20 @@ import { blueSquareButton, circleBlueButton } from "@/assets/images/ui";
 import { NormalVideo } from "@/components/video/NormalVideo";
 
 import { MAX_PET_POWER } from "@/constants";
+import { getPetStatusTier } from "@/lib/app/petStatus";
+import { VIDEOS } from "./constants";
 import { CalendarEastern } from "@/features/calendar/eastern";
 import { CalendarWestern } from "@/features/calendar/western";
 import { KaucimOrb } from "@/features/kau-cim/orb";
 import { HealthBar } from "@/features/mascot/health-bar";
 import { StatusMessage } from "@/features/mascot/status-message";
 import { useAppState } from "@/hooks/useAppState";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
-import { router, type Href } from "expo-router";
+import { router, useFocusEffect, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { VIDEOS } from "./constants";
 
 export function RouteMainMenu() {
   const [ioniconsReady] = useFonts(Ionicons.font);
@@ -42,6 +44,13 @@ export function RouteMainMenu() {
   const { profile } = useUserProfile();
   const { userState } = useUserState();
   const { lastPetPowerChange, setAppState } = useAppState();
+  const { rescheduleFromCurrentState } = usePushNotifications();
+
+  useFocusEffect(
+    useCallback(() => {
+      void rescheduleFromCurrentState({ force: true });
+    }, [rescheduleFromCurrentState]),
+  );
 
   const [petPowerGainChange, setPetPowerGainChange] = useState<number | null>(
     null,
@@ -141,23 +150,24 @@ export function RouteMainMenu() {
   const petState = useMemo(() => {
     const petPower = userState?.petPower ?? 0;
     const petPowerPercentage = petPower / MAX_PET_POWER;
-    let petVideo = VIDEOS.mascot.normal;
-    if (petPowerPercentage >= 0.75) {
-      petVideo = VIDEOS.mascot.very_good;
-    } else if (petPowerPercentage >= 0.5) {
-      petVideo = VIDEOS.mascot.good;
-    } else if (petPowerPercentage >= 0.25) {
-      petVideo = VIDEOS.mascot.bad;
-    } else {
-      petVideo = VIDEOS.mascot.very_bad;
-    }
+    const tier = getPetStatusTier(petPower);
+    const petVideo =
+      tier === "veryGood"
+        ? VIDEOS.mascot.very_good
+        : tier === "good"
+          ? VIDEOS.mascot.good
+          : tier === "normal"
+            ? VIDEOS.mascot.normal
+            : tier === "bad"
+              ? VIDEOS.mascot.bad
+              : VIDEOS.mascot.very_bad;
 
     return {
       petVideo,
       petPower,
       petPowerPercentage,
     };
-  }, [userState, profile]);
+  }, [userState?.petPower]);
 
   return (
     <View style={styles.root}>

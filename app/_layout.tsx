@@ -3,6 +3,7 @@ import {
   AnalyticsScreenTracker,
 } from "@/contexts/AnalyticsContext";
 import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
+import { PushNotificationProvider } from "@/contexts/PushNotificationContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { useMasterData } from "@/hooks/useMasterData";
@@ -61,19 +62,21 @@ function AppContent() {
 
   return (
     <AppAppearanceProvider>
-      <SafeAreaView
-        style={styles.container}
-        edges={["top", "left", "right", "bottom"]}
-      >
-        <AnalyticsScreenTracker />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
+      <PushNotificationProvider>
+        <SafeAreaView
+          style={styles.container}
+          edges={["top", "left", "right", "bottom"]}
         >
-          <Stack.Screen name="index" />
-        </Stack>
-      </SafeAreaView>
+          <AnalyticsScreenTracker />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="index" />
+          </Stack>
+        </SafeAreaView>
+      </PushNotificationProvider>
     </AppAppearanceProvider>
   );
 }

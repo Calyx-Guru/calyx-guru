@@ -6,6 +6,7 @@ import { KaucimStoryExperience } from "@/features/kau-cim/story-experience";
 
 import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useUserState } from "@/hooks/useUserState";
 import { pickRandom } from "@/lib/app/helper";
 import { FIVE_ELEMENTS } from "@/types/UserState";
@@ -51,6 +52,7 @@ function KaucimSlideShow() {
     useAppState();
   const { userState } = useUserState();
   const { getKaucimStory } = useKaucim();
+  const { rescheduleFromCurrentState } = usePushNotifications();
   /** Survives `kaucimReplay` being cleared on exit so skip/back does not re-render invalid. */
   const [replaySelection] = useState(() => kaucimReplay);
   const isReplay = replaySelection != null;
@@ -172,6 +174,7 @@ function KaucimSlideShow() {
           powerChange: !isReplay && lastKaucimFresh ? result.powerChange : 0,
         }}
         onResultDismiss={() => {
+          void rescheduleFromCurrentState({ force: true });
           router.back();
         }}
       />

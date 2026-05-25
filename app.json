@@ -59,7 +59,14 @@
       "expo-image",
       "expo-localization",
       "expo-secure-store",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/assets/images/icon.png",
+          "color": "#030a1e"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
