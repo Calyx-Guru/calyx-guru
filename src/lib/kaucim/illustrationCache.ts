@@ -4,9 +4,15 @@ export type KaucimIllustrationPhase = "omen" | "action" | "conclude";
 
 export type KaucimIllustrationCacheKey = `${string}:${KaucimIllustrationPhase}:${number}:${number}`;
 
+export type ExpoImageSource = {
+  uri: string;
+  cacheKey: KaucimIllustrationCacheKey;
+};
+
 export type CachedIllustration = {
   cacheKey: KaucimIllustrationCacheKey;
   module: ImageModule;
+  expoSource: ExpoImageSource;
 };
 
 type CacheEntry = {
@@ -43,11 +49,26 @@ export function resolveImageModule(module: ImageModule): {
   };
 }
 
+export function toExpoImageSource(
+  cacheKey: KaucimIllustrationCacheKey,
+  module: ImageModule,
+): ExpoImageSource | null {
+  const { uri } = resolveImageModule(module);
+  if (!uri) {
+    return null;
+  }
+  return { uri, cacheKey };
+}
+
 export function toCachedIllustration(
   cacheKey: KaucimIllustrationCacheKey,
   module: ImageModule,
-): CachedIllustration {
-  return { cacheKey, module };
+): CachedIllustration | null {
+  const expoSource = toExpoImageSource(cacheKey, module);
+  if (!expoSource) {
+    return null;
+  }
+  return { cacheKey, module, expoSource };
 }
 
 export async function prefetchImageUri(uri: string): Promise<boolean> {

@@ -5,6 +5,7 @@ import {
 } from "@/lib/kaucim/illustrationCache";
 import { ILLUSTRATIONS } from "@/routes/kau-cim/constants";
 import type { KAUCIM_CONCERNS } from "@/types/UserState";
+import { Image } from "react-native";
 
 export type StoryIllustrationSet = {
   omen: ImageModule[][];
@@ -118,19 +119,53 @@ export function selectStoryIllustrations(
   };
 }
 
+/** Omen loaders for a stick — `OMENS[stickNumber]` maps stick 1 → `omen-1.jpg`, etc. */
+export function getOmenPoolForStick(
+  illustrations: StoryIllustrationSet,
+  stickNumber: number,
+): (() => ImageModule)[] {
+  return illustrations.omen[stickNumber] ?? [];
+}
+
+/** Synchronous omen source for collection grid cards (no shared async cache). */
+export function resolveCollectionOmenImage(
+  concern: KAUCIM_CONCERNS,
+  stickNumber: number,
+  variantIndex = 0,
+): { uri: string; imageKey: string } | null {
+  const illustrations = getConcernIllustrations(concern);
+  if (!illustrations) {
+    return null;
+  }
+
+  const pool = getOmenPoolForStick(illustrations, stickNumber);
+  const loader = pool[variantIndex] ?? pool[0];
+  if (!loader) {
+    return null;
+  }
+
+  const resolved = Image.resolveAssetSource(loader());
+  if (!resolved?.uri) {
+    return null;
+  }
+
+  return {
+    uri: resolved.uri,
+    imageKey: `${concern}-omen-${stickNumber}`,
+  };
+}
+
 export function selectOmenIllustration(
   concern: KAUCIM_CONCERNS,
   illustrations: StoryIllustrationSet,
   stickNumber: number,
   variantIndex = 0,
 ): IllustrationPick {
-  const pool = illustrations.omen[stickNumber]?.length
-    ? illustrations.omen[stickNumber]
-    : illustrations.omen[stickNumber % illustrations.omen.length];
+  const pool = getOmenPoolForStick(illustrations, stickNumber);
 
   const loader =
-    pool?.[variantIndex] ??
-    pool?.[0] ??
+    pool[variantIndex] ??
+    pool[0] ??
     (() => {
       throw new Error(`No omen illustration for stick ${stickNumber}`);
     });

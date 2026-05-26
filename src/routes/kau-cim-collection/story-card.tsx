@@ -8,13 +8,13 @@ import {
 import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useUserState } from "@/hooks/useUserState";
+import { resolveCollectionOmenImage } from "@/lib/kaucim/illustrations";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useKaucimOmenImageSource } from "@/hooks/useKaucimIllustration";
 import { memo, useCallback, useMemo } from "react";
 import {
+  Image,
   ImageBackground,
   Platform,
   Pressable,
@@ -35,132 +35,152 @@ type StoryCardProps = {
   gap?: number;
 };
 
-export const StoryCard = memo(function StoryCard({
-  concern,
-  stickNumber,
-  width,
-  index,
-  numColumns,
-  gap = 10,
-}: StoryCardProps) {
-  const { userState } = useUserState();
-  const { setAppState } = useAppState();
-  const { getKaucimStory, findKaucimResultForStick } = useKaucim();
-  const isLocked = useMemo(() => {
-    if (!userState) {
-      return true;
-    }
-    return !userState.kaucimStoryUnlocks?.[concern]?.[stickNumber];
-  }, [userState, concern, stickNumber]);
-  const { illustration: omenIllustration } = useKaucimOmenImageSource({
+export const StoryCard = memo(
+  function StoryCard({
     concern,
     stickNumber,
-  });
-  const story = useMemo(() => {
-    return getKaucimStory(concern, stickNumber, 0);
-  }, [concern, stickNumber]);
+    width,
+    index,
+    numColumns,
+    gap = 10,
+  }: StoryCardProps) {
+    const { userState } = useUserState();
+    const { setAppState } = useAppState();
+    const { getKaucimStory, findKaucimResultForStick } = useKaucim();
 
-  const handleOpenStory = useCallback(() => {
-    if (isLocked) {
-      return;
-    }
+    const omenImageKey = `${concern}-omen-${stickNumber}`;
+    const omenImageSource = useMemo(
+      () => resolveCollectionOmenImage(concern, stickNumber),
+      [concern, stickNumber],
+    );
 
-    const savedResult = findKaucimResultForStick(concern, stickNumber);
+    const isLocked = useMemo(() => {
+      if (!userState) {
+        return true;
+      }
+      return !userState.kaucimStoryUnlocks?.[concern]?.[stickNumber];
+    }, [userState, concern, stickNumber]);
 
-    setAppState({
-      lastKaucimConcern: concern,
-      lastKaucimFresh: false,
-      kaucimReplay: {
-        concern,
-        stickNumber,
-        storyIndex: savedResult?.storyIndex ?? 0,
-        powerChange: savedResult?.powerChange ?? 0,
-      },
-    });
-    router.push("/kau-cim");
-  }, [concern, findKaucimResultForStick, isLocked, setAppState, stickNumber]);
+    const story = useMemo(() => {
+      return getKaucimStory(concern, stickNumber, 0);
+    }, [concern, getKaucimStory, stickNumber]);
 
-  const buttonImage = useMemo(() => {
-    switch (Number(story.fortuneLevel)) {
-      case 1:
-        return darkGreyCircleButton;
-      case 2:
-        return redCircleButton;
-      case 3:
-        return darkGreenCircleButton;
-      case 4:
-        return darkBlueCircleButton;
-      case 5:
-        return goldCircleButton;
-      default:
-        return darkGreenCircleButton;
-    }
-  }, [story.fortuneLevel]);
+    const handleOpenStory = useCallback(() => {
+      if (isLocked) {
+        return;
+      }
 
-  return (
-    <View
-      style={[
-        styles.cardCell,
-        { width },
-        numColumns > 1 &&
-          index % numColumns < numColumns - 1 && {
-            marginRight: gap,
-          },
-      ]}
-    >
-      <Pressable
-        onPress={handleOpenStory}
-        disabled={isLocked}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: isLocked }}
-        accessibilityLabel={
-          isLocked ? `Locked story ${stickNumber}` : `Open story ${stickNumber}`
-        }
+      const savedResult = findKaucimResultForStick(concern, stickNumber);
+
+      setAppState({
+        lastKaucimConcern: concern,
+        lastKaucimFresh: false,
+        kaucimReplay: {
+          concern,
+          stickNumber,
+          storyIndex: savedResult?.storyIndex ?? 0,
+          powerChange: savedResult?.powerChange ?? 0,
+        },
+      });
+      router.push("/kau-cim");
+    }, [concern, findKaucimResultForStick, isLocked, setAppState, stickNumber]);
+
+    const buttonImage = useMemo(() => {
+      switch (Number(story.fortuneLevel)) {
+        case 1:
+          return darkGreyCircleButton;
+        case 2:
+          return redCircleButton;
+        case 3:
+          return darkGreenCircleButton;
+        case 4:
+          return darkBlueCircleButton;
+        case 5:
+          return goldCircleButton;
+        default:
+          return darkGreenCircleButton;
+      }
+    }, [story.fortuneLevel]);
+
+    return (
+      <View
+        style={[
+          styles.cardCell,
+          { width },
+          numColumns > 1 &&
+            index % numColumns < numColumns - 1 && {
+              marginRight: gap,
+            },
+        ]}
       >
-        <LinearGradient
-          colors={HEADER_BAR_BORDER_GRADIENT}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.cardBorder}
+        <Pressable
+          onPress={handleOpenStory}
+          disabled={isLocked}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isLocked }}
+          accessibilityLabel={
+            isLocked
+              ? `Locked story ${stickNumber}`
+              : `Open story ${stickNumber}`
+          }
         >
-          <View style={styles.card}>
-            {omenIllustration ? (
-              <View style={styles.omenImageContainer}>
-                <Image
-                  key={omenIllustration.cacheKey}
-                  source={omenIllustration.module}
-                  style={[styles.omenImage, isLocked && styles.omenImageLocked]}
-                  contentFit="cover"
-                  recyclingKey={omenIllustration.cacheKey}
-                />
-                {isLocked ? (
-                  <>
-                    {Platform.OS !== "web" ? (
+          <LinearGradient
+            colors={HEADER_BAR_BORDER_GRADIENT}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.cardBorder}
+          >
+            <View style={styles.card}>
+              {omenImageSource ? (
+                <View style={styles.omenImageContainer}>
+                  <Image
+                    key={omenImageKey}
+                    source={{ uri: omenImageSource.uri }}
+                    style={[
+                      styles.omenImage,
+                      isLocked && styles.omenImageLocked,
+                    ]}
+                    resizeMode="cover"
+                  />
+                  {isLocked ? (
+                    <>
+                      {Platform.OS !== "web" ? (
+                        <View
+                          style={styles.omenLockedDesaturate}
+                          pointerEvents="none"
+                        />
+                      ) : null}
                       <View
-                        style={styles.omenLockedDesaturate}
+                        style={styles.omenLockedWash}
                         pointerEvents="none"
                       />
-                    ) : null}
-                    <View style={styles.omenLockedWash} pointerEvents="none" />
-                  </>
-                ) : null}
+                    </>
+                  ) : null}
+                </View>
+              ) : null}
+              <View style={styles.stickBadge}>
+                <ImageBackground
+                  source={buttonImage}
+                  style={styles.stickBadgeImage}
+                  resizeMode="cover"
+                >
+                  <Text style={styles.stickNumber}>{stickNumber}</Text>
+                </ImageBackground>
               </View>
-            ) : null}
-            <View style={styles.stickBadge}>
-              <ImageBackground
-                source={buttonImage}
-                style={styles.stickBadgeImage}
-                resizeMode="cover"
-              >
-                <Text style={styles.stickNumber}>{stickNumber}</Text>
-              </ImageBackground>
             </View>
-          </View>
-        </LinearGradient>
-      </Pressable>
-    </View>
-  );
-});
+          </LinearGradient>
+        </Pressable>
+      </View>
+    );
+  },
+  (prev, next) =>
+    prev.concern === next.concern &&
+    prev.stickNumber === next.stickNumber &&
+    prev.width === next.width &&
+    prev.index === next.index &&
+    prev.numColumns === next.numColumns &&
+    prev.gap === next.gap,
+);
 
 const styles = StyleSheet.create({
   cardCell: {

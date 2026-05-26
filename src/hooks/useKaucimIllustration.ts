@@ -11,11 +11,14 @@ import type { KAUCIM_CONCERNS } from "@/types/UserState";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type SetStateAction,
 } from "react";
+import { toCachedIllustration } from "@/lib/kaucim/illustrationCache";
 
 export type PreloadedStoryImages = {
   omen: ImageModule;
@@ -28,11 +31,22 @@ function setIllustrationIfChanged(
   next: CachedIllustration | null,
 ): void {
   setter((prev) => {
-    if (prev?.cacheKey === next?.cacheKey && prev?.module === next?.module) {
+    if (
+      prev?.cacheKey === next?.cacheKey &&
+      prev?.module === next?.module &&
+      prev?.expoSource.uri === next?.expoSource.uri
+    ) {
       return prev;
     }
     return next;
   });
+}
+
+function moduleToIllustration(
+  cacheKey: CachedIllustration["cacheKey"],
+  module: ImageModule,
+): CachedIllustration | null {
+  return toCachedIllustration(cacheKey, module);
 }
 
 export function useKaucimOmenImageSource({
@@ -47,10 +61,12 @@ export function useKaucimOmenImageSource({
   enabled?: boolean;
 }): {
   illustration: CachedIllustration | null;
+  cacheKey: CachedIllustration["cacheKey"] | null;
   isReady: boolean;
 } {
   const { ensureModule, getModule, subscribeKey } =
     useKaucimIllustrationContext();
+  const activeCacheKeyRef = useRef<CachedIllustration["cacheKey"] | null>(null);
   const illustrations = getConcernIllustrations(concern);
   const pick = useMemo(() => {
     if (!illustrations || !enabled) {
@@ -68,55 +84,70 @@ export function useKaucimOmenImageSource({
     null,
   );
 
-  const syncFromCache = useCallback(() => {
-    if (!pick) {
-      setIllustrationIfChanged(setIllustration, null);
-      return;
-    }
-    const module = getModule(pick.cacheKey);
-    if (module) {
-      setIllustrationIfChanged(setIllustration, {
-        cacheKey: pick.cacheKey,
-        module,
-      });
-    }
-  }, [getModule, pick]);
+  const syncFromCache = useCallback(
+    (cacheKey: CachedIllustration["cacheKey"]) => {
+      if (activeCacheKeyRef.current !== cacheKey) {
+        return;
+      }
+      const module = getModule(cacheKey);
+      if (!module) {
+        return;
+      }
+      const cached = moduleToIllustration(cacheKey, module);
+      if (cached) {
+        setIllustrationIfChanged(setIllustration, cached);
+      }
+    },
+    [getModule],
+  );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    activeCacheKeyRef.current = pick?.cacheKey ?? null;
+
     if (!pick || !enabled) {
       setIllustrationIfChanged(setIllustration, null);
       return;
     }
 
-    let cancelled = false;
-
     const module = getModule(pick.cacheKey);
     if (module) {
-      setIllustrationIfChanged(setIllustration, {
-        cacheKey: pick.cacheKey,
-        module,
-      });
-    } else {
-      setIllustrationIfChanged(setIllustration, null);
-      void ensureModule(pick.cacheKey, pick.loader)
+      const cached = moduleToIllustration(pick.cacheKey, module);
+      setIllustrationIfChanged(setIllustration, cached);
+      return;
+    }
+
+    setIllustrationIfChanged(setIllustration, null);
+  }, [enabled, getModule, pick?.cacheKey]);
+
+  useEffect(() => {
+    if (!pick || !enabled) {
+      return;
+    }
+
+    const cacheKey = pick.cacheKey;
+    let cancelled = false;
+
+    const module = getModule(cacheKey);
+    if (!module) {
+      void ensureModule(cacheKey, pick.loader)
         .then((loaded) => {
-          if (!cancelled) {
-            setIllustrationIfChanged(setIllustration, {
-              cacheKey: pick.cacheKey,
-              module: loaded,
-            });
+          if (!cancelled && activeCacheKeyRef.current === cacheKey) {
+            const cached = moduleToIllustration(cacheKey, loaded);
+            if (cached) {
+              setIllustrationIfChanged(setIllustration, cached);
+            }
           }
         })
         .catch(() => {
-          if (!cancelled) {
+          if (!cancelled && activeCacheKeyRef.current === cacheKey) {
             setIllustrationIfChanged(setIllustration, null);
           }
         });
     }
 
-    const unsubscribe = subscribeKey(pick.cacheKey, () => {
+    const unsubscribe = subscribeKey(cacheKey, () => {
       if (!cancelled) {
-        syncFromCache();
+        syncFromCache(cacheKey);
       }
     });
 
@@ -126,7 +157,14 @@ export function useKaucimOmenImageSource({
     };
   }, [enabled, ensureModule, getModule, pick, subscribeKey, syncFromCache]);
 
-  return { illustration, isReady: illustration != null };
+  const illustrationMatches =
+    illustration != null && illustration.cacheKey === pick?.cacheKey;
+
+  return {
+    illustration: illustrationMatches ? illustration : null,
+    cacheKey: pick?.cacheKey ?? null,
+    isReady: illustrationMatches,
+  };
 }
 
 export function useKaucimStoryImages({
