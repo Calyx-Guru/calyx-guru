@@ -3,6 +3,7 @@ import {
   AnalyticsScreenTracker,
 } from "@/contexts/AnalyticsContext";
 import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
+import { BillingProvider } from "@/contexts/BillingContext";
 import { KaucimIllustrationProvider } from "@/contexts/KaucimIllustrationContext";
 import { PushNotificationProvider } from "@/contexts/PushNotificationContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
@@ -88,9 +89,11 @@ export default function RootLayout() {
       <SupabaseAuthProvider>
         <MasterDataProvider>
           <KaucimIllustrationProvider>
-            <AnalyticsProvider>
-              <AppContent />
-            </AnalyticsProvider>
+            <BillingProvider>
+              <AnalyticsProvider>
+                <AppContent />
+              </AnalyticsProvider>
+            </BillingProvider>
           </KaucimIllustrationProvider>
         </MasterDataProvider>
       </SupabaseAuthProvider>
