@@ -1,4 +1,4 @@
-import type { KAUCIM_CONCERNS, LanguageKey } from './common';
+import type { FIVE_ELEMENTS, KAUCIM_CONCERNS, LanguageKey } from './common';
 
 /**
  * A story line for a specific stick number in a pack
@@ -6,6 +6,7 @@ import type { KAUCIM_CONCERNS, LanguageKey } from './common';
 export type KaucimStoryLineType = {  
   stickNumber: number;
   fortuneLevel: number;
+  element: FIVE_ELEMENTS;
   title: string;
   verdict: string;
   omen: string;

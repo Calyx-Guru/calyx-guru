@@ -7,11 +7,10 @@ import { MasterDataContext } from '@/contexts/MasterDataContext';
 import { usePageState } from '@/hooks/usePageState';
 import {
   mergeColumnWidths,
-  textColumnsFromWidths,
 } from '@/lib/handsontableColumnWidths';
 import supabase from '@/lib/supabase/client';
 import { languageKeyToLabel } from '@/lib/utils';
-import { KAUCIM_CONCERNS, type LanguageKey } from '@/types';
+import { FIVE_ELEMENTS, KAUCIM_CONCERNS, type LanguageKey } from '@/types';
 import type { KaucimStoryLineType } from '@/types/KaucimStories';
 import type { MasterDataManifest } from '@/types/MasterDataManifest';
 import Handsontable from 'handsontable';
@@ -21,8 +20,8 @@ import { Navigate, useParams } from 'react-router-dom';
 
 const PAGE_STATE_PREFIX = 'kaucimStories';
 
-/** Title column (0-based index 2): paste text always starts here and wraps along the row. */
-const PASTE_TEXT_START_COL = 2;
+/** Title column (0-based index 3): paste text always starts here and wraps along the row. */
+const PASTE_TEXT_START_COL = 3;
 
 function makeFilePath(concern: KAUCIM_CONCERNS, language: LanguageKey, version: number) {
   return `${KAUCIM_STORIES_STORAGE_FOLDER}/${concern}-${language}-${version}.json`;
@@ -35,8 +34,9 @@ function clipboardNonEmptyLines(text: string): string[] {
 }
 
 const KAUCIM_STORIES_DEFAULT_COLUMN_WIDTHS = [
-  80, 80, 240, 480, 480, 480, 480,
+  80, 80, 120, 240, 480, 480, 480, 480,
 ] as const;
+const FIVE_ELEMENT_OPTIONS: string[] = Object.values(FIVE_ELEMENTS);
 
 interface KaucimStoriesPageState {
   selectedLanguage: LanguageKey;
@@ -142,13 +142,29 @@ function KaucimStoriesPageContent({
           colHeaders: [
             'No.',
             'Level',
+            'Element',
             'Title',
             'Verdict',
             'Omen',
             'Action',
             'Conclusion',
           ],
-          columns: textColumnsFromWidths(colWidths),
+          columns: [
+            { type: 'text', width: colWidths[0] },
+            { type: 'text', width: colWidths[1] },
+            {
+              type: 'dropdown',
+              width: colWidths[2],
+              source: FIVE_ELEMENT_OPTIONS,
+              strict: true,
+              allowInvalid: false,
+            },
+            { type: 'text', width: colWidths[3] },
+            { type: 'text', width: colWidths[4] },
+            { type: 'text', width: colWidths[5] },
+            { type: 'text', width: colWidths[6] },
+            { type: 'text', width: colWidths[7] },
+          ],
           afterColumnResize: (newSize, column) => {
             setPageState((prev) => {
               const merged = mergeColumnWidths(
@@ -253,6 +269,7 @@ function KaucimStoriesPageContent({
     const tableData = storyLines.map((item) => [
       item.stickNumber,
       item.fortuneLevel,
+      item.element,
       item.title,
       item.verdict,
       item.omen,
@@ -315,6 +332,7 @@ function KaucimStoriesPageContent({
     const newStoryLine: KaucimStoryLineType = {
       stickNumber: storyLines.length + 1,
       fortuneLevel: 3,
+      element: FIVE_ELEMENTS.EARTH,
       title: '',
       verdict: '',
       omen: '',
@@ -333,11 +351,12 @@ function KaucimStoriesPageContent({
     const updatedData = data.map((row: any[]) => ({
       stickNumber: row[0] ?? 0,
       fortuneLevel: row[1] ?? 0,
-      title: row[2] ?? '',
-      verdict: row[3] ?? '',
-      omen: row[4] ?? '',
-      action: row[5] ?? '',
-      conclusion: row[6] ?? '',
+      element: row[2] ?? FIVE_ELEMENTS.EARTH,
+      title: row[3] ?? '',
+      verdict: row[4] ?? '',
+      omen: row[5] ?? '',
+      action: row[6] ?? '',
+      conclusion: row[7] ?? '',
     }));
     setStoryLines(updatedData);
   };
@@ -350,11 +369,12 @@ function KaucimStoriesPageContent({
     const updatedData = data.map((row: any[]) => ({
       stickNumber: row[0] ?? 0,
       fortuneLevel: row[1] ?? 0,
-      title: row[2] ?? '',
-      verdict: row[3] ?? '',
-      omen: row[4] ?? '',
-      action: row[5] ?? '',
-      conclusion: row[6] ?? '',
+      element: row[2] ?? FIVE_ELEMENTS.EARTH,
+      title: row[3] ?? '',
+      verdict: row[4] ?? '',
+      omen: row[5] ?? '',
+      action: row[6] ?? '',
+      conclusion: row[7] ?? '',
     }));
     setStoryLines(updatedData);
   };

@@ -1,14 +1,23 @@
-import { KAUCIM_RNG_INDEX, MAX_PET_POWER } from "@/constants";
+import {
+  KAUCIM_RNG_INDEX,
+  MAX_ELEMENTAL_ENERGY,
+  MAX_PET_POWER,
+  MIN_ELEMENTAL_ENERGY,
+} from "@/constants";
 import { useAppAppearance } from "@/contexts/AppAppearanceContext";
 import { useAppState } from "@/hooks/useAppState";
 import { getRandomInt } from "@/lib/app/rng";
 import { createDate, getTodayFirstTimestamp } from "@/lib/app/time";
 import {
   computeKaucimPowerChange,
+  FORTUNE_LEVEL_TO_TIER,
+  KAUCIM_ENERGY_CALCULATION_CONFIG_KEY,
   KAUCIM_POWER_CALCULATION_CONFIG_KEY,
   parseKaucimPowerCalculation,
 } from "@/lib/kaucim/powerChange";
+import { KaucimStoryLineType } from "@/types/KaucimStories";
 import {
+  ELEMENT_OPPOSITES,
   FIVE_ELEMENTS,
   KAUCIM_CONCERNS,
   KaucimResult,
@@ -71,6 +80,14 @@ export function useKaucim() {
     [getAppConfigValue],
   );
 
+  const energyCalculation = useMemo(
+    () =>
+      parseKaucimPowerCalculation(
+        getAppConfigValue(KAUCIM_ENERGY_CALCULATION_CONFIG_KEY),
+      ),
+    [getAppConfigValue],
+  );
+
   const getPowerChange = useCallback(
     (fortuneLevel: number, rngSeed: number) => {
       const roll = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);
@@ -78,6 +95,29 @@ export function useKaucim() {
       return computeKaucimPowerChange(fortuneLevel, roll, powerCalculation);
     },
     [deviceId, powerCalculation],
+  );
+
+  const getElementalEnergyChange = useCallback(
+    (story: KaucimStoryLineType, rngSeed: number): [FIVE_ELEMENTS, number] => {
+      const { element, fortuneLevel } = story;
+      const roll = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);
+      if (!energyCalculation) return [element, 0];
+      const energyChange = computeKaucimPowerChange(
+        Number(fortuneLevel),
+        roll,
+        energyCalculation,
+      );
+
+      const tier = FORTUNE_LEVEL_TO_TIER[Number(fortuneLevel)] || "normal";
+      if (tier === "bad" || tier === "very_bad") {
+        // get the opposite element
+        const oppositeElement = ELEMENT_OPPOSITES[element];
+        return [oppositeElement, energyChange];
+      }
+
+      return [element, energyChange];
+    },
+    [deviceId, energyCalculation],
   );
 
   const isConcernReadToday = useCallback(
@@ -140,19 +180,19 @@ export function useKaucim() {
       let result: KaucimResult | undefined;
       if (userState) {
         const lastKaucimTimestamp = userState?.lastKaucimTimestamp || 0;
-        // if (lastKaucimTimestamp >= todayFirstTimestamp) {
-        //   result = lastKaucimResults[concern];
-        //   if (result) {
-        //     setAppState({
-        //       lastKaucimConcern: concern,
-        //       lastKaucimFresh: false,
-        //       kaucimReplay: null,
-        //     });
-        //     unlockKaucimStory(concern, result.stickNumber);
+        if (lastKaucimTimestamp >= todayFirstTimestamp) {
+          result = lastKaucimResults[concern];
+          if (result) {
+            setAppState({
+              lastKaucimConcern: concern,
+              lastKaucimFresh: false,
+              kaucimReplay: null,
+            });
+            unlockKaucimStory(concern, result.stickNumber);
 
-        //     return result;
-        //   }
-        // }
+            return result;
+          }
+        }
       }
 
       const lastKaucimRollTimestamp = userState?.lastKaucimRollTimestamp || 0;
@@ -187,12 +227,17 @@ export function useKaucim() {
         Number(story.fortuneLevel),
         rngIndex + 2,
       );
+      const elementalEnergyChange = getElementalEnergyChange(
+        story,
+        rngIndex + 3,
+      );
 
       result = {
         concern,
         stickNumber,
         powerChange,
         storyIndex,
+        elementalEnergyChange,
         element: profile?.element || FIVE_ELEMENTS.EARTH,
         currentPower: userState?.petPower || 0,
         timestamp: createDate().getTime(),
@@ -202,6 +247,16 @@ export function useKaucim() {
         const nextPetPower = Math.max(
           1,
           Math.min(MAX_PET_POWER, userState.petPower + result.powerChange),
+        );
+        const nextElementalEnergy = { ...userState.elementalEnergy };
+        nextElementalEnergy[elementalEnergyChange[0]] +=
+          elementalEnergyChange[1];
+        nextElementalEnergy[elementalEnergyChange[0]] = Math.max(
+          MIN_ELEMENTAL_ENERGY,
+          Math.min(
+            MAX_ELEMENTAL_ENERGY,
+            nextElementalEnergy[elementalEnergyChange[0]],
+          ),
         );
         const lastKaucimTimestamp = userState.lastKaucimTimestamp || 0;
         let nextLastKaucimTimestamp = lastKaucimTimestamp || 0;
@@ -226,6 +281,7 @@ export function useKaucim() {
           lastKaucimTimestamp: nextLastKaucimTimestamp,
           lastKaucimResults: nextLastKaucimResults,
           petPower: nextPetPower,
+          elementalEnergy: nextElementalEnergy,
         });
       }
       return result;

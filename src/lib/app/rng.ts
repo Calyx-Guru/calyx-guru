@@ -1,8 +1,17 @@
 import { getDeviceIdAsync } from '@/lib/app/helper';
 import { getLocalDayStartMs } from '@/lib/app/time';
 
+export type RngMode = 'normal' | 'deterministic';
+
+let currentRngMode: RngMode = 'normal';
+
+export function setRngMode(mode: RngMode): void {
+  currentRngMode = mode;
+}
+
 /**
  * Milliseconds since Unix epoch at 00:00:00.000 UTC for the calendar day of `utcTime`.
+ * Kept for deterministic mode.
  */
 export function getUtcDayStartMs(utcTime: Date | number): number {
   const d = typeof utcTime === 'number' ? new Date(utcTime) : utcTime;
@@ -25,7 +34,7 @@ function assertNonNegativeInteger(index: number, name: string): number {
 }
 
 /**
- * MurmurHash3 (x86_32). Deterministic, good avalanche for small keys.
+ * MurmurHash3 (x86_32). Used for deterministic mode.
  */
 function murmur3_x86_32(key: string, seed: number): number {
   const c1 = 0xcc9e2d51;
@@ -89,6 +98,7 @@ function dailyRngKey(
 /**
  * Deterministic uniform float in [0, 1), same for the same device, local calendar day, and index.
  * Uses a daily sub-key (local midnight of the day containing `time`) and MurmurHash3.
+ * Only used when `currentRngMode` is 'deterministic'.
  */
 export function getDailyRandom01Sync(
   deviceId: string,
@@ -102,12 +112,19 @@ export function getDailyRandom01Sync(
 }
 
 /**
- * Same as {@link getDailyRandom01Sync} but resolves the device id from {@link getDeviceIdAsync}.
+ * Mode-aware uniform float in [0, 1).
+ *
+ * - 'normal' mode: uses `Math.random()` (pure random).
+ * - 'deterministic' mode: same as {@link getDailyRandom01Sync} but resolves the device id.
  */
 export async function getRandom(
   index: number,
   time: Date | number,
 ): Promise<number> {
+  if (currentRngMode === 'normal') {
+    return Math.random();
+  }
+
   const deviceId = await getDeviceIdAsync();
   return getDailyRandom01Sync(deviceId, index, time);
 }
@@ -123,6 +140,7 @@ function dailyRngKeySalted(
 
 /**
  * Inclusive integer in [min, max], uniform over integers (rejection avoids modulo bias).
+ * Used for deterministic mode.
  */
 export function getDailyRandomIntSync(
   deviceId: string,
@@ -162,6 +180,12 @@ export function getDailyRandomIntSync(
   return lo + (h % span);
 }
 
+/**
+ * Mode-aware inclusive integer in [min, max].
+ *
+ * - 'normal' mode: uses `Math.random()` (may have tiny modulo bias, acceptable for typical app usage).
+ * - 'deterministic' mode: delegates to {@link getDailyRandomIntSync}.
+ */
 export function getRandomInt(
   deviceId: string,
   index: number,
@@ -169,5 +193,18 @@ export function getRandomInt(
   min: number,
   max: number,
 ): number {
+  if (currentRngMode === 'normal') {
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min > max) {
+      throw new RangeError('min and max must be finite and min <= max');
+    }
+    const lo = Math.ceil(min);
+    const hi = Math.floor(max);
+    if (lo > hi) {
+      throw new RangeError('no integers in [min, max]');
+    }
+    const span = hi - lo + 1;
+    return lo + Math.floor(Math.random() * span);
+  }
+
   return getDailyRandomIntSync(deviceId, index, time, min, max);
 }

@@ -1,4 +1,5 @@
 export const KAUCIM_POWER_CALCULATION_CONFIG_KEY = "kaucim_power_calculation";
+export const KAUCIM_ENERGY_CALCULATION_CONFIG_KEY = "kaucim_energy_calculation";
 
 export type KaucimFortuneTier =
   | "very_good"
@@ -12,7 +13,7 @@ export type KaucimPowerCalculation = Record<
   [number, number]
 >;
 
-const FORTUNE_LEVEL_TO_TIER: Record<number, KaucimFortuneTier> = {
+export const FORTUNE_LEVEL_TO_TIER: Record<number, KaucimFortuneTier> = {
   1: "very_bad",
   2: "bad",
   3: "normal",

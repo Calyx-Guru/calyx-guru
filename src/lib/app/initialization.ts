@@ -1,6 +1,7 @@
 import { DEFAULT_LANGUAGE } from '@/constants';
 import { loadStoredAppearance } from '@/lib/appearanceStorage';
 import { ensureIconFonts } from '@/lib/app/loadIconFonts';
+import { setRngMode } from '@/lib/app/rng';
 import { initializeI18n } from '@/lib/i18n/config';
 import { ensureFonts } from '@/theme/fonts';
 import { LanguageKey } from '@/types';
@@ -11,6 +12,10 @@ import { LanguageKey } from '@/types';
  */
 export async function initializeApp(): Promise<void> {
   try {
+    // Configure RNG behavior for the entire app.
+    // Change to 'deterministic' if you want device/day/index-based randomness again.
+    setRngMode('normal');
+
     // Run all initialization tasks in parallel for better performance
     await Promise.all([initializeLocale()]);
   } catch (error) {

@@ -20,6 +20,14 @@ export enum KAUCIM_CONCERNS {
   LOST_ITEMS = "lost_items",
 }
 
+export const ELEMENT_OPPOSITES: Record<FIVE_ELEMENTS, FIVE_ELEMENTS> = {
+  [FIVE_ELEMENTS.WOOD]: FIVE_ELEMENTS.FIRE,
+  [FIVE_ELEMENTS.FIRE]: FIVE_ELEMENTS.EARTH,
+  [FIVE_ELEMENTS.EARTH]: FIVE_ELEMENTS.METAL,
+  [FIVE_ELEMENTS.METAL]: FIVE_ELEMENTS.WATER,
+  [FIVE_ELEMENTS.WATER]: FIVE_ELEMENTS.WOOD,
+};
+
 export type KaucimStoryUnlock = Record<number, number>;
 
 export interface KaucimResult {
@@ -30,6 +38,7 @@ export interface KaucimResult {
   currentPower: number;
   powerChange: number;
   timestamp: number;
+  elementalEnergyChange: [FIVE_ELEMENTS, number];
 }
 
 export interface KaucimState {
