@@ -35,13 +35,6 @@ export function getConcernIllustrations(
   return ILLUSTRATIONS[concern as keyof typeof ILLUSTRATIONS];
 }
 
-function pickLoader(
-  pool: (() => ImageModule)[],
-): { loader: () => ImageModule; variantIndex: number } {
-  const variantIndex = Math.floor(Math.random() * pool.length);
-  return { loader: pool[variantIndex]!, variantIndex };
-}
-
 function findLoaderIndex(
   pool: (() => ImageModule)[],
   loader: () => ImageModule,
@@ -81,8 +74,7 @@ export function selectStoryIllustrations(
   const actionPool =
     illustrations.action[stickNumber % illustrations.action.length] ?? [];
   const concludePool =
-    illustrations.conclude[stickNumber % illustrations.conclude.length] ??
-    [];
+    illustrations.conclude[stickNumber % illustrations.conclude.length] ?? [];
 
   const omenLoader = pickRandom(omenPool);
   const actionLoader =

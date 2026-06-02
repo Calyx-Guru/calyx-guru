@@ -2,7 +2,7 @@
  * Zustand store for per-user app state (kaucim history, …): same sync pattern as {@link useUserProfileStore}.
  */
 
-import { INITIAL_PET_POWER } from "@/constants";
+import { INITIAL_ELEMENTAL_ENERGY, INITIAL_PET_POWER } from "@/constants";
 import {
   clampUserState,
   kaucimHistoryExceedsLimit,
@@ -14,11 +14,12 @@ import {
   updateUserState,
 } from "@/lib/supabase/userStateService";
 import { RemoteSyncedUserDocument } from "@/store/RemoteSyncedUserDocument";
-import type {
-  KAUCIM_CONCERNS,
-  KaucimResult,
-  KaucimState,
-  UserState,
+import {
+  FIVE_ELEMENTS,
+  type KAUCIM_CONCERNS,
+  type KaucimResult,
+  type KaucimState,
+  type UserState,
 } from "@/types/UserState";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -35,6 +36,13 @@ function createDefaultUserState(userId: string): UserState {
     kaucimStoryUnlocks: {},
     lastKaucimRollTimestamp: 0,
     kaucimJourneyProgress: 0,
+    elementalEnergy: {
+      [FIVE_ELEMENTS.WOOD]: INITIAL_ELEMENTAL_ENERGY,
+      [FIVE_ELEMENTS.FIRE]: INITIAL_ELEMENTAL_ENERGY,
+      [FIVE_ELEMENTS.EARTH]: INITIAL_ELEMENTAL_ENERGY,
+      [FIVE_ELEMENTS.METAL]: INITIAL_ELEMENTAL_ENERGY,
+      [FIVE_ELEMENTS.WATER]: INITIAL_ELEMENTAL_ENERGY,
+    },
   };
 }
 

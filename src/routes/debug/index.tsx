@@ -2,19 +2,13 @@ import { useAppState } from "@/hooks/useAppState";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import {
-    createDate,
-    getDebugTimeOffset,
-    setDebugTimeOffset,
+  createDate,
+  getDebugTimeOffset,
+  setDebugTimeOffset,
 } from "@/lib/app/time";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import {
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const HOUR_MS = 3_600_000;
@@ -54,11 +48,14 @@ export function RouteDebug() {
   const { userState, updateUserState } = useUserState();
   const [offsetMs, setOffsetMs] = useState(getDebugTimeOffset);
 
-  const bumpOffset = useCallback((delta: number) => {
-    const next = offsetMs + delta;
-    setDebugTimeOffset(next);
-    setOffsetMs(next);
-  }, [offsetMs]);
+  const bumpOffset = useCallback(
+    (delta: number) => {
+      const next = offsetMs + delta;
+      setDebugTimeOffset(next);
+      setOffsetMs(next);
+    },
+    [offsetMs],
+  );
 
   const bumpPetPower = useCallback(
     (delta: number) => {
@@ -76,7 +73,7 @@ export function RouteDebug() {
         element: undefined,
       });
     }
-    if (userState) {      
+    if (userState) {
       await updateUserState({
         petPower: 0,
         kaucimHistory: [],
@@ -108,8 +105,7 @@ export function RouteDebug() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Simulated time</Text>
         <Text style={styles.mono}>
-          Offset: {formatOffsetHuman(offsetMs)} ({offsetMs.toLocaleString()}{" "}
-          ms)
+          Offset: {formatOffsetHuman(offsetMs)} ({offsetMs.toLocaleString()} ms)
         </Text>
         <Text style={styles.monoMuted}>
           createDate(): {sampleNow.toISOString()}

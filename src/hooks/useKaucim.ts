@@ -140,19 +140,19 @@ export function useKaucim() {
       let result: KaucimResult | undefined;
       if (userState) {
         const lastKaucimTimestamp = userState?.lastKaucimTimestamp || 0;
-        if (lastKaucimTimestamp >= todayFirstTimestamp) {
-          result = lastKaucimResults[concern];
-          if (result) {
-            setAppState({
-              lastKaucimConcern: concern,
-              lastKaucimFresh: false,
-              kaucimReplay: null,
-            });
-            unlockKaucimStory(concern, result.stickNumber);
+        // if (lastKaucimTimestamp >= todayFirstTimestamp) {
+        //   result = lastKaucimResults[concern];
+        //   if (result) {
+        //     setAppState({
+        //       lastKaucimConcern: concern,
+        //       lastKaucimFresh: false,
+        //       kaucimReplay: null,
+        //     });
+        //     unlockKaucimStory(concern, result.stickNumber);
 
-            return result;
-          }
-        }
+        //     return result;
+        //   }
+        // }
       }
 
       const lastKaucimRollTimestamp = userState?.lastKaucimRollTimestamp || 0;

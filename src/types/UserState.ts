@@ -1,23 +1,23 @@
 export enum FIVE_ELEMENTS {
-  WOOD = 'wood',
-  FIRE = 'fire',
-  EARTH = 'earth',
-  METAL = 'metal',
-  WATER = 'water',
+  WOOD = "wood",
+  FIRE = "fire",
+  EARTH = "earth",
+  METAL = "metal",
+  WATER = "water",
 }
 
 export enum KAUCIM_CONCERNS {
-  CAREER = 'career',
-  WEALTH = 'wealth',
-  LOVE = 'love',
-  HEALTH = 'health',
-  FAMILY = 'family',
-  CHILDREN = 'children',
-  FRIENDS = 'friends',
-  TRAVEL = 'travel',
-  LAWSUITS = 'lawsuits',
-  ACADEMIC = 'academic',
-  LOST_ITEMS = 'lost_items',
+  CAREER = "career",
+  WEALTH = "wealth",
+  LOVE = "love",
+  HEALTH = "health",
+  FAMILY = "family",
+  CHILDREN = "children",
+  FRIENDS = "friends",
+  TRAVEL = "travel",
+  LAWSUITS = "lawsuits",
+  ACADEMIC = "academic",
+  LOST_ITEMS = "lost_items",
 }
 
 export type KaucimStoryUnlock = Record<number, number>;
@@ -25,7 +25,7 @@ export type KaucimStoryUnlock = Record<number, number>;
 export interface KaucimResult {
   storyIndex: number;
   concern: KAUCIM_CONCERNS;
-  stickNumber: number; 
+  stickNumber: number;
   element: FIVE_ELEMENTS;
   currentPower: number;
   powerChange: number;
@@ -48,4 +48,5 @@ export interface UserState {
   kaucimStoryUnlocks: Partial<Record<KAUCIM_CONCERNS, KaucimStoryUnlock>>;
   lastKaucimRollTimestamp: number;
   kaucimJourneyProgress: number;
+  elementalEnergy: Record<FIVE_ELEMENTS, number>;
 }

@@ -34,3 +34,6 @@ export const APP_CONFIG_FILE_NAME = "appConfig";
 // TODO: Get these from server
 export const MAX_PET_POWER = 200;
 export const INITIAL_PET_POWER = 100;
+export const INITIAL_ELEMENTAL_ENERGY = 0;
+export const MIN_ELEMENTAL_ENERGY = -100;
+export const MAX_ELEMENTAL_ENERGY = 100;

@@ -1,20 +1,23 @@
-export const KAUCIM_POWER_CALCULATION_CONFIG_KEY = 'kaucim_power_calculation';
+export const KAUCIM_POWER_CALCULATION_CONFIG_KEY = "kaucim_power_calculation";
 
 export type KaucimFortuneTier =
-  | 'very_good'
-  | 'good'
-  | 'normal'
-  | 'bad'
-  | 'very_bad';
+  | "very_good"
+  | "good"
+  | "normal"
+  | "bad"
+  | "very_bad";
 
-export type KaucimPowerCalculation = Record<KaucimFortuneTier, [number, number]>;
+export type KaucimPowerCalculation = Record<
+  KaucimFortuneTier,
+  [number, number]
+>;
 
 const FORTUNE_LEVEL_TO_TIER: Record<number, KaucimFortuneTier> = {
-  1: 'very_bad',
-  2: 'bad',
-  3: 'normal',
-  4: 'good',
-  5: 'very_good',
+  1: "very_bad",
+  2: "bad",
+  3: "normal",
+  4: "good",
+  5: "very_good",
 };
 
 export function parseKaucimPowerCalculation(
@@ -42,5 +45,6 @@ export function computeKaucimPowerChange(
   if (!range || range.length !== 2) return 0;
 
   const [low, high] = range;
-  return low + Math.ceil((high - low) * (roll / 100));
+  const result = low + Math.ceil((high - low) * (roll / 100));
+  return result;
 }

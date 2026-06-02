@@ -1,9 +1,5 @@
 import { STATUS_MESSAGE_RNG_INDEX } from "@/constants";
-import {
-  getPetStatusTier,
-  isLowPetStatusTier,
-  PET_STATUS_TIER_THRESHOLDS,
-} from "@/lib/app/petStatus";
+import { getPetStatusTier } from "@/lib/app/petStatus";
 import { getRandomInt } from "@/lib/app/rng";
 import { createDate } from "@/lib/app/time";
 import i18n from "@/lib/i18n/config";
@@ -13,7 +9,7 @@ export {
   getPetPowerPercentage,
   getPetStatusTier,
   isLowPetStatusTier,
-  PET_STATUS_TIER_THRESHOLDS,
+  PET_STATUS_TIER_THRESHOLDS
 } from "@/lib/app/petStatus";
 
 /** Same message pool as {@link StatusMessage} on the main menu. */

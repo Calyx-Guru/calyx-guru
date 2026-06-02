@@ -11,11 +11,12 @@ export default function Index() {
 
   useEffect(() => {
     if (!isLoadingProfile && profile) {
-      if (profile?.element) {
-        router.replace("/main-menu");
-      } else {
-        router.replace("/choose-element");
-      }
+      // if (profile?.element) {
+      //   router.replace("/main-menu");
+      // } else {
+      //   router.replace("/choose-element");
+      // }
+      router.replace("/main-menu");
     }
   }, [isLoadingProfile, profile]);
 

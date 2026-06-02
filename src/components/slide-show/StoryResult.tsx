@@ -120,7 +120,7 @@ export function StoryResult(properties: Properties) {
               </View>
             </Animated.View>
 
-            {summary.powerChange > 0 && (
+            {summary.powerChange !== 0 && (
               <Text style={styles.resultPowerLine}>
                 {formatPowerChangeLine(summary.powerChange)}
               </Text>
