@@ -1,7 +1,8 @@
 import {
   AnalyticsProvider,
   AnalyticsScreenTracker,
-} from "@/contexts/AnalyticsContext";
+} from "@/contexts/analytics";
+import { ENV } from "@/constants/env";
 import { AppAppearanceProvider } from "@/contexts/AppAppearanceContext";
 import { BillingProvider } from "@/contexts/BillingContext";
 import { KaucimIllustrationProvider } from "@/contexts/KaucimIllustrationContext";
@@ -90,7 +91,13 @@ export default function RootLayout() {
         <MasterDataProvider>
           <KaucimIllustrationProvider>
             <BillingProvider>
-              <AnalyticsProvider>
+              <AnalyticsProvider
+                provider="game-analytics"
+                debugMode={ENV.DEBUG_MODE}
+                amplitudeApiKey={ENV.AMPLITUDE_API_KEY}
+                gameAnalyticsGameKey={ENV.GAME_ANALYTICS_GAME_KEY}
+                gameAnalyticsSecretKey={ENV.GAME_ANALYTICS_SECRET_KEY}
+              >
                 <AppContent />
               </AnalyticsProvider>
             </BillingProvider>

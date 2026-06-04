@@ -14,6 +14,7 @@
     "build:android:prebuild": "npx expo prebuild --platform android",
     "build:android:apk": "npm run build:android:prebuild && cd android && gradlew.bat assembleRelease -PreactNativeArchitectures=armeabi-v7a,arm64-v8a",
     "build:android:aab": "npm run build:android:prebuild && cd android && gradlew.bat bundleRelease -PreactNativeArchitectures=armeabi-v7a,arm64-v8a",
+    "install:android:apk": "node scripts/install-android-apk.js",
     "admin:dev": "cd admin && vite",
     "admin:build": "cd admin && tsc -b && vite build",
     "admin:lint": "cd admin && eslint .",
