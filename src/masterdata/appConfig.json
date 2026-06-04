@@ -1,4 +1,5 @@
 {
   "kaucim_power_calculation": "{ \"very_good\": [3, 5], \"good\": [1, 3], \"normal\": [0, 1], \"bad\": [-3, -7], \"very_bad\": [-7, -12] }",
+  "kaucim_power_defense": "{ \"very_good\": [20, 30], \"good\": [10, 20], \"normal\": 0, \"bad\": [-15, -30], \"very_bad\": [-30, -50] }",
   "kaucim_energy_calculation": "{ \"very_good\": [3, 5], \"good\": [1, 3], \"normal\": [0, 1], \"bad\": [-3, -7], \"very_bad\": [-7, -12] }"
 }

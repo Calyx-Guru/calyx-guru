@@ -9,10 +9,14 @@ import { useAppState } from "@/hooks/useAppState";
 import { getRandomInt } from "@/lib/app/rng";
 import { createDate, getTodayFirstTimestamp } from "@/lib/app/time";
 import {
+  applyDefenseToEnergyLoss,
   computeKaucimPowerChange,
   FORTUNE_LEVEL_TO_TIER,
+  getDefenseValue,
+  KAUCIM_DEFENSE_CALCULATION_CONFIG_KEY,
   KAUCIM_ENERGY_CALCULATION_CONFIG_KEY,
   KAUCIM_POWER_CALCULATION_CONFIG_KEY,
+  parseKaucimDefenseCalculation,
   parseKaucimPowerCalculation,
 } from "@/lib/kaucim/powerChange";
 import { KaucimStoryLineType } from "@/types/KaucimStories";
@@ -88,6 +92,14 @@ export function useKaucim() {
     [getAppConfigValue],
   );
 
+  const defenseCalculation = useMemo(
+    () =>
+      parseKaucimDefenseCalculation(
+        getAppConfigValue(KAUCIM_DEFENSE_CALCULATION_CONFIG_KEY),
+      ),
+    [getAppConfigValue],
+  );
+
   const getPowerChange = useCallback(
     (fortuneLevel: number, rngSeed: number) => {
       const roll = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);
@@ -98,15 +110,25 @@ export function useKaucim() {
   );
 
   const getElementalEnergyChange = useCallback(
-    (story: KaucimStoryLineType, rngSeed: number): [FIVE_ELEMENTS, number] => {
+    (
+      story: KaucimStoryLineType,
+      currentPower: number,
+      rngSeed: number,
+    ): [FIVE_ELEMENTS, number] => {
       const { element, fortuneLevel } = story;
       const roll = getRandomInt(deviceId, rngSeed, createDate(), 0, 100);
-      if (!energyCalculation) return [element, 0];
-      const energyChange = computeKaucimPowerChange(
+      if (!energyCalculation || !defenseCalculation) return [element, 0];
+      let energyChange = computeKaucimPowerChange(
         Number(fortuneLevel),
         roll,
         energyCalculation,
       );
+
+      const defensePercent = getDefenseValue(
+        currentPower,
+        defenseCalculation,
+      );
+      energyChange = applyDefenseToEnergyLoss(energyChange, defensePercent);
 
       const tier = FORTUNE_LEVEL_TO_TIER[Number(fortuneLevel)] || "normal";
       if (tier === "bad" || tier === "very_bad") {
@@ -117,7 +139,7 @@ export function useKaucim() {
 
       return [element, energyChange];
     },
-    [deviceId, energyCalculation],
+    [deviceId, defenseCalculation, energyCalculation],
   );
 
   const isConcernReadToday = useCallback(
@@ -229,6 +251,7 @@ export function useKaucim() {
       );
       const elementalEnergyChange = getElementalEnergyChange(
         story,
+        userState?.petPower || 0,
         rngIndex + 3,
       );
 
