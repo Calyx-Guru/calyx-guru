@@ -124,10 +124,7 @@ export function useKaucim() {
         energyCalculation,
       );
 
-      const defensePercent = getDefenseValue(
-        currentPower,
-        defenseCalculation,
-      );
+      const defensePercent = getDefenseValue(currentPower, defenseCalculation);
       energyChange = applyDefenseToEnergyLoss(energyChange, defensePercent);
 
       const tier = FORTUNE_LEVEL_TO_TIER[Number(fortuneLevel)] || "normal";
@@ -278,7 +275,7 @@ export function useKaucim() {
           MIN_ELEMENTAL_ENERGY,
           Math.min(
             MAX_ELEMENTAL_ENERGY,
-            nextElementalEnergy[elementalEnergyChange[0]],
+            nextElementalEnergy[elementalEnergyChange[0]] || 0,
           ),
         );
         const lastKaucimTimestamp = userState.lastKaucimTimestamp || 0;
