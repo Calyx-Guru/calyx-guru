@@ -74,7 +74,11 @@ export const StatusMessage = (properties: Types.Properties) => {
       <Pressable
         onPress={() => scrollToPage(pageIndex - 1)}
         disabled={!canGoLeft}
-        style={[styles.navButton, styles.navButtonLeft, !canGoLeft && styles.navDisabled]}
+        style={[
+          styles.navButton,
+          styles.navButtonLeft,
+          !canGoLeft && styles.navDisabled,
+        ]}
         accessibilityRole="button"
         accessibilityLabel="Previous status page"
       >
@@ -99,7 +103,9 @@ export const StatusMessage = (properties: Types.Properties) => {
               <View style={[styles.page, { width: pageWidth }]}>
                 <Text style={styles.text}>{message}</Text>
               </View>
-              <View style={[styles.page, styles.energyPage, { width: pageWidth }]}>
+              <View
+                style={[styles.page, styles.energyPage, { width: pageWidth }]}
+              >
                 <ElementEnergyGauges energy={userState?.elementalEnergy} />
               </View>
             </ScrollView>
@@ -157,7 +163,7 @@ const styles = StyleSheet.create({
   text: {
     color: "#ffffff",
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "500",
     textShadowColor: "#000000",
     textShadowOffset: { width: 2, height: 2 },
