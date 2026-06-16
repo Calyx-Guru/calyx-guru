@@ -2,6 +2,16 @@ import { formatKaucimConcernLabel, isKaucimConcern } from '@/components/KaucimCo
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { TableLayout } from '@/components/layout/TableLayout';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogCancel,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { DEFAULT_HANDSON_TABLE_OPTIONS, KAUCIM_STORIES_STORAGE_FOLDER, STORAGE_BUCKET } from '@/constants';
 import { MasterDataContext } from '@/contexts/MasterDataContext';
 import { usePageState } from '@/hooks/usePageState';
@@ -14,8 +24,8 @@ import { FIVE_ELEMENTS, KAUCIM_CONCERNS, type LanguageKey } from '@/types';
 import type { KaucimStoryLineType } from '@/types/KaucimStories';
 import type { MasterDataManifest } from '@/types/MasterDataManifest';
 import Handsontable from 'handsontable';
-import { Plus } from 'lucide-react';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { FileDown, FileUp, FolderOpen, Plus } from 'lucide-react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 
 const PAGE_STATE_PREFIX = 'kaucimStories';
@@ -25,6 +35,10 @@ const PASTE_TEXT_START_COL = 3;
 
 function makeFilePath(concern: KAUCIM_CONCERNS, language: LanguageKey, version: number) {
   return `${KAUCIM_STORIES_STORAGE_FOLDER}/${concern}-${language}-${version}.json`;
+}
+
+function makeExportFileName(concern: KAUCIM_CONCERNS, language: LanguageKey) {
+  return `${concern}_${language}.json`;
 }
 
 /** Clipboard text → non-empty lines (newline split, empty lines removed). */
@@ -37,6 +51,54 @@ const KAUCIM_STORIES_DEFAULT_COLUMN_WIDTHS = [
   80, 80, 120, 240, 480, 480, 480, 480,
 ] as const;
 const FIVE_ELEMENT_OPTIONS: string[] = Object.values(FIVE_ELEMENTS);
+
+function parseKaucimStoriesImport(text: string): KaucimStoryLineType[] {
+  const parsed: unknown = JSON.parse(text);
+  if (!Array.isArray(parsed)) {
+    throw new Error('JSON must be an array of story objects.');
+  }
+
+  for (const [index, item] of parsed.entries()) {
+    if (item == null || typeof item !== 'object' || !('stickNumber' in item)) {
+      throw new Error(`Item at index ${index} is missing stickNumber.`);
+    }
+  }
+
+  return parsed as KaucimStoryLineType[];
+}
+
+function mergeImportedStories(
+  current: KaucimStoryLineType[],
+  imported: KaucimStoryLineType[],
+): { merged: KaucimStoryLineType[]; matched: number; unmatched: number } {
+  const byStickNumber = new Map(
+    imported.map((item) => [String(item.stickNumber), item]),
+  );
+
+  let matched = 0;
+  const merged = current.map((row) => {
+    const incoming = byStickNumber.get(String(row.stickNumber));
+    if (!incoming) return row;
+
+    matched++;
+    return {
+      stickNumber: row.stickNumber,
+      fortuneLevel: incoming.fortuneLevel || row.fortuneLevel,
+      element: incoming.element || row.element,
+      title: incoming.title || row.title,
+      verdict: incoming.verdict || row.verdict,
+      omen: incoming.omen || row.omen,
+      action: incoming.action || row.action,
+      conclusion: incoming.conclusion || row.conclusion,
+    };
+  });
+
+  return {
+    merged,
+    matched,
+    unmatched: imported.length - matched,
+  };
+}
 
 interface KaucimStoriesPageState {
   selectedLanguage: LanguageKey;
@@ -61,6 +123,7 @@ function KaucimStoriesPageContent({
 }) {
   const hotTableRef = useRef(null);
   const hotInstanceRef = useRef<any>(null);
+  const importFileInputRef = useRef<HTMLInputElement>(null);
   const [pageState, setPageState] = usePageState<KaucimStoriesPageState>(
     PAGE_STATE_PREFIX,
     {
@@ -76,6 +139,10 @@ function KaucimStoriesPageContent({
   const [error, setError] = useState<string | null>(null);
   const [tableUpdateTimestamp, setTableUpdateTimestamp] = useState(0);
   const [storyLines, setStoryLines] = useState<KaucimStoryLineType[]>([]);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importJsonText, setImportJsonText] = useState('');
+  const [importDialogError, setImportDialogError] = useState<string | null>(null);
 
   // -- Page state management --
   const updatePageState = useCallback(
@@ -291,6 +358,7 @@ function KaucimStoriesPageContent({
 
       setLoading(true);
       setError(null);
+      setImportMessage(null);
       const version = manifest.kaucimStories?.[concern]?.[language] || 1;
       const fileName = makeFilePath(concern, language, version);
 
@@ -379,6 +447,38 @@ function KaucimStoriesPageContent({
     setStoryLines(updatedData);
   };
 
+  const getCurrentStoryLines = (): KaucimStoryLineType[] => {
+    const data = hotInstanceRef.current?.getData?.();
+    if (!data) return storyLines;
+
+    return data.map((row: any[]) => ({
+      stickNumber: row[0] ?? 0,
+      fortuneLevel: row[1] ?? 0,
+      element: row[2] ?? FIVE_ELEMENTS.EARTH,
+      title: row[3] ?? '',
+      verdict: row[4] ?? '',
+      omen: row[5] ?? '',
+      action: row[6] ?? '',
+      conclusion: row[7] ?? '',
+    }));
+  };
+
+  const handleExportJson = () => {
+    const sortedStoryLines = [...getCurrentStoryLines()].sort(
+      (a, b) => Number(a.stickNumber) - Number(b.stickNumber),
+    );
+    const fileName = makeExportFileName(selectedConcern, pageState.selectedLanguage);
+    const blob = new Blob([`${JSON.stringify(sortedStoryLines, null, 2)}\n`], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   const versionUpData = async () => {
     try {
       if (!manifest) return;
@@ -418,6 +518,68 @@ function KaucimStoriesPageContent({
     }
   };
 
+  const resetImportDialog = () => {
+    setImportJsonText('');
+    setImportDialogError(null);
+  };
+
+  const openImportDialog = () => {
+    resetImportDialog();
+    setImportDialogOpen(true);
+  };
+
+  const handleImportFileSelect = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) return;
+
+    try {
+      setImportDialogError(null);
+      setImportJsonText(await file.text());
+    } catch (err: unknown) {
+      setImportDialogError(
+        `Failed to read file: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  };
+
+  const handleConfirmImport = () => {
+    try {
+      setImportDialogError(null);
+      setError(null);
+      setImportMessage(null);
+
+      const trimmed = importJsonText.trim();
+      if (!trimmed) {
+        throw new Error('Paste JSON or load a file first.');
+      }
+
+      const imported = parseKaucimStoriesImport(trimmed);
+      const { merged, matched, unmatched } = mergeImportedStories(storyLines, imported);
+
+      if (matched === 0) {
+        throw new Error(
+          'No matching stick numbers found in the current table. Load stories first or check stickNumber values.',
+        );
+      }
+
+      setStoryLines(merged);
+      setTableUpdateTimestamp(Date.now());
+      setImportMessage(
+        unmatched > 0
+          ? `Imported ${matched} stor${matched === 1 ? 'y' : 'ies'}. ${unmatched} stick number${unmatched === 1 ? '' : 's'} in the JSON had no matching row.`
+          : `Imported ${matched} stor${matched === 1 ? 'y' : 'ies'}.`,
+      );
+      setImportDialogOpen(false);
+      resetImportDialog();
+    } catch (err: unknown) {
+      setImportDialogError(
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  };
+
   const saveData = async () => {
     try {
       if (!manifest) return;
@@ -441,6 +603,7 @@ function KaucimStoriesPageContent({
       if (uploadError) throw uploadError;
 
       setStoryLines(sortedStoryLines);
+      setImportMessage(null);
       setTableUpdateTimestamp(Date.now());
     } catch (err: any) {
       setError(`Failed to save stories: ${err.message}`);
@@ -461,6 +624,33 @@ function KaucimStoriesPageContent({
           Version:{' '}
           {manifest?.kaucimStories?.[selectedConcern]?.[pageState.selectedLanguage] || 1 || '-'}
           {!loading && <span> ({storyLines.length} stories)</span>}
+          {importMessage && (
+            <span className="block text-sm text-muted-foreground mt-1">{importMessage}</span>
+          )}
+        </>
+      }
+      extraCardActions={
+        <>
+          <Button
+            type="button"
+            onClick={handleExportJson}
+            disabled={loading || storyLines.length === 0}
+            variant="outline"
+            size="sm"
+          >
+            <FileDown className="mr-2 h-4 w-4" />
+            Export JSON
+          </Button>
+          <Button
+            type="button"
+            onClick={openImportDialog}
+            disabled={loading || storyLines.length === 0}
+            variant="outline"
+            size="sm"
+          >
+            <FileUp className="mr-2 h-4 w-4" />
+            Import JSON
+          </Button>
         </>
       }
       noDataContent={<div className="text-center py-8">
@@ -477,6 +667,71 @@ function KaucimStoriesPageContent({
       addRow={addRow}
       saveData={saveData}
     />
+
+    <Dialog
+      open={importDialogOpen}
+      onOpenChange={(open) => {
+        setImportDialogOpen(open);
+        if (!open) resetImportDialog();
+      }}
+    >
+      <DialogContent showCloseButton>
+        <div className="border-b px-6 py-4">
+          <DialogHeader>
+            <DialogTitle>Import JSON</DialogTitle>
+            <DialogDescription>
+              Paste a JSON array of story objects, or load a file into the editor below.
+              Matching rows are updated by stick number.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 py-4">
+          <Textarea
+            value={importJsonText}
+            onChange={(event) => {
+              setImportJsonText(event.target.value);
+              if (importDialogError) setImportDialogError(null);
+            }}
+            placeholder='[{"stickNumber":"1","fortuneLevel":"5","title":"...","verdict":"...","omen":"...","action":"...","conclusion":"...","element":"metal"}]'
+            className="field-sizing-fixed h-[min(50vh,28rem)] min-h-48 w-full resize-y font-mono text-sm leading-relaxed"
+            spellCheck={false}
+          />
+
+          {importDialogError && (
+            <p className="text-sm text-destructive">{importDialogError}</p>
+          )}
+        </div>
+
+        <DialogFooter className="border-t px-6 py-4 sm:justify-between">
+          <div>
+            <input
+              ref={importFileInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={handleImportFileSelect}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => importFileInputRef.current?.click()}
+            >
+              <FolderOpen className="mr-2 h-4 w-4" />
+              Select file
+            </Button>
+          </div>
+
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
+            <DialogCancel type="button">Cancel</DialogCancel>
+            <Button type="button" onClick={handleConfirmImport}>
+              Import
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </>
   );
 }

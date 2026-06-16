@@ -322,9 +322,36 @@ export function useKaucim() {
   );
 
   const getKaucimStory = useCallback(
-    (concern: KAUCIM_CONCERNS, stickNumber: number, storyIndex: number) => {
+    (
+      concern: KAUCIM_CONCERNS,
+      stickNumber: number,
+      storyIndex: number,
+      energyLevels: Record<FIVE_ELEMENTS, number>,
+    ) => {
       const storyBundle = getKaucimStoryBundle(concern, locale, stickNumber);
-      return storyBundle[storyIndex % storyBundle.length];
+      const storyData = storyBundle[storyIndex % storyBundle.length];
+      const storyVerdicts = storyData.verdict.split("\n");
+      const storyOmens = storyData.omen.split("\n");
+      const storyActions = storyData.action.split("\n");
+      const storyConclusions = storyData.conclusion.split("\n");
+      const energyLevel = energyLevels[storyData.element] || 0;
+      return {
+        ...storyData,
+        verdict: (
+          storyVerdicts[energyLevel % storyVerdicts.length] || ""
+        ).replace(/\n/g, ""),
+        omen: (storyOmens[energyLevel % storyOmens.length] || "").replace(
+          /\n/g,
+          "",
+        ),
+        action: (storyActions[energyLevel % storyActions.length] || "").replace(
+          /\n/g,
+          "",
+        ),
+        conclusion: (
+          storyConclusions[energyLevel % storyConclusions.length] || ""
+        ).replace(/\n/g, ""),
+      };
     },
     [getKaucimStoryBundle, locale],
   );

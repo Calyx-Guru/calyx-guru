@@ -19,6 +19,7 @@ interface TableLayoutProps {
   versionUp: () => void;
   addRow: () => void;
   saveData: () => void;
+  extraCardActions?: ReactNode;
 }
 
 export function TableLayout({
@@ -35,6 +36,7 @@ export function TableLayout({
   versionUp,
   addRow,
   saveData,
+  extraCardActions,
 }: TableLayoutProps) {
   return (
     <DashboardLayout title={title} headerContent={headerContent}>
@@ -99,6 +101,7 @@ export function TableLayout({
                   <Plus className="mr-2 h-4 w-4" />
                   Add Row
                 </Button>
+                {extraCardActions}
                 <Button onClick={saveData} disabled={loading} size="sm">
                   {loading ? (
                     <>

@@ -6,9 +6,9 @@ import { KaucimStoryExperience } from "@/features/kau-cim/story-experience";
 
 import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
+import { useKaucimStoryImages } from "@/hooks/useKaucimIllustration";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useUserState } from "@/hooks/useUserState";
-import { useKaucimStoryImages } from "@/hooks/useKaucimIllustration";
 import { FIVE_ELEMENTS } from "@/types/UserState";
 
 import * as KAUCIM_VIDEOS from "@/assets/videos/kau-cim";
@@ -53,6 +53,7 @@ function KaucimSlideShow() {
   const { userState } = useUserState();
   const { getKaucimStory } = useKaucim();
   const { rescheduleFromCurrentState } = usePushNotifications();
+
   /** Survives `kaucimReplay` being cleared on exit so skip/back does not re-render invalid. */
   const [replaySelection] = useState(() => kaucimReplay);
   const isReplay = replaySelection != null;
@@ -77,7 +78,18 @@ function KaucimSlideShow() {
   const illustrations = concern ? ILLUSTRATIONS[concern] : undefined;
   const story =
     concern && result
-      ? getKaucimStory(concern, result.stickNumber, result.storyIndex)
+      ? getKaucimStory(
+          concern,
+          result.stickNumber,
+          result.storyIndex,
+          userState?.elementalEnergy || {
+            [FIVE_ELEMENTS.WOOD]: 0,
+            [FIVE_ELEMENTS.FIRE]: 0,
+            [FIVE_ELEMENTS.EARTH]: 0,
+            [FIVE_ELEMENTS.METAL]: 0,
+            [FIVE_ELEMENTS.WATER]: 0,
+          },
+        )
       : undefined;
 
   const fortuneLevel = story ? Number(story.fortuneLevel) : 0;
@@ -89,11 +101,11 @@ function KaucimSlideShow() {
   );
 
   const { images: storyImages } = useKaucimStoryImages({
-      concern: concern ?? undefined,
-      stickNumber,
-      illustrations,
-      enabled: Boolean(illustrations && story && result),
-    });
+    concern: concern ?? undefined,
+    stickNumber,
+    illustrations,
+    enabled: Boolean(illustrations && story && result),
+  });
 
   const slideShow = useMemo<Kaucim.Slide[]>(() => {
     if (!storyImages || !story || !result) {

@@ -9,7 +9,7 @@ import { useAppState } from "@/hooks/useAppState";
 import { useKaucim } from "@/hooks/useKaucim";
 import { useUserState } from "@/hooks/useUserState";
 import { resolveCollectionOmenImage } from "@/lib/kaucim/illustrations";
-import { KAUCIM_CONCERNS } from "@/types/UserState";
+import { FIVE_ELEMENTS, KAUCIM_CONCERNS } from "@/types/UserState";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { memo, useCallback, useMemo } from "react";
@@ -62,7 +62,18 @@ export const StoryCard = memo(
     }, [userState, concern, stickNumber]);
 
     const story = useMemo(() => {
-      return getKaucimStory(concern, stickNumber, 0);
+      return getKaucimStory(
+        concern,
+        stickNumber,
+        0,
+        userState?.elementalEnergy || {
+          [FIVE_ELEMENTS.WOOD]: 0,
+          [FIVE_ELEMENTS.FIRE]: 0,
+          [FIVE_ELEMENTS.EARTH]: 0,
+          [FIVE_ELEMENTS.METAL]: 0,
+          [FIVE_ELEMENTS.WATER]: 0,
+        },
+      );
     }, [concern, getKaucimStory, stickNumber]);
 
     const handleOpenStory = useCallback(() => {
