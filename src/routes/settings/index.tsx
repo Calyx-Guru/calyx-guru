@@ -30,6 +30,26 @@ export function RouteSettings() {
         ))}
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Legal</Text>
+        <Pressable
+          onPress={() => router.push("/settings/privacy-policy" as Href)}
+          style={styles.option}
+          accessibilityRole="button"
+          accessibilityLabel="Open privacy policy"
+        >
+          <Text style={styles.optionLabel}>Privacy Policy</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => router.push("/settings/terms-of-service" as Href)}
+          style={styles.option}
+          accessibilityRole="button"
+          accessibilityLabel="Open terms of service"
+        >
+          <Text style={styles.optionLabel}>Terms of Service</Text>
+        </Pressable>
+      </View>
+
       {ENV.DEBUG_MODE && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Developer</Text>
