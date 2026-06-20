@@ -120,7 +120,16 @@
     "guestStartFailed": "无法开始游客会话，请重试。",
     "account": "账户",
     "logout": "退出登录",
-    "logoutFailed": "无法退出登录，请重试。"
+    "logoutFailed": "无法退出登录，请重试。",
+    "deleteAccountTitle": "删除账户和数据",
+    "deleteAccountMessage": "请选择要删除的内容。此操作无法撤销。\n\n删除我的账户会从此设备和服务器删除您的档案及全部游戏进度，并退出登录。\n\n仅删除进度会重置游戏进度，但保留您的档案（例如所选元素）。",
+    "deleteAccountConfirm": "删除我的账户",
+    "deleteProgressionConfirm": "仅删除进度",
+    "deleteAccountFinalMessage": "这将从此设备和服务器永久删除您的档案及所有已保存数据，并退出登录。\n\n您确定要继续吗？",
+    "deleteProgressionFinalMessage": "这将永久重置所有游戏进度。您的档案（例如所选元素）将保留。\n\n您确定要继续吗？",
+    "deleteFinalConfirm": "是的，永久删除",
+    "deleteAccountFailed": "无法删除账户和数据。请检查网络连接后重试。",
+    "deleteProgressionFailed": "无法删除进度。请检查网络连接后重试。"
   },
   "forms": {
     "labels": {

@@ -50,7 +50,7 @@
             "./src/assets/fonts/cormorant-sc-latin/CormorantSC-Bold.ttf",
             "./src/assets/fonts/zcool-xiao-wei-simplified-chinese/ZCOOLXiaoWei-Regular.ttf",
             "./src/assets/fonts/uoq-mun-then-khung-traditional-chinese/UoqMunThenKhung-Regular.ttf",
-            "./node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf"
+            "./src/assets/fonts/Ionicons.ttf"
           ]
         }
       ],

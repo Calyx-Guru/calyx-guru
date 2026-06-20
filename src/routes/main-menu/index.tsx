@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFonts } from "expo-font";
 import {
   useCallback,
   useEffect,
@@ -39,7 +38,6 @@ import { router, useFocusEffect, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function RouteMainMenu() {
-  const [ioniconsReady] = useFonts(Ionicons.font);
   const insets = useSafeAreaInsets();
   const { profile } = useUserProfile();
   const { userState } = useUserState();
@@ -193,14 +191,12 @@ export function RouteMainMenu() {
               style={styles.settingsButton}
               resizeMode="contain"
             >
-              {ioniconsReady ? (
-                <Ionicons
-                  name="settings-sharp"
-                  size={22}
-                  color="#ffffff"
-                  style={styles.settingsIcon}
-                />
-              ) : null}
+              <Ionicons
+                name="settings-sharp"
+                size={22}
+                color="#ffffff"
+                style={styles.settingsIcon}
+              />
             </ImageBackground>
           </Pressable>
         </View>

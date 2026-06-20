@@ -120,7 +120,16 @@
     "guestStartFailed": "無法開始訪客工作階段，請再試一次。",
     "account": "帳戶",
     "logout": "登出",
-    "logoutFailed": "無法登出，請再試一次。"
+    "logoutFailed": "無法登出，請再試一次。",
+    "deleteAccountTitle": "刪除帳戶與資料",
+    "deleteAccountMessage": "請選擇要刪除的內容。此操作無法復原。\n\n刪除我的帳戶會從此裝置與伺服器刪除您的檔案及全部遊戲進度，並登出。\n\n僅刪除進度會重置遊戲進度，但保留您的檔案（例如所選元素）。",
+    "deleteAccountConfirm": "刪除我的帳戶",
+    "deleteProgressionConfirm": "僅刪除進度",
+    "deleteAccountFinalMessage": "這將從此裝置與伺服器永久刪除您的檔案及所有已儲存資料，並登出。\n\n您確定要繼續嗎？",
+    "deleteProgressionFinalMessage": "這將永久重置所有遊戲進度。您的檔案（例如所選元素）將保留。\n\n您確定要繼續嗎？",
+    "deleteFinalConfirm": "是的，永久刪除",
+    "deleteAccountFailed": "無法刪除帳戶與資料。請檢查網路連線後再試一次。",
+    "deleteProgressionFailed": "無法刪除進度。請檢查網路連線後再試一次。"
   },
   "forms": {
     "labels": {

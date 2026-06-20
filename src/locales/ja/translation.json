@@ -120,7 +120,16 @@
     "guestStartFailed": "ゲストセッションを開始できませんでした。もう一度お試しください。",
     "account": "アカウント",
     "logout": "ログアウト",
-    "logoutFailed": "ログアウトできませんでした。もう一度お試しください。"
+    "logoutFailed": "ログアウトできませんでした。もう一度お試しください。",
+    "deleteAccountTitle": "アカウントとデータを削除",
+    "deleteAccountMessage": "削除する内容を選択してください。この操作は元に戻せません。\n\n「アカウントを削除」はプロフィールとゲームの進行状況を端末とサーバーから削除し、サインアウトします。\n\n「進行状況のみ削除」はゲームの進行をリセットしますが、プロフィール（選択した属性など）は保持します。",
+    "deleteAccountConfirm": "アカウントを削除",
+    "deleteProgressionConfirm": "進行状況のみ削除",
+    "deleteAccountFinalMessage": "プロフィールと保存されたすべてのデータが端末とサーバーから完全に削除され、サインアウトされます。\n\n本当によろしいですか？",
+    "deleteProgressionFinalMessage": "ゲームの進行状況が完全にリセットされます。プロフィール（選択した属性など）は保持されます。\n\n本当によろしいですか？",
+    "deleteFinalConfirm": "はい、完全に削除します",
+    "deleteAccountFailed": "アカウントとデータを削除できませんでした。接続を確認して再試行してください。",
+    "deleteProgressionFailed": "進行状況を削除できませんでした。接続を確認して再試行してください。"
   },
   "forms": {
     "labels": {

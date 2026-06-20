@@ -1,5 +1,9 @@
 import { isSavedataStorageUserId } from '@/lib/auth/savedataUserId';
-import { deleteSavedataFromStorage } from '@/lib/supabase/savedataStorageService';
+import {
+  deleteSavedataFromStorage,
+  deleteSavedataKindFromStorage,
+} from '@/lib/supabase/savedataStorageService';
+import { resetSavedataSync } from '@/lib/supabase/savedataSync';
 
 export type DeleteAccountTarget = {
   googlePlayUserId?: string | null;
@@ -25,4 +29,30 @@ export async function deleteRemoteUserData(
       await deleteSavedataFromStorage(userId);
     }
   }
+}
+
+/** Delete cloud progression (`state.json`) only; keeps `profile.json`. */
+export async function deleteRemoteProgression(
+  target: DeleteAccountTarget,
+): Promise<void> {
+  const ids = new Set(
+    [target.googlePlayUserId, target.supabaseUserId].filter(
+      (id): id is string => !!id,
+    ),
+  );
+
+  for (const userId of ids) {
+    if (isSavedataStorageUserId(userId)) {
+      await deleteSavedataKindFromStorage(userId, 'state');
+    }
+  }
+}
+
+export async function deleteUserProgression(
+  target: DeleteAccountTarget,
+  resetLocalProgression: () => Promise<void>,
+): Promise<void> {
+  resetSavedataSync();
+  await deleteRemoteProgression(target);
+  await resetLocalProgression();
 }

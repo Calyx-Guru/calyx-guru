@@ -28,6 +28,7 @@ export function useUserState() {
   const storePushKaucimHistory = useUserStateStore((s) => s.pushKaucimHistory);
   const storeUnlockKaucimStory = useUserStateStore((s) => s.unlockKaucimStory);
   const storeUpdatePetPower = useUserStateStore((s) => s.updatePetPower);
+  const storeResetProgression = useUserStateStore((s) => s.resetProgression);
 
   const scheduleStateUpload = useCallback(() => {
     scheduleSavedataStateUploadFromStore(savedataUserId);
@@ -74,6 +75,11 @@ export function useUserState() {
     [scheduleStateUpload, storeUpdatePetPower],
   );
 
+  const resetProgression = useCallback(async () => {
+    await storeResetProgression();
+    scheduleStateUpload();
+  }, [scheduleStateUpload, storeResetProgression]);
+
   return {
     getState,
     userState,
@@ -86,5 +92,6 @@ export function useUserState() {
     pushKaucimHistory,
     unlockKaucimStory,
     updatePetPower,
+    resetProgression,
   };
 }

@@ -3,9 +3,13 @@ import { useAppAppearance } from "@/contexts/AppAppearanceContext";
 import { useAppState } from "@/hooks/useAppState";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserState } from "@/hooks/useUserState";
+import { deleteUserProgression } from "@/lib/account/deleteAccountAndData";
 import { isGuestUserId } from "@/lib/app/guestMode";
+import {
+  getStoredGooglePlayUserId,
+} from "@/lib/auth/googlePlaySignIn";
 import { useTranslation } from "@/hooks/useTranslation";
-import type { ThemeMode } from "@/types";
 import { router, type Href } from "expo-router";
 import { useCallback } from "react";
 import {
@@ -17,13 +21,35 @@ import {
   View,
 } from "react-native";
 
-const THEME_OPTIONS: ThemeMode[] = ["system", "light", "dark"];
+async function resolveDeleteTargets(
+  googlePlayUserId: string | null,
+  supabaseUserId: string | null,
+  profileId: string | undefined,
+) {
+  const storedGooglePlayUserId =
+    googlePlayUserId ?? (await getStoredGooglePlayUserId());
+  const guestUserId =
+    profileId && isGuestUserId(profileId) ? profileId : null;
+
+  return {
+    googlePlayUserId: storedGooglePlayUserId,
+    supabaseUserId,
+    guestUserId,
+  };
+}
 
 export function RouteSettings() {
-  const { locale, themeMode, setLocale, setThemeMode } = useAppAppearance();
-  const { logout, deleteAccountAndData, isGooglePlaySignedIn, isSignedIn } =
-    useSupabaseAuth();
+  const { locale, setLocale } = useAppAppearance();
+  const {
+    logout,
+    deleteAccountAndData,
+    isGooglePlaySignedIn,
+    isSignedIn,
+    googlePlayUserId,
+    user,
+  } = useSupabaseAuth();
   const { profile } = useUserProfile();
+  const { resetProgression } = useUserState();
   const { resetAppState } = useAppState();
   const { t } = useTranslation();
 
@@ -40,34 +66,83 @@ export function RouteSettings() {
     }
   }, [logout, t]);
 
-  const handleDeleteAccountAndData = useCallback(() => {
+  const handleDeleteAccount = useCallback(async () => {
+    try {
+      await deleteAccountAndData();
+      resetAppState();
+      router.replace("/");
+    } catch (error) {
+      console.error("Delete account failed:", error);
+      Alert.alert(t("auth.deleteAccountTitle"), t("auth.deleteAccountFailed"));
+    }
+  }, [deleteAccountAndData, resetAppState, t]);
+
+  const handleDeleteProgressionOnly = useCallback(async () => {
+    try {
+      const target = await resolveDeleteTargets(
+        googlePlayUserId,
+        user?.id ?? null,
+        profile?.id,
+      );
+      await deleteUserProgression(target, resetProgression);
+      resetAppState();
+    } catch (error) {
+      console.error("Delete progression failed:", error);
+      Alert.alert(
+        t("auth.deleteAccountTitle"),
+        t("auth.deleteProgressionFailed"),
+      );
+    }
+  }, [googlePlayUserId, profile?.id, resetAppState, resetProgression, t, user?.id]);
+
+  const confirmDeleteAccount = useCallback(() => {
     Alert.alert(
-      t("auth.deleteAccountTitle"),
-      t("auth.deleteAccountMessage"),
+      t("auth.deleteAccountConfirm"),
+      t("auth.deleteAccountFinalMessage"),
       [
         { text: t("common.cancel"), style: "cancel" },
         {
-          text: t("auth.deleteAccountConfirm"),
+          text: t("auth.deleteFinalConfirm"),
           style: "destructive",
           onPress: () => {
-            void (async () => {
-              try {
-                await deleteAccountAndData();
-                resetAppState();
-                router.replace("/");
-              } catch (error) {
-                console.error("Delete account failed:", error);
-                Alert.alert(
-                  t("auth.deleteAccountTitle"),
-                  t("auth.deleteAccountFailed"),
-                );
-              }
-            })();
+            void handleDeleteAccount();
           },
         },
       ],
     );
-  }, [deleteAccountAndData, resetAppState, t]);
+  }, [handleDeleteAccount, t]);
+
+  const confirmDeleteProgression = useCallback(() => {
+    Alert.alert(
+      t("auth.deleteProgressionConfirm"),
+      t("auth.deleteProgressionFinalMessage"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("auth.deleteFinalConfirm"),
+          style: "destructive",
+          onPress: () => {
+            void handleDeleteProgressionOnly();
+          },
+        },
+      ],
+    );
+  }, [handleDeleteProgressionOnly, t]);
+
+  const handleDeleteAccountAndData = useCallback(() => {
+    Alert.alert(t("auth.deleteAccountTitle"), t("auth.deleteAccountMessage"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("auth.deleteProgressionConfirm"),
+        onPress: confirmDeleteProgression,
+      },
+      {
+        text: t("auth.deleteAccountConfirm"),
+        style: "destructive",
+        onPress: confirmDeleteAccount,
+      },
+    ]);
+  }, [confirmDeleteAccount, confirmDeleteProgression, t]);
 
   return (
     <ScrollView

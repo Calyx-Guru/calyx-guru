@@ -128,15 +128,37 @@ function isStorageObjectNotFound(error: unknown): boolean {
   return message.includes("not found");
 }
 
-/** Remove profile/state JSON for a user from both mock and prod prefixes. */
+function savedataPathsForKind(userId: string, kind: SavedataKind): string[] {
+  const fileName = FILE_NAMES[kind];
+  return [
+    `${SAVEDATA_STORAGE_MOCK_PREFIX}/${userId}/${fileName}`,
+    `${SAVEDATA_STORAGE_PROD_PREFIX}/${userId}/${fileName}`,
+  ];
+}
+
+/** Remove one savedata JSON file for a user from both mock and prod prefixes. */
+export async function deleteSavedataKindFromStorage(
+  userId: string,
+  kind: SavedataKind,
+): Promise<void> {
+  if (!supabaseStorageClient || !isSavedataStorageUserId(userId)) return;
+
+  const { error } = await supabaseStorageClient.storage
+    .from(SAVEDATA_STORAGE_BUCKET)
+    .remove(savedataPathsForKind(userId, kind));
+
+  if (error && !isStorageObjectNotFound(error)) {
+    throw error;
+  }
+}
+
+/** Remove profile and state JSON for a user from both mock and prod prefixes. */
 export async function deleteSavedataFromStorage(userId: string): Promise<void> {
   if (!supabaseStorageClient || !isSavedataStorageUserId(userId)) return;
 
   const paths = [
-    `${SAVEDATA_STORAGE_MOCK_PREFIX}/${userId}/${SAVEDATA_PROFILE_FILE_NAME}`,
-    `${SAVEDATA_STORAGE_MOCK_PREFIX}/${userId}/${SAVEDATA_STATE_FILE_NAME}`,
-    `${SAVEDATA_STORAGE_PROD_PREFIX}/${userId}/${SAVEDATA_PROFILE_FILE_NAME}`,
-    `${SAVEDATA_STORAGE_PROD_PREFIX}/${userId}/${SAVEDATA_STATE_FILE_NAME}`,
+    ...savedataPathsForKind(userId, "profile"),
+    ...savedataPathsForKind(userId, "state"),
   ];
 
   const { error } = await supabaseStorageClient.storage

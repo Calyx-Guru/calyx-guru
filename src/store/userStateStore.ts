@@ -62,6 +62,7 @@ export interface UserStateStore {
     stickNumber: number,
   ) => Promise<void>;
   updatePetPower: (power: number) => Promise<void>;
+  resetProgression: () => Promise<void>;
 }
 
 export const useUserStateStore = create<UserStateStore>()(
@@ -159,6 +160,12 @@ export const useUserStateStore = create<UserStateStore>()(
               [concern]: storyUnlocks,
             },
           });
+        },
+
+        resetProgression: async () => {
+          const prev = get().userState;
+          if (!prev?.id) return;
+          sync.applyServerRecord(createDefaultUserState(prev.id));
         },
       };
     },

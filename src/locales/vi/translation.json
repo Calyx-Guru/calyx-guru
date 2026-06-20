@@ -120,7 +120,16 @@
     "guestStartFailed": "Không thể bắt đầu phiên khách. Vui lòng thử lại.",
     "account": "Tài khoản",
     "logout": "Đăng xuất",
-    "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại."
+    "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại.",
+    "deleteAccountTitle": "Xóa tài khoản và dữ liệu",
+    "deleteAccountMessage": "Chọn nội dung cần xóa. Hành động này không thể hoàn tác.\n\nXóa tài khoản của tôi sẽ xóa hồ sơ và toàn bộ tiến trình game trên thiết bị và máy chủ, rồi đăng xuất.\n\nChỉ xóa tiến trình sẽ đặt lại tiến trình game nhưng giữ hồ sơ (ví dụ nguyên tố đã chọn).",
+    "deleteAccountConfirm": "Xóa tài khoản của tôi",
+    "deleteProgressionConfirm": "Chỉ xóa tiến trình",
+    "deleteAccountFinalMessage": "Điều này sẽ xóa vĩnh viễn hồ sơ và mọi dữ liệu đã lưu trên thiết bị và máy chủ, rồi đăng xuất.\n\nBạn có chắc chắn không?",
+    "deleteProgressionFinalMessage": "Điều này sẽ đặt lại vĩnh viễn toàn bộ tiến trình game. Hồ sơ của bạn (ví dụ nguyên tố đã chọn) sẽ được giữ lại.\n\nBạn có chắc chắn không?",
+    "deleteFinalConfirm": "Có, xóa vĩnh viễn",
+    "deleteAccountFailed": "Không thể xóa tài khoản và dữ liệu. Kiểm tra kết nối và thử lại.",
+    "deleteProgressionFailed": "Không thể xóa tiến trình. Kiểm tra kết nối và thử lại."
   },
   "forms": {
     "labels": {
