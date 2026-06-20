@@ -1,6 +1,9 @@
 import { ENV, LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES } from "@/constants";
 import { useAppAppearance } from "@/contexts/AppAppearanceContext";
+import { useAppState } from "@/hooks/useAppState";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { isGuestUserId } from "@/lib/app/guestMode";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { ThemeMode } from "@/types";
 import { router, type Href } from "expo-router";
@@ -18,8 +21,14 @@ const THEME_OPTIONS: ThemeMode[] = ["system", "light", "dark"];
 
 export function RouteSettings() {
   const { locale, themeMode, setLocale, setThemeMode } = useAppAppearance();
-  const { logout } = useSupabaseAuth();
+  const { logout, deleteAccountAndData, isGooglePlaySignedIn, isSignedIn } =
+    useSupabaseAuth();
+  const { profile } = useUserProfile();
+  const { resetAppState } = useAppState();
   const { t } = useTranslation();
+
+  const showDeleteAccount =
+    isGooglePlaySignedIn || isSignedIn || isGuestUserId(profile?.id);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -30,6 +39,35 @@ export function RouteSettings() {
       Alert.alert(t("auth.logout"), t("auth.logoutFailed"));
     }
   }, [logout, t]);
+
+  const handleDeleteAccountAndData = useCallback(() => {
+    Alert.alert(
+      t("auth.deleteAccountTitle"),
+      t("auth.deleteAccountMessage"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("auth.deleteAccountConfirm"),
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              try {
+                await deleteAccountAndData();
+                resetAppState();
+                router.replace("/");
+              } catch (error) {
+                console.error("Delete account failed:", error);
+                Alert.alert(
+                  t("auth.deleteAccountTitle"),
+                  t("auth.deleteAccountFailed"),
+                );
+              }
+            })();
+          },
+        },
+      ],
+    );
+  }, [deleteAccountAndData, resetAppState, t]);
 
   return (
     <ScrollView
@@ -82,6 +120,18 @@ export function RouteSettings() {
         >
           <Text style={styles.logoutLabel}>{t("auth.logout")}</Text>
         </Pressable>
+        {showDeleteAccount ? (
+          <Pressable
+            onPress={handleDeleteAccountAndData}
+            style={styles.option}
+            accessibilityRole="button"
+            accessibilityLabel={t("auth.deleteAccountTitle")}
+          >
+            <Text style={styles.deleteAccountLabel}>
+              {t("auth.deleteAccountTitle")}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
 
       {ENV.DEBUG_MODE && (
@@ -141,5 +191,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#b42318",
+  },
+  deleteAccountLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#7f1d1d",
   },
 });

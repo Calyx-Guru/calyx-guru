@@ -10,7 +10,8 @@ import type {
 import { useCallback } from 'react';
 
 export function useUserState() {
-  const { googlePlayUserId } = useSupabaseAuth();
+  const { googlePlayUserId, user } = useSupabaseAuth();
+  const savedataUserId = googlePlayUserId ?? user?.id ?? null;
   const getState = useUserStateStore.getState;
   const userState = useUserStateStore((s) => s.userState);
   const isLoading = useUserStateStore((s) => s.isLoading);
@@ -29,8 +30,8 @@ export function useUserState() {
   const storeUpdatePetPower = useUserStateStore((s) => s.updatePetPower);
 
   const scheduleStateUpload = useCallback(() => {
-    scheduleSavedataStateUploadFromStore(googlePlayUserId);
-  }, [googlePlayUserId]);
+    scheduleSavedataStateUploadFromStore(savedataUserId);
+  }, [savedataUserId]);
 
   const updateUserState = useCallback(
     async (updates: Partial<UserState>) => {

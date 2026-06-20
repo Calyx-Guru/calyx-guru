@@ -6,7 +6,7 @@ import {
   SAVEDATA_STORAGE_PROD_PREFIX,
 } from "@/constants/common";
 import { ENV } from "@/constants/env";
-import { isGooglePlayUserId } from "@/lib/auth/googlePlaySignIn";
+import { isSavedataStorageUserId } from "@/lib/auth/savedataUserId";
 import { supabaseStorageClient } from "@/lib/supabase/client";
 
 export type SavedataKind = "profile" | "state";
@@ -54,7 +54,7 @@ function jsonToUploadBody(body: string): Uint8Array {
 }
 
 export function isSavedataStorageEnabled(userId: string | null | undefined): boolean {
-  return isGooglePlayUserId(userId) && supabaseStorageClient != null;
+  return isSavedataStorageUserId(userId) && supabaseStorageClient != null;
 }
 
 async function blobToText(blob: Blob): Promise<string> {
@@ -117,4 +117,33 @@ export async function upsertSavedataJson<T extends { id: string }>(
     });
 
   if (error) throw error;
+}
+
+function isStorageObjectNotFound(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const message =
+    "message" in error && typeof (error as { message: unknown }).message === "string"
+      ? (error as { message: string }).message.toLowerCase()
+      : "";
+  return message.includes("not found");
+}
+
+/** Remove profile/state JSON for a user from both mock and prod prefixes. */
+export async function deleteSavedataFromStorage(userId: string): Promise<void> {
+  if (!supabaseStorageClient || !isSavedataStorageUserId(userId)) return;
+
+  const paths = [
+    `${SAVEDATA_STORAGE_MOCK_PREFIX}/${userId}/${SAVEDATA_PROFILE_FILE_NAME}`,
+    `${SAVEDATA_STORAGE_MOCK_PREFIX}/${userId}/${SAVEDATA_STATE_FILE_NAME}`,
+    `${SAVEDATA_STORAGE_PROD_PREFIX}/${userId}/${SAVEDATA_PROFILE_FILE_NAME}`,
+    `${SAVEDATA_STORAGE_PROD_PREFIX}/${userId}/${SAVEDATA_STATE_FILE_NAME}`,
+  ];
+
+  const { error } = await supabaseStorageClient.storage
+    .from(SAVEDATA_STORAGE_BUCKET)
+    .remove(paths);
+
+  if (error && !isStorageObjectNotFound(error)) {
+    throw error;
+  }
 }

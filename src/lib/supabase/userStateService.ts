@@ -38,6 +38,11 @@ export async function fetchUserState(
   return fromRow(data as Record<string, unknown>);
 }
 
+export async function deleteUserState(userId: string): Promise<void> {
+  const { error } = await supabase.from('user_states').delete().eq('id', userId);
+  if (error) throw error;
+}
+
 export async function updateUserState(
   userId: string,
   updates: Partial<UserState>,

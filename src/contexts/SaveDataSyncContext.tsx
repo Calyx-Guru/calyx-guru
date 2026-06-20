@@ -61,14 +61,14 @@ export function SaveDataSyncProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { googlePlayUserId } = useSupabaseAuth();
+  const { googlePlayUserId, user } = useSupabaseAuth();
   const { profile, applyServerProfile } = useUserProfile();
   const { userState, applyServerUserState } = useUserState();
   const [syncStatus, setSyncStatus] = useState(getSavedataSyncStatus);
 
   useEffect(() => subscribeSavedataSync(setSyncStatus), []);
 
-  const userId = googlePlayUserId;
+  const userId = googlePlayUserId ?? user?.id ?? null;
   const isEnabled = isSavedataStorageEnabled(userId);
   const debugInfo = useMemo(() => getSavedataDebugInfo(userId), [userId]);
 

@@ -11,6 +11,8 @@ import {
   signInWithGooglePlay as performGooglePlaySignIn,
   signOutGooglePlay,
 } from '@/lib/auth/googlePlaySignIn';
+import { deleteRemoteUserData } from '@/lib/account/deleteAccountAndData';
+import { resetSavedataSync } from '@/lib/supabase/savedataSync';
 import supabase from '@/lib/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
@@ -35,8 +37,10 @@ type SupabaseAuth = {
   initializeSupabaseProfile: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithEmailPassword: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccountAndData: () => Promise<void>;
   signInWithGooglePlay: () => Promise<void>;
   signInWithOAuth: (provider: OAuthProvider) => Promise<void>;
 };
@@ -51,8 +55,10 @@ export const SupabaseAuthContext = createContext<SupabaseAuth>({
   initializeSupabaseProfile: async () => {},
   signUp: async () => {},
   signIn: async () => {},
+  signInWithEmailPassword: async () => {},
   signOut: async () => {},
   logout: async () => {},
+  deleteAccountAndData: async () => {},
   signInWithGooglePlay: async () => {},
   signInWithOAuth: async () => {},
 });
@@ -240,7 +246,95 @@ export function SupabaseAuthProvider({
     initializeUserStateForUser,
   ]);
 
+  const deleteAccountAndData = useCallback(async () => {
+    const storedGooglePlayUserId = googlePlayUserId ?? (await getStoredGooglePlayUserId());
+    const supabaseUserId = session?.user?.id ?? null;
+    const guestUserId = (await isGuestMode()) ? await getGuestUserId() : null;
+
+    await deleteRemoteUserData({
+      googlePlayUserId: storedGooglePlayUserId,
+      supabaseUserId,
+      guestUserId,
+    });
+
+    resetSavedataSync();
+    await clearGuestMode();
+    await signOutGooglePlay();
+    setGooglePlayUserId(null);
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error during account deletion:', error);
+      }
+    } catch (error) {
+      console.error('Sign out error during account deletion:', error);
+    }
+
+    setSession(null);
+    setUser(null);
+
+    await Promise.all([clearProfile(), clearUserState()]);
+    await Promise.all([
+      initializeProfileForUser(null),
+      initializeUserStateForUser(null),
+    ]);
+
+    if (await isGuestMode()) {
+      throw new Error('Guest mode still active after account deletion');
+    }
+
+    if (await getStoredGooglePlayUserId()) {
+      throw new Error('Google Play session still active after account deletion');
+    }
+  }, [
+    clearProfile,
+    clearUserState,
+    googlePlayUserId,
+    initializeProfileForUser,
+    initializeUserStateForUser,
+    session?.user?.id,
+  ]);
+
+  const signInWithEmailPassword = useCallback(
+    async (email: string, password: string) => {
+      await clearGuestMode();
+      await signOutGooglePlay();
+      setGooglePlayUserId(null);
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+
+      const nextSession = data.session;
+      const uid = nextSession?.user?.id;
+      if (!uid) {
+        throw new Error('No user id returned after email sign-in');
+      }
+
+      setSession(nextSession);
+      setUser(nextSession.user);
+      setIsLoading(false);
+
+      await Promise.all([
+        initializeProfileForUser(uid),
+        initializeUserStateForUser(uid),
+      ]);
+    },
+    [initializeProfileForUser, initializeUserStateForUser],
+  );
+
   const signInWithGooglePlay = useCallback(async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Supabase sign out before Google Play sign-in:', error);
+    }
+    setSession(null);
+    setUser(null);
+
     const { userId } = await performGooglePlaySignIn();
     setGooglePlayUserId(userId);
     setIsLoading(false);
@@ -273,8 +367,10 @@ export function SupabaseAuthProvider({
     initializeSupabaseProfile,
     signUp,
     signIn,
+    signInWithEmailPassword,
     signOut,
     logout,
+    deleteAccountAndData,
     signInWithGooglePlay,
     signInWithOAuth,
   };

@@ -120,7 +120,15 @@
     "guestStartFailed": "Could not start a guest session. Please try again.",
     "account": "Account",
     "logout": "Log out",
-    "logoutFailed": "Could not log out. Please try again."
+    "logoutFailed": "Could not log out. Please try again.",
+    "deleteAccountTitle": "Delete account and data",
+    "deleteAccountMessage": "This will permanently delete your account, settings, and all saved data from our servers and this device. This action cannot be undone.",
+    "deleteAccountConfirm": "Delete permanently",
+    "deleteAccountFailed": "Could not delete your account and data. Check your connection and try again.",
+    "signInWithEmail": "Sign in with email",
+    "emailSignInFailed": "Could not sign in with email and password. Please try again.",
+    "emailSignInMissingFields": "Enter both email and password.",
+    "signingIn": "Signing in…"
   },
   "forms": {
     "labels": {

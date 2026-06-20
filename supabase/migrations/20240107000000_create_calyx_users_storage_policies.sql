@@ -31,3 +31,13 @@ create policy "Allow anon to read calyx-users"
   using (
     bucket_id = 'calyx-users'
   );
+  
+-- Allow anonymous clients to delete savedata files in calyx-users (account deletion)
+
+drop policy if exists "Allow anon to delete from calyx-users" on storage.objects;
+create policy "Allow anon to delete from calyx-users"
+  on storage.objects for delete
+  to anon
+  using (
+    bucket_id = 'calyx-users'
+  );

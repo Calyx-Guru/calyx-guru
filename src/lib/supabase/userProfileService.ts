@@ -51,6 +51,14 @@ export async function updateUserProfile(
 }
 
 /**
+ * Delete user profile row
+ */
+export async function deleteUserProfile(userId: string): Promise<void> {
+  const { error } = await supabase.from('profiles').delete().eq('id', userId);
+  if (error) throw error;
+}
+
+/**
  * Subscribe to real-time profile changes using the new listen API
  * Returns an unsubscribe function
  */

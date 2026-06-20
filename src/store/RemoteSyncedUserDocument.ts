@@ -2,8 +2,8 @@
  * Shared remote-first + persisted local storage + debounced serial sync for per-user documents (profile, user state, …).
  */
 
-import { isGooglePlayUserId } from '@/lib/auth/googlePlaySignIn';
 import { isGuestUserId } from '@/lib/app/guestMode';
+import { isSavedataStorageUserId } from '@/lib/auth/savedataUserId';
 import {
   hydrateSavedataFromStorage,
   resetSavedataSync,
@@ -18,7 +18,7 @@ import {
 import { storage } from '@/lib/storage';
 
 function isLocalOnlyUserId(userId: string | null | undefined): boolean {
-  return isGuestUserId(userId) || isGooglePlayUserId(userId);
+  return isGuestUserId(userId) || isSavedataStorageUserId(userId);
 }
 
 const REMOTE_DEBOUNCE_MS = 400;
@@ -81,7 +81,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
     if (
       userId &&
-      isGooglePlayUserId(userId) &&
+      isSavedataStorageUserId(userId) &&
       this.cfg.savedataKind
     ) {
       try {
@@ -293,10 +293,10 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
   private resolveSavedataUserId(): string | null {
     const record = this.getRecord();
-    if (record?.id && isGooglePlayUserId(record.id)) {
+    if (record?.id && isSavedataStorageUserId(record.id)) {
       return record.id;
     }
-    if (this.currentUserId && isGooglePlayUserId(this.currentUserId)) {
+    if (this.currentUserId && isSavedataStorageUserId(this.currentUserId)) {
       return this.currentUserId;
     }
     return null;
