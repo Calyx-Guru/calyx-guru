@@ -1,4 +1,6 @@
 import { useAppState } from "@/hooks/useAppState";
+import { useSaveDataSync } from "@/hooks/useSaveDataSync";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import {
@@ -6,6 +8,7 @@ import {
   getDebugTimeOffset,
   setDebugTimeOffset,
 } from "@/lib/app/time";
+import type { SavedataSyncActionResult } from "@/contexts/SaveDataSyncContext";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -43,10 +46,44 @@ function formatOffsetHuman(ms: number): string {
 
 export function RouteDebug() {
   const insets = useSafeAreaInsets();
+  const { isGooglePlaySignedIn, googlePlayUserId } = useSupabaseAuth();
+  const {
+    isEnabled: isSavedataEnabled,
+    syncStatus,
+    debugInfo,
+    pushLocalProfileToRemote,
+    pushLocalStateToRemote,
+    pullAllFromRemote,
+  } = useSaveDataSync();
   const { resetAppState } = useAppState();
   const { profile, updateProfile } = useUserProfile();
   const { userState, updateUserState } = useUserState();
   const [offsetMs, setOffsetMs] = useState(getDebugTimeOffset);
+  const [savedataLog, setSavedataLog] = useState<string | null>(null);
+  const [savedataBusy, setSavedataBusy] = useState(false);
+
+  const formatSyncResults = (results: SavedataSyncActionResult[]) =>
+    results
+      .map((r) => `${r.ok ? "OK" : "ERR"} [${r.kind}] ${r.path ?? "—"}: ${r.message}`)
+      .join("\n");
+
+  const runSavedataAction = useCallback(
+    async (action: () => Promise<SavedataSyncActionResult | SavedataSyncActionResult[]>) => {
+      setSavedataBusy(true);
+      setSavedataLog("Running…");
+      try {
+        const result = await action();
+        setSavedataLog(
+          Array.isArray(result) ? formatSyncResults(result) : formatSyncResults([result]),
+        );
+      } catch (error) {
+        setSavedataLog(error instanceof Error ? error.message : String(error));
+      } finally {
+        setSavedataBusy(false);
+      }
+    },
+    [],
+  );
 
   const bumpOffset = useCallback(
     (delta: number) => {
@@ -101,6 +138,89 @@ export function RouteDebug() {
       keyboardShouldPersistTaps="handled"
     >
       <Text style={styles.title}>Debug</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Google Play</Text>
+        <Text style={styles.mono}>
+          Signed in: {isGooglePlaySignedIn ? "yes" : "no"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          UUID: {googlePlayUserId ?? "—"}
+        </Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Savedata storage</Text>
+        <Text style={styles.mono}>
+          Enabled: {isSavedataEnabled ? "yes" : "no"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          Bucket: {debugInfo.bucket} / {debugInfo.prefix}
+        </Text>
+        <Text style={styles.monoMuted}>
+          Client: {debugInfo.storageClientReady ? "ready" : "missing"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          URL: {debugInfo.supabaseUrl ?? "—"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          Profile: {debugInfo.profilePath ?? "—"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          State: {debugInfo.statePath ?? "—"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          Local profile id: {profile?.id ?? "—"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          Local state id: {userState?.id ?? "—"}
+        </Text>
+        <Text style={styles.monoMuted}>
+          Uploading: profile={syncStatus.isUploadingProfile ? "yes" : "no"},{" "}
+          state={syncStatus.isUploadingState ? "yes" : "no"}
+        </Text>
+        {syncStatus.lastError ? (
+          <Text style={styles.errorText}>Last error: {syncStatus.lastError}</Text>
+        ) : null}
+        <View style={styles.row}>
+          <Pressable
+            disabled={savedataBusy}
+            style={({ pressed }) => [
+              styles.stepButton,
+              savedataBusy && styles.stepButtonDisabled,
+              !savedataBusy && pressed && styles.stepButtonPressed,
+            ]}
+            onPress={() => void runSavedataAction(pushLocalProfileToRemote)}
+          >
+            <Text style={styles.stepButtonLabel}>Push profile</Text>
+          </Pressable>
+          <Pressable
+            disabled={savedataBusy}
+            style={({ pressed }) => [
+              styles.stepButton,
+              savedataBusy && styles.stepButtonDisabled,
+              !savedataBusy && pressed && styles.stepButtonPressed,
+            ]}
+            onPress={() => void runSavedataAction(pushLocalStateToRemote)}
+          >
+            <Text style={styles.stepButtonLabel}>Push state</Text>
+          </Pressable>
+        </View>
+        <Pressable
+          disabled={savedataBusy}
+          style={({ pressed }) => [
+            styles.secondaryButton,
+            savedataBusy && styles.stepButtonDisabled,
+            !savedataBusy && pressed && styles.secondaryButtonPressed,
+          ]}
+          onPress={() => void runSavedataAction(pullAllFromRemote)}
+        >
+          <Text style={styles.secondaryButtonLabel}>Pull all from storage</Text>
+        </Pressable>
+        {savedataLog ? (
+          <Text style={styles.monoMuted}>{savedataLog}</Text>
+        ) : null}
+      </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Simulated time</Text>
@@ -258,6 +378,11 @@ const styles = StyleSheet.create({
   monoMuted: {
     fontSize: 13,
     color: "#737373",
+    lineHeight: 20,
+  },
+  errorText: {
+    fontSize: 13,
+    color: "#fca5a5",
     lineHeight: 20,
   },
   row: {

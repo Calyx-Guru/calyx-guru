@@ -8,6 +8,7 @@ import { BillingProvider } from "@/contexts/BillingContext";
 import { KaucimIllustrationProvider } from "@/contexts/KaucimIllustrationContext";
 import { PushNotificationProvider } from "@/contexts/PushNotificationContext";
 import { MasterDataProvider } from "@/contexts/MasterDataContext";
+import { SaveDataSyncProvider } from "@/contexts/SaveDataSyncContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { useMasterData } from "@/hooks/useMasterData";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -20,7 +21,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSupabaseAuth } from "../admin/src/hooks/useSupabaseAuth";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -88,21 +89,23 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.gestureRoot}>
       <SupabaseAuthProvider>
-        <MasterDataProvider>
-          <KaucimIllustrationProvider>
-            <BillingProvider>
-              <AnalyticsProvider
-                provider="game-analytics"
-                debugMode={ENV.DEBUG_MODE}
-                amplitudeApiKey={ENV.AMPLITUDE_API_KEY}
-                gameAnalyticsGameKey={ENV.GAME_ANALYTICS_GAME_KEY}
-                gameAnalyticsSecretKey={ENV.GAME_ANALYTICS_SECRET_KEY}
-              >
-                <AppContent />
-              </AnalyticsProvider>
-            </BillingProvider>
-          </KaucimIllustrationProvider>
-        </MasterDataProvider>
+        <SaveDataSyncProvider>
+          <MasterDataProvider>
+            <KaucimIllustrationProvider>
+              <BillingProvider>
+                <AnalyticsProvider
+                  provider="game-analytics"
+                  debugMode={ENV.DEBUG_MODE}
+                  amplitudeApiKey={ENV.AMPLITUDE_API_KEY}
+                  gameAnalyticsGameKey={ENV.GAME_ANALYTICS_GAME_KEY}
+                  gameAnalyticsSecretKey={ENV.GAME_ANALYTICS_SECRET_KEY}
+                >
+                  <AppContent />
+                </AnalyticsProvider>
+              </BillingProvider>
+            </KaucimIllustrationProvider>
+          </MasterDataProvider>
+        </SaveDataSyncProvider>
       </SupabaseAuthProvider>
     </GestureHandlerRootView>
   );

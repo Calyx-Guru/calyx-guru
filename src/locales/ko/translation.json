@@ -112,7 +112,15 @@
     "signInDiscord": "Discord로 로그인",
     "signInKakao": "Kakao로 로그인",
     "signInLinkedIn": "LinkedIn으로 로그인",
-    "signInTwitch": "Twitch로 로그인"
+    "signInTwitch": "Twitch로 로그인",
+    "signInGooglePlay": "Google Play로 로그인",
+    "playAsGuest": "게스트로 플레이",
+    "googlePlayComingSoon": "Google Play 로그인은 곧 제공됩니다.",
+    "googlePlaySignInFailed": "Google Play 로그인에 실패했습니다. 다시 시도해 주세요.",
+    "guestStartFailed": "게스트 세션을 시작할 수 없습니다. 다시 시도해 주세요.",
+    "account": "계정",
+    "logout": "로그아웃",
+    "logoutFailed": "로그아웃할 수 없습니다. 다시 시도해 주세요."
   },
   "forms": {
     "labels": {

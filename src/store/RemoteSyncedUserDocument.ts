@@ -2,7 +2,24 @@
  * Shared remote-first + persisted local storage + debounced serial sync for per-user documents (profile, user state, …).
  */
 
+import { isGooglePlayUserId } from '@/lib/auth/googlePlaySignIn';
+import { isGuestUserId } from '@/lib/app/guestMode';
+import {
+  hydrateSavedataFromStorage,
+  resetSavedataSync,
+  scheduleSavedataProfileUpload,
+  scheduleSavedataStateUpload,
+} from '@/lib/supabase/savedataSync';
+import type { SavedataKind } from '@/lib/supabase/savedataStorageService';
+import {
+  isSavedataStorageEnabled,
+  upsertSavedataJson,
+} from '@/lib/supabase/savedataStorageService';
 import { storage } from '@/lib/storage';
+
+function isLocalOnlyUserId(userId: string | null | undefined): boolean {
+  return isGuestUserId(userId) || isGooglePlayUserId(userId);
+}
 
 const REMOTE_DEBOUNCE_MS = 400;
 
@@ -26,6 +43,8 @@ export interface RemoteSyncedUserDocumentConfig<
 > {
   storageKey: string;
   debounceMs?: number;
+  /** When set, Google Play users sync this document via Supabase Storage (`calyx-users`). */
+  savedataKind?: SavedataKind;
   /** Load from API; return null if there is simply no row yet (do not disable remote). Throw only on real failures. */
   fetchRemote: (userId: string) => Promise<T | null>;
   updateRemote: (userId: string, updates: Partial<T>) => Promise<T | null>;
@@ -42,6 +61,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   private remoteFlushEpoch = 0;
   private debounceMs = REMOTE_DEBOUNCE_MS;
   private label: string;
+  private currentUserId: string | null = null;
 
   constructor(private readonly cfg: RemoteSyncedUserDocumentConfig<T, S>) {
     this.debounceMs = cfg.debounceMs ?? REMOTE_DEBOUNCE_MS;
@@ -49,14 +69,55 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   }
 
   initializeForUser = async (userId: string | null): Promise<void> => {
+    this.currentUserId = userId;
     this.remoteFlushEpoch++;
     this.cancelDebounce();
     this.needsAnotherRemoteWrite = false;
+    resetSavedataSync();
     this.patch({ isLoading: true, error: null });
 
     const loadEpoch = this.remoteFlushEpoch;
+    let shouldBackfillSavedata = false;
 
-    if (!this.getRemoteDisabled() && userId) {
+    if (
+      userId &&
+      isGooglePlayUserId(userId) &&
+      this.cfg.savedataKind
+    ) {
+      try {
+        const remote = await hydrateSavedataFromStorage<T>(
+          userId,
+          this.cfg.savedataKind,
+        );
+        if (loadEpoch !== this.remoteFlushEpoch) return;
+        if (remote) {
+          this.patch({
+            [this.cfg.recordKey]: remote,
+            isLoading: false,
+            error: null,
+          });
+          try {
+            await storage.setItem(this.cfg.storageKey, JSON.stringify(remote));
+          } catch (e) {
+            console.error(
+              `[${this.label}] Error saving savedata record to local storage:`,
+              e,
+            );
+          }
+          return;
+        }
+        shouldBackfillSavedata = true;
+      } catch (err) {
+        if (loadEpoch !== this.remoteFlushEpoch) return;
+        shouldBackfillSavedata = true;
+        console.warn(
+          `[${this.label}] Savedata storage fetch failed; using local storage:`,
+          err,
+        );
+      }
+    }
+
+    if (!this.getRemoteDisabled() && userId && !isLocalOnlyUserId(userId)) {
       try {
         const remote = await this.cfg.fetchRemote(userId);
         if (loadEpoch !== this.remoteFlushEpoch) return;
@@ -95,11 +156,20 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
       if (loadEpoch !== this.remoteFlushEpoch) return;
       if (raw) {
         const parsed = JSON.parse(raw) as T;
+        const record = this.withUserId(parsed, userId);
         this.patch({
-          [this.cfg.recordKey]: parsed,
+          [this.cfg.recordKey]: record,
           isLoading: false,
           error: null,
         });
+        try {
+          await storage.setItem(this.cfg.storageKey, JSON.stringify(record));
+        } catch (e) {
+          console.error(`[${this.label}] Error persisting local record:`, e);
+        }
+        if (shouldBackfillSavedata && userId) {
+          this.backfillSavedataToStorage(record, userId);
+        }
         return;
       }
     } catch (e) {
@@ -107,7 +177,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     }
 
     if (loadEpoch !== this.remoteFlushEpoch) return;
-    const def = this.cfg.createDefault('');
+    const def = this.withUserId(this.cfg.createDefault(userId ?? ''), userId);
     this.patch({
       [this.cfg.recordKey]: def,
       isLoading: false,
@@ -124,7 +194,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     const prev = this.getRecord();
     if (!prev) return;
 
-    const merged = { ...prev, ...updates } as T;
+    const merged = this.withUserId({ ...prev, ...updates } as T, this.currentUserId);
     this.patch({ [this.cfg.recordKey]: merged, error: null });
 
     try {
@@ -135,12 +205,15 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     }
 
     this.scheduleRemoteFlush();
+    this.scheduleSavedataFlush();
   };
 
   clearRecord = async (): Promise<void> => {
+    this.currentUserId = null;
     this.remoteFlushEpoch++;
     this.cancelDebounce();
     this.needsAnotherRemoteWrite = false;
+    resetSavedataSync();
     try {
       await storage.removeItem(this.cfg.storageKey);
     } catch (e) {
@@ -155,14 +228,16 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   };
 
   applyServerRecord = (record: T): void => {
-    this.patch({ [this.cfg.recordKey]: record, error: null });
-    void storage.setItem(this.cfg.storageKey, JSON.stringify(record)).catch(
+    const normalized = this.withUserId(record, this.currentUserId);
+    this.patch({ [this.cfg.recordKey]: normalized, error: null });
+    void storage.setItem(this.cfg.storageKey, JSON.stringify(normalized)).catch(
       (e) =>
         console.error(
           `[${this.label}] Error persisting server record locally:`,
           e,
         ),
     );
+    this.scheduleSavedataFlush();
   };
 
   private patch(partial: Record<string, unknown>): void {
@@ -189,7 +264,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   }
 
   private scheduleRemoteFlush(): void {
-    if (this.getRemoteDisabled()) return;
+    if (this.getRemoteDisabled() || isLocalOnlyUserId(this.getRecord()?.id)) return;
     this.cancelDebounce();
     this.debounceTimer = setTimeout(() => {
       this.debounceTimer = null;
@@ -197,8 +272,59 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     }, this.debounceMs);
   }
 
+  private scheduleSavedataFlush(): void {
+    const userId = this.resolveSavedataUserId();
+    if (!userId || !this.cfg.savedataKind) {
+      return;
+    }
+
+    const getPayload = (): T | null => {
+      const record = this.getRecord();
+      if (!record) return null;
+      return this.withUserId(record, userId);
+    };
+
+    if (this.cfg.savedataKind === 'profile') {
+      scheduleSavedataProfileUpload(userId, getPayload);
+    } else {
+      scheduleSavedataStateUpload(userId, getPayload);
+    }
+  }
+
+  private resolveSavedataUserId(): string | null {
+    const record = this.getRecord();
+    if (record?.id && isGooglePlayUserId(record.id)) {
+      return record.id;
+    }
+    if (this.currentUserId && isGooglePlayUserId(this.currentUserId)) {
+      return this.currentUserId;
+    }
+    return null;
+  }
+
+  private withUserId(record: T, userId: string | null): T {
+    if (!userId) return record;
+    return { ...record, id: userId };
+  }
+
+  /** Upload local record when remote savedata file is missing (non-blocking). */
+  private backfillSavedataToStorage(record: T, userId: string): void {
+    if (!this.cfg.savedataKind || !isSavedataStorageEnabled(userId)) return;
+
+    const payload = this.withUserId(record, userId);
+    void upsertSavedataJson(userId, this.cfg.savedataKind, payload)
+      .then(() => {
+        console.info(
+          `[${this.label}] Backfilled local savedata to storage in background`,
+        );
+      })
+      .catch((err) => {
+        console.warn(`[${this.label}] Savedata backfill failed:`, err);
+      });
+  }
+
   private async flushRemote(): Promise<void> {
-    if (this.getRemoteDisabled()) return;
+    if (this.getRemoteDisabled() || isLocalOnlyUserId(this.getRecord()?.id)) return;
 
     if (this.isRemoteWriting) {
       this.needsAnotherRemoteWrite = true;

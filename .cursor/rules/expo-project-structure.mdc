@@ -1,0 +1,47 @@
+---
+description: Folder purposes and where to put new code in the CalyxGuru Expo app
+alwaysApply: true
+---
+
+# CalyxGuru project structure
+
+Path alias: `@/*` → `src/*` (see `tsconfig.json`).
+
+## Mobile app (`app/` + `src/`)
+
+| Folder | Purpose |
+|--------|---------|
+| `app/` | **Expo Router** file-based routes only. Keep files thin: `Stack.Screen` options + render a `Route*` from `src/routes/`. |
+| `src/routes/` | **Screen implementations** (`RouteMainMenu`, `RouteSettings`, …). Route-specific UI, layout, and screen-only helpers. |
+| `src/features/` | **Feature modules** reused across screens (e.g. `kau-cim/orb`, `mascot/health-bar`). Domain UI + local types/constants. |
+| `src/components/` | **Shared presentational components** (typography, video, image, animation). No business logic. |
+| `src/hooks/` | **Custom React hooks** (`useUserProfile`, `useSupabaseAuth`). Thin wrappers over stores/contexts; prefer hooks over calling stores directly in UI. |
+| `src/contexts/` | **React context providers** (auth, billing, appearance, master data). Cross-cutting runtime state and side effects. |
+| `src/store/` | **Zustand stores** for app/user state (`userProfileStore`, `userStateStore`). Persistence and remote sync live here or in `src/lib/`. |
+| `src/lib/` | **Non-React logic**: services, integrations, algorithms (`auth/`, `supabase/`, `billing/`, `app/`, `kaucim/`). No JSX. |
+| `src/constants/` | **App-wide constants** (storage keys, buckets, config). Re-exported from `src/constants/index.ts`. |
+| `src/types/` | **Shared TypeScript types** and ambient declarations. |
+| `src/theme/` | **Design tokens** (fonts, layout, colors). |
+| `src/locales/` | **i18n translation JSON** per language. |
+| `src/assets/` | **Static assets** (images, videos, fonts). Use barrel `index.ts` files where present. |
+| `src/masterdata/` | **Bundled master-data manifest** synced from server/tools. |
+| `src/utils/` | **Pure utility helpers** with no app/domain coupling. |
+
+## Repo root (outside the Expo app)
+
+| Folder | Purpose |
+|--------|---------|
+| `supabase/` | **Backend**: SQL migrations, Edge Functions, `config.toml`. Client code belongs in `src/lib/supabase/`. |
+| `admin/` | **Separate admin web app** (Vite/React). Do not mix with mobile `src/`. |
+| `scripts/` | **Build & Expo config plugins** (`with-android-*.js`, GameAnalytics build). |
+| `tools/` | **Offline dev scripts** (sync master data, generate images, translations). |
+| `docs/` | **Project documentation**. |
+
+## Where to add new code
+
+- **New screen** → route file in `app/<path>/index.tsx` + `src/routes/<path>/index.tsx`
+- **Reusable domain widget** → `src/features/<domain>/`
+- **Shared UI primitive** → `src/components/`
+- **Global state** → `src/store/` + expose via `src/hooks/`
+- **API / storage / auth** → `src/lib/<domain>/`
+- **Do not** put screen logic in `app/` or business logic in `src/components/`

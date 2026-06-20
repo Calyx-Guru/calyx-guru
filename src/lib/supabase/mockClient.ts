@@ -3,24 +3,63 @@
  * Simulates Supabase API responses without making actual network requests
  */
 
-import { createMockQueryResponse, mockAuthResponse } from './mocks';
+import { createMockQueryResponse, mockSession, mockUser } from './mocks';
 
 /**
  * Mock auth object that mirrors Supabase auth interface
  */
 export const createMockAuthClient = () => {
+  let currentSession: (typeof mockSession.session & { user: typeof mockUser }) | null =
+    null;
+
   return {
-    getSession: async () => mockAuthResponse,
+    getSession: async () => ({
+      data: { session: currentSession },
+      error: null,
+    }),
     getUser: async () => ({
-      data: { user: mockAuthResponse.data.user },
+      data: { user: currentSession?.user ?? null },
       error: null,
     }),
-    signInWithPassword: async (_email: string, _password: string) =>
-      mockAuthResponse,
-    signUp: async (_email: string, _password: string) => mockAuthResponse,
-    signOut: async () => ({
-      error: null,
-    }),
+    signInWithPassword: async (_email: string, _password: string) => {
+      currentSession = { ...mockSession.session, user: mockUser };
+      return {
+        data: { session: currentSession, user: mockUser },
+        error: null,
+      };
+    },
+    signUp: async (_email: string, _password: string) => {
+      currentSession = { ...mockSession.session, user: mockUser };
+      return {
+        data: { session: currentSession, user: mockUser },
+        error: null,
+      };
+    },
+    signOut: async () => {
+      currentSession = null;
+      return {
+        error: null,
+      };
+    },
+    signInWithIdToken: async ({
+      provider,
+    }: {
+      provider: string;
+      token: string;
+    }) => {
+      if (provider !== 'google') {
+        return {
+          data: { session: null, user: null },
+          error: { message: `Unsupported provider: ${provider}` },
+        };
+      }
+
+      currentSession = { ...mockSession.session, user: mockUser };
+      return {
+        data: { session: currentSession, user: mockUser },
+        error: null,
+      };
+    },
     onAuthStateChange: (_callback: any) => {
       return {
         data: { subscription: { unsubscribe: () => {} } },

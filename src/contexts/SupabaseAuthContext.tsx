@@ -1,6 +1,16 @@
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useUserState } from '@/hooks/useUserState';
 import { runWithTimeout } from '@/lib/app/helper';
+import {
+  clearGuestMode,
+  getGuestUserId,
+  isGuestMode,
+} from '@/lib/app/guestMode';
+import {
+  getStoredGooglePlayUserId,
+  signInWithGooglePlay as performGooglePlaySignIn,
+  signOutGooglePlay,
+} from '@/lib/auth/googlePlaySignIn';
 import supabase from '@/lib/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
@@ -20,10 +30,14 @@ type SupabaseAuth = {
   session: Session | null;
   isLoading: boolean;
   isSignedIn: boolean;
+  isGooglePlaySignedIn: boolean;
+  googlePlayUserId: string | null;
   initializeSupabaseProfile: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>;
+  signInWithGooglePlay: () => Promise<void>;
   signInWithOAuth: (provider: OAuthProvider) => Promise<void>;
 };
 
@@ -32,10 +46,14 @@ export const SupabaseAuthContext = createContext<SupabaseAuth>({
   session: null,
   isLoading: true,
   isSignedIn: false,
+  isGooglePlaySignedIn: false,
+  googlePlayUserId: null,
   initializeSupabaseProfile: async () => {},
   signUp: async () => {},
   signIn: async () => {},
   signOut: async () => {},
+  logout: async () => {},
+  signInWithGooglePlay: async () => {},
   signInWithOAuth: async () => {},
 });
 
@@ -46,12 +64,38 @@ export function SupabaseAuthProvider({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [googlePlayUserId, setGooglePlayUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const { clearProfile, initializeProfileForUser } = useUserProfile();
   const { clearUserState, initializeUserStateForUser } = useUserState();
 
   const initializeSupabaseProfile = async () => {
+    const loadLocalProfile = async () => {
+      const storedGooglePlayUserId = await getStoredGooglePlayUserId();
+      if (storedGooglePlayUserId) {
+        setGooglePlayUserId(storedGooglePlayUserId);
+        await Promise.all([
+          initializeProfileForUser(storedGooglePlayUserId),
+          initializeUserStateForUser(storedGooglePlayUserId),
+        ]);
+        return;
+      }
+
+      if (await isGuestMode()) {
+        const guestId = await getGuestUserId();
+        await Promise.all([
+          initializeProfileForUser(guestId),
+          initializeUserStateForUser(guestId),
+        ]);
+      } else {
+        await Promise.all([
+          initializeProfileForUser(null),
+          initializeUserStateForUser(null),
+        ]);
+      }
+    };
+
     try {
       const {
         data: { session: initialSession },
@@ -70,15 +114,13 @@ export function SupabaseAuthProvider({
           8000,
         );
       } else {
-        await Promise.all([
-          initializeProfileForUser(null),
-          initializeUserStateForUser(null),
-        ])
+        await loadLocalProfile();
       }
 
       console.log('Initial Supabase session:', initialSession);
     } catch (error) {
       console.error('Error initializing session / profile:', error);
+      await loadLocalProfile();
     } finally {
       console.log('Supabase auth loading complete');
       setIsLoading(false);
@@ -96,6 +138,7 @@ export function SupabaseAuthProvider({
       if (event === 'SIGNED_IN' && newSession?.user) {
         const uid = newSession.user.id;
         try {
+          await clearGuestMode();
           await Promise.all([
             initializeProfileForUser(uid),
             initializeUserStateForUser(uid),
@@ -104,7 +147,13 @@ export function SupabaseAuthProvider({
           console.error('Error loading user profile / state:', error);
         }
       } else if (event === 'SIGNED_OUT') {
-        await Promise.all([clearProfile(), clearUserState()]);
+        setSession(null);
+        setUser(null);
+        await Promise.all([clearProfile(), clearUserState(), clearGuestMode()]);
+        await Promise.all([
+          initializeProfileForUser(null),
+          initializeUserStateForUser(null),
+        ]);
       }
     });
 
@@ -154,6 +203,54 @@ export function SupabaseAuthProvider({
     }
   }, []);
 
+  const logout = useCallback(async () => {
+    await clearGuestMode();
+    await signOutGooglePlay();
+    setGooglePlayUserId(null);
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+
+    setSession(null);
+    setUser(null);
+
+    await Promise.all([clearProfile(), clearUserState()]);
+    await Promise.all([
+      initializeProfileForUser(null),
+      initializeUserStateForUser(null),
+    ]);
+
+    if (await isGuestMode()) {
+      throw new Error('Guest mode still active after logout');
+    }
+
+    if (await getStoredGooglePlayUserId()) {
+      throw new Error('Google Play session still active after logout');
+    }
+  }, [
+    clearProfile,
+    clearUserState,
+    initializeProfileForUser,
+    initializeUserStateForUser,
+  ]);
+
+  const signInWithGooglePlay = useCallback(async () => {
+    const { userId } = await performGooglePlaySignIn();
+    setGooglePlayUserId(userId);
+    setIsLoading(false);
+    await clearGuestMode();
+    await Promise.all([
+      initializeProfileForUser(userId),
+      initializeUserStateForUser(userId),
+    ]);
+  }, [initializeProfileForUser, initializeUserStateForUser]);
+
   const signInWithOAuth = useCallback(async (provider: OAuthProvider) => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -171,10 +268,14 @@ export function SupabaseAuthProvider({
     session,
     isLoading,
     isSignedIn: !!session,
+    isGooglePlaySignedIn: !!googlePlayUserId,
+    googlePlayUserId,
     initializeSupabaseProfile,
     signUp,
     signIn,
     signOut,
+    logout,
+    signInWithGooglePlay,
     signInWithOAuth,
   };
 

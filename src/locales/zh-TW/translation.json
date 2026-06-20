@@ -112,7 +112,15 @@
     "signInDiscord": "使用 Discord 登入",
     "signInKakao": "使用 Kakao 登入",
     "signInLinkedIn": "使用 LinkedIn 登入",
-    "signInTwitch": "使用 Twitch 登入"
+    "signInTwitch": "使用 Twitch 登入",
+    "signInGooglePlay": "使用 Google Play 登入",
+    "playAsGuest": "訪客模式",
+    "googlePlayComingSoon": "Google Play 登入即將推出。",
+    "googlePlaySignInFailed": "無法使用 Google Play 登入，請再試一次。",
+    "guestStartFailed": "無法開始訪客工作階段，請再試一次。",
+    "account": "帳戶",
+    "logout": "登出",
+    "logoutFailed": "無法登出，請再試一次。"
   },
   "forms": {
     "labels": {

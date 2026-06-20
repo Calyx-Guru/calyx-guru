@@ -79,6 +79,7 @@ export const useUserProfileStore = create<UserProfileStore>()(
   devtools((set, get) => {
     const sync = new RemoteSyncedUserDocument<UserProfile, UserProfileStore>({
       storageKey: STORAGE_KEY,
+      savedataKind: 'profile',
       fetchRemote: (userId) => fetchUserProfile(userId),
       updateRemote: (userId, updates) => updateUserProfile(userId, updates),
       createDefault: createDefaultProfile,

@@ -112,7 +112,15 @@
     "signInDiscord": "Đăng nhập bằng Discord",
     "signInKakao": "Đăng nhập bằng Kakao",
     "signInLinkedIn": "Đăng nhập bằng LinkedIn",
-    "signInTwitch": "Đăng nhập bằng Twitch"
+    "signInTwitch": "Đăng nhập bằng Twitch",
+    "signInGooglePlay": "Đăng nhập bằng Google Play",
+    "playAsGuest": "Chơi với tư cách khách",
+    "googlePlayComingSoon": "Đăng nhập Google Play sẽ sớm có.",
+    "googlePlaySignInFailed": "Không thể đăng nhập bằng Google Play. Vui lòng thử lại.",
+    "guestStartFailed": "Không thể bắt đầu phiên khách. Vui lòng thử lại.",
+    "account": "Tài khoản",
+    "logout": "Đăng xuất",
+    "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại."
   },
   "forms": {
     "labels": {

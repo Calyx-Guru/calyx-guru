@@ -1,13 +1,35 @@
 import { ENV, LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES } from "@/constants";
 import { useAppAppearance } from "@/contexts/AppAppearanceContext";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { ThemeMode } from "@/types";
 import { router, type Href } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback } from "react";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const THEME_OPTIONS: ThemeMode[] = ["system", "light", "dark"];
 
 export function RouteSettings() {
   const { locale, themeMode, setLocale, setThemeMode } = useAppAppearance();
+  const { logout } = useSupabaseAuth();
+  const { t } = useTranslation();
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout();
+      router.replace("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Alert.alert(t("auth.logout"), t("auth.logoutFailed"));
+    }
+  }, [logout, t]);
 
   return (
     <ScrollView
@@ -47,6 +69,18 @@ export function RouteSettings() {
           accessibilityLabel="Open terms of service"
         >
           <Text style={styles.optionLabel}>Terms of Service</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t("auth.account")}</Text>
+        <Pressable
+          onPress={handleLogout}
+          style={styles.option}
+          accessibilityRole="button"
+          accessibilityLabel={t("auth.logout")}
+        >
+          <Text style={styles.logoutLabel}>{t("auth.logout")}</Text>
         </Pressable>
       </View>
 
@@ -102,5 +136,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#0B3C49",
+  },
+  logoutLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#b42318",
   },
 });

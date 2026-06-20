@@ -69,6 +69,7 @@ export const useUserStateStore = create<UserStateStore>()(
     (set, get) => {
       const sync = new RemoteSyncedUserDocument<UserState, UserStateStore>({
         storageKey: STORAGE_KEY,
+        savedataKind: "state",
         fetchRemote: (userId) => fetchUserState(userId),
         updateRemote: (userId, updates) => updateUserState(userId, updates),
         createDefault: createDefaultUserState,

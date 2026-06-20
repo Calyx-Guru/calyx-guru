@@ -1,14 +1,13 @@
-import { ENV } from '@/constants';
-import { USE_MOCK_DATA } from '@/constants/common';
-import { storage } from '@/lib/storage';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import createMockSupabaseClient from './mockClient';
+import { ENV } from "@/constants";
+import { storage } from "@/lib/storage";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import createMockSupabaseClient from "./mockClient";
 
 const supabaseUrl = ENV.SUPABASE_URL;
 const supabaseAnonKey = ENV.SUPABASE_ANON_KEY;
 
 // Skip credential validation when using mock data
-// if (!USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
+// if (!ENV.USE_MOCK_DATA && (!supabaseUrl || !supabaseAnonKey)) {
 //   throw new Error(
 //     'Missing Supabase credentials. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file',
 //   );
@@ -39,8 +38,20 @@ const customStorage = {
   },
 };
 
+// Always use real credentials for Storage savedata (`mock/` vs `prod/` path is env-driven).
+export const supabaseStorageClient: SupabaseClient | null =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      })
+    : null;
+
 // Create either a real or mock Supabase client based on the USE_MOCK_DATA flag
-export const supabase: SupabaseClient = USE_MOCK_DATA
+export const supabase: SupabaseClient = ENV.USE_MOCK_DATA
   ? (createMockSupabaseClient() as any)
   : createClient(supabaseUrl!, supabaseAnonKey!, {
       auth: {
@@ -51,11 +62,19 @@ export const supabase: SupabaseClient = USE_MOCK_DATA
       },
     });
 
-if (!USE_MOCK_DATA) {
-  console.log('Using real Supabase client');
+if (!ENV.USE_MOCK_DATA) {
+  console.log("Using real Supabase client");
 } else {
   console.log(
-    'Using mock Supabase client - set USE_MOCK_DATA to false in constants/general.ts to use real API',
+    "Using mock Supabase client - set USE_MOCK_DATA to false in constants/general.ts to use real API",
+  );
+}
+
+if (supabaseStorageClient) {
+  console.log("Supabase Storage client ready for savedata sync");
+} else {
+  console.warn(
+    "Supabase Storage client unavailable — set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY for savedata sync",
   );
 }
 

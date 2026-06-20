@@ -6,7 +6,7 @@ const RUNNING_TASKS: any = {};
 
 const DEVICE_INSTALL_ID_KEY = 'calyx_device_install_id';
 
-function newInstallId(): string {
+export function createRandomUuid(): string {
   const g = globalThis as { crypto?: Crypto };
   if (g.crypto?.randomUUID) {
     return g.crypto.randomUUID();
@@ -16,6 +16,10 @@ function newInstallId(): string {
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+function newInstallId(): string {
+  return createRandomUuid();
 }
 
 async function getOrCreatePersistedInstallId(): Promise<string> {

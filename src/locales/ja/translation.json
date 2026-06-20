@@ -112,7 +112,15 @@
     "signInDiscord": "Discordでサインイン",
     "signInKakao": "Kakaoでサインイン",
     "signInLinkedIn": "LinkedInでサインイン",
-    "signInTwitch": "Twitchでサインイン"
+    "signInTwitch": "Twitchでサインイン",
+    "signInGooglePlay": "Google Playでログイン",
+    "playAsGuest": "ゲストとしてプレイ",
+    "googlePlayComingSoon": "Google Playログインは近日公開予定です。",
+    "googlePlaySignInFailed": "Google Playでログインできませんでした。もう一度お試しください。",
+    "guestStartFailed": "ゲストセッションを開始できませんでした。もう一度お試しください。",
+    "account": "アカウント",
+    "logout": "ログアウト",
+    "logoutFailed": "ログアウトできませんでした。もう一度お試しください。"
   },
   "forms": {
     "labels": {
