@@ -66,6 +66,12 @@ export function SiteFooter() {
                           <a href="#">Blog</a>
                         </li>
                         <li>
+                          <Link href="/privacy-policy">Privacy Policy</Link>
+                        </li>
+                        <li>
+                          <Link href="/terms-of-service">Terms of Service</Link>
+                        </li>
+                        <li>
                           <Link href="/delete-account">Delete account</Link>
                         </li>
                         <li>

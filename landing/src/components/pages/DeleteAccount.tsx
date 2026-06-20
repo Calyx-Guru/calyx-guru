@@ -96,60 +96,99 @@ export default function DeleteAccount() {
                 </p>
               </div>
 
-              <div className="as_legal_panel">
+              <div className="as_legal_panel as_legal_panel--email">
                 <div className="as_legal_panel__heading">
-                  <SunGlyph />
+                  <Image src={mailIcon} alt="" width={34} height={34} />
                   <h2 className="as_heading">Request deletion by email</h2>
                 </div>
-                <p className="as_text_color">
-                  If you cannot access the app or need assistance, email us with
-                  the subject line <strong>Account deletion request</strong>.
-                </p>
-                <p className="as_text_color">Please include:</p>
-                <ul className="as_legal_list as_legal_list--check">
-                  <li>
-                    <strong>Profile ID</strong> — your unique Calyx Guru profile
-                    identifier
-                  </li>
-                  <li>
-                    <strong>Email address</strong> — linked to your account, if
-                    any
-                  </li>
-                  <li>
-                    <strong>Google Play user ID</strong> — if you signed in with
-                    Google Play
-                  </li>
-                  <li>
-                    <strong>Supabase user ID</strong> — if you signed in with
-                    email and password
-                  </li>
-                  <li>
-                    Whether you want a <strong>full account deletion</strong> or
-                    a <strong>progression-only reset</strong>
-                  </li>
-                </ul>
-                <p className="as_text_color">
+
+                <div className="as_legal_email_intro">
+                  <p className="as_text_color">
+                    If you cannot access the app or need assistance, send a
+                    message to{" "}
+                    <a href={mailto} className="as_legal_email_link">
+                      {SUPPORT_EMAIL}
+                    </a>{" "}
+                    with the subject line{" "}
+                    <strong>Account deletion request</strong>.
+                  </p>
+                </div>
+
+                <div className="as_legal_email_grid">
+                  <div className="as_legal_email_block">
+                    <h3 className="as_legal_subheading">
+                      What to include in your email
+                    </h3>
+                    <ul className="as_legal_list as_legal_list--check">
+                      <li>
+                        <strong>Profile ID</strong> — your unique Calyx Guru
+                        profile identifier
+                      </li>
+                      <li>
+                        <strong>Email address</strong> — linked to your account,
+                        if any
+                      </li>
+                      <li>
+                        <strong>Google Play user ID</strong> — if you signed in
+                        with Google Play
+                      </li>
+                      <li>
+                        <strong>Supabase user ID</strong> — if you signed in with
+                        email and password
+                      </li>
+                      <li>
+                        Whether you want a{" "}
+                        <strong>full account deletion</strong> or a{" "}
+                        <strong>progression-only reset</strong>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="as_legal_email_block">
+                    <h3 className="as_legal_subheading">
+                      Where to find your account details
+                    </h3>
+                    <p className="as_text_color">
+                      Open the Calyx Guru app and go to{" "}
+                      <strong>Settings → Account information</strong>. That
+                      screen lists the identifiers you should copy into your
+                      support email.
+                    </p>
+                    <p className="as_text_color">
+                      Google Play sign-in: note your Google Play user ID. Email
+                      sign-in: note your Supabase user ID and email. Guest
+                      players should send their Profile ID (it begins with{" "}
+                      <code className="as_legal_code">guest_</code>).
+                    </p>
+                  </div>
+                </div>
+
+                <p className="as_legal_email_timeline as_text_color">
                   We will verify your request and process it as soon as
                   possible, usually within 30 days.
                 </p>
-              </div>
 
-              <div className="as_legal_panel">
-                <div className="as_legal_panel__heading">
-                  <SunGlyph />
-                  <h2 className="as_heading">Where to find your account details</h2>
+                <div className="as_legal_email_cta">
+                  <div className="as_legal_email_cta__info">
+                    <Image src={mailIcon} alt="" width={32} height={32} />
+                    <div>
+                      <p className="as_legal_email_cta__label">
+                        Send your deletion request
+                      </p>
+                      <p className="as_legal_email_cta__subject as_text_color">
+                        Subject: Account deletion request
+                      </p>
+                    </div>
+                  </div>
+                  <a href={mailto} className="as_legal_email_cta__btn">
+                    <span className="as_legal_email_cta__btn-label">
+                      Open email app
+                    </span>
+                    <span className="as_legal_email_cta__btn-email">
+                      {SUPPORT_EMAIL}
+                    </span>
+                  </a>
                 </div>
-                <p className="as_text_color">
-                  Open the Calyx Guru app and go to{" "}
-                  <strong>Settings → Account information</strong>. That screen
-                  lists the identifiers you should copy into your support email.
-                </p>
-                <p className="as_text_color">
-                  Google Play sign-in: note your Google Play user ID. Email
-                  sign-in: note your Supabase user ID and email. Guest players
-                  should send their Profile ID (it begins with{" "}
-                  <code className="as_legal_code">guest_</code>).
-                </p>
               </div>
             </div>
 
@@ -161,18 +200,6 @@ export default function DeleteAccount() {
                     alt=""
                     className="as_legal_sidebar__img"
                   />
-                </div>
-
-                <div className="as_legal_contact_card">
-                  <Image src={mailIcon} alt="" width={28} height={28} />
-                  <h3>Email support</h3>
-                  <p className="as_text_color">
-                    Send your deletion request with account details from the
-                    app.
-                  </p>
-                  <a href={mailto} className="as_btn as_legal_contact_btn">
-                    {SUPPORT_EMAIL}
-                  </a>
                 </div>
 
                 <div className="as_legal_sidebar__image as_legal_sidebar__image--secondary">
@@ -187,9 +214,13 @@ export default function DeleteAccount() {
                   <p className="as_text_color">Related</p>
                   <ul>
                     <li>
-                      <a href="https://calyx.guru/privacy-policy">
-                        Privacy Policy
-                      </a>
+                      <Link href="/privacy-policy">Privacy Policy</Link>
+                    </li>
+                    <li>
+                      <Link href="/terms-of-service">Terms of Service</Link>
+                    </li>
+                    <li>
+                      <Link href="/delete-account">Delete account</Link>
                     </li>
                     <li>
                       <Link href="/">Back to home</Link>
@@ -199,22 +230,6 @@ export default function DeleteAccount() {
               </aside>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="as_legal_cta as_section_dark text-center">
-        <div className="container">
-          <TitleLine />
-          <h2 className="as_heading as_legal_cta__title">
-            Need help deleting your data?
-          </h2>
-          <p className="as_text_color as_legal_cta__text">
-            Our team can process account and progression deletion requests when
-            you cannot use the in-app options.
-          </p>
-          <a href={mailto} className="as_btn as_legal_cta__btn">
-            Email {SUPPORT_EMAIL}
-          </a>
         </div>
       </section>
     </>

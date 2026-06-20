@@ -1,7 +1,11 @@
 {
   "Metadata": {
-    "title": "Calyx Guru",
-    "description": "Calyx Guru 着陆页"
+    "siteName": "Calyx Guru",
+    "title": "Calyx Guru — 占星娱乐与占卜应用",
+    "description": "Calyx Guru 是一款移动端占星与占卜娱乐应用，提供元素伙伴、运势风格指引和有趣的吉祥物互动。",
+    "ogTitle": "Calyx Guru — 占星娱乐与占卜应用",
+    "ogDescription": "在 Calyx Guru 移动应用中探索元素伙伴、占卜与占星灵感的玩法。",
+    "keywords": "Calyx Guru, 占星应用, 占卜, 星座, 娱乐应用, 元素伙伴, Google Play"
   },
   "HomePage": {
     "title": "要开始使用，请编辑 page.tsx 文件。",

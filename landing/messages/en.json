@@ -1,7 +1,11 @@
 {
   "Metadata": {
-    "title": "Calyx Guru",
-    "description": "Calyx Guru landing page"
+    "siteName": "Calyx Guru",
+    "title": "Calyx Guru — Astrology Entertainment & Fortune App",
+    "description": "Calyx Guru is a mobile astrology and fortune-telling entertainment app with elemental companions, horoscope-style guidance, and playful mascot interactions.",
+    "ogTitle": "Calyx Guru — Astrology Entertainment & Fortune App",
+    "ogDescription": "Discover elemental companions, fortune readings, and astrology-inspired play in the Calyx Guru mobile app.",
+    "keywords": "Calyx Guru, astrology app, fortune telling, horoscope, entertainment app, elemental companion, Google Play"
   },
   "HomePage": {
     "title": "To get started, edit the page.tsx file.",

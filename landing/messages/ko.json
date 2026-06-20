@@ -1,7 +1,11 @@
 {
   "Metadata": {
-    "title": "Calyx Guru",
-    "description": "Calyx Guru 랜딩 페이지"
+    "siteName": "Calyx Guru",
+    "title": "Calyx Guru — 점성술 엔터테인먼트 & 운세 앱",
+    "description": "Calyx Guru는 원소 동반자, 운세 스타일 가이드, 재미있는 마스코트 상호작용을 제공하는 모바일 점성술·운세 엔터테인먼트 앱입니다.",
+    "ogTitle": "Calyx Guru — 점성술 엔터테인먼트 & 운세 앱",
+    "ogDescription": "Calyx Guru 모바일 앱에서 원소 동반자, 운세, 점성술 영감의 플레이를 만나보세요.",
+    "keywords": "Calyx Guru, 점성술 앱, 운세, 별자리, 엔터테인먼트 앱, 원소 동반자, Google Play"
   },
   "HomePage": {
     "title": "시작하려면 page.tsx 파일을 편집하세요.",

@@ -1,7 +1,11 @@
 {
   "Metadata": {
-    "title": "Calyx Guru",
-    "description": "Trang đích Calyx Guru"
+    "siteName": "Calyx Guru",
+    "title": "Calyx Guru — Ứng dụng giải trí chiêm tinh & bói toán",
+    "description": "Calyx Guru là ứng dụng giải trí chiêm tinh và bói toán trên di động với người bạn nguyên tố, hướng dẫn theo phong cách vận mệnh và tương tác linh vật thú vị.",
+    "ogTitle": "Calyx Guru — Ứng dụng giải trí chiêm tinh & bói toán",
+    "ogDescription": "Khám phá người bạn nguyên tố, bói toán và lối chơi lấy cảm hứng từ chiêm tinh trong ứng dụng Calyx Guru.",
+    "keywords": "Calyx Guru, ứng dụng chiêm tinh, bói toán, cung hoàng đạo, ứng dụng giải trí, nguyên tố, Google Play"
   },
   "HomePage": {
     "title": "Để bắt đầu, hãy chỉnh sửa tệp page.tsx.",

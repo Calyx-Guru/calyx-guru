@@ -1,7 +1,11 @@
 {
   "Metadata": {
-    "title": "Calyx Guru",
-    "description": "Calyx Guru ランディングページ"
+    "siteName": "Calyx Guru",
+    "title": "Calyx Guru — 占星術エンタメ & 占いアプリ",
+    "description": "Calyx Guruは、エレメントの相棒、占いスタイルのガイド、楽しいマスコットとの交流を楽しめるモバイル占星術・占いエンタメアプリです。",
+    "ogTitle": "Calyx Guru — 占星術エンタメ & 占いアプリ",
+    "ogDescription": "Calyx Guruモバイルアプリで、エレメントの相棒、占い、占星術インスパイアのプレイを体験しましょう。",
+    "keywords": "Calyx Guru, 占星術アプリ, 占い, ホロスコープ, エンタメアプリ, エレメント, Google Play"
   },
   "HomePage": {
     "title": "始めるには、page.tsx ファイルを編集してください。",
