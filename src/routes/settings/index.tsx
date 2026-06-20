@@ -188,6 +188,14 @@ export function RouteSettings() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t("auth.account")}</Text>
         <Pressable
+          onPress={() => router.push("/account" as Href)}
+          style={styles.option}
+          accessibilityRole="button"
+          accessibilityLabel={t("auth.accountInformation")}
+        >
+          <Text style={styles.optionLabel}>{t("auth.accountInformation")}</Text>
+        </Pressable>
+        <Pressable
           onPress={handleLogout}
           style={styles.option}
           accessibilityRole="button"

@@ -1,0 +1,16 @@
+{
+  "Metadata": {
+    "title": "Calyx Guru",
+    "description": "Calyx Guru landing page"
+  },
+  "HomePage": {
+    "title": "To get started, edit the page.tsx file.",
+    "descriptionBefore": "Looking for a starting point or more instructions? Head over to",
+    "templates": "Templates",
+    "descriptionMiddle": "or the",
+    "learning": "Learning",
+    "descriptionAfter": "center.",
+    "deployNow": "Deploy Now",
+    "documentation": "Documentation"
+  }
+}

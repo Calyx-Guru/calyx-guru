@@ -129,7 +129,19 @@
     "deleteProgressionFinalMessage": "Điều này sẽ đặt lại vĩnh viễn toàn bộ tiến trình game. Hồ sơ của bạn (ví dụ nguyên tố đã chọn) sẽ được giữ lại.\n\nBạn có chắc chắn không?",
     "deleteFinalConfirm": "Có, xóa vĩnh viễn",
     "deleteAccountFailed": "Không thể xóa tài khoản và dữ liệu. Kiểm tra kết nối và thử lại.",
-    "deleteProgressionFailed": "Không thể xóa tiến trình. Kiểm tra kết nối và thử lại."
+    "deleteProgressionFailed": "Không thể xóa tiến trình. Kiểm tra kết nối và thử lại.",
+    "accountInformation": "Thông tin tài khoản",
+    "accountInfoDescription": "Hãy sao chép các thông tin bên dưới khi liên hệ hỗ trợ hoặc yêu cầu xóa tài khoản qua email.",
+    "accountInfoSupportHint": "Để yêu cầu xóa tài khoản, gửi email tới support@calyx.guru kèm thông tin ở trên. Bạn cũng có thể xóa dữ liệu trong Cài đặt.",
+    "accountInfoNotAvailable": "Không có",
+    "accountType": "Loại tài khoản",
+    "accountTypeGuest": "Khách",
+    "accountTypeGooglePlay": "Google Play",
+    "accountTypeEmail": "Email",
+    "profileId": "ID hồ sơ",
+    "googlePlayUserId": "ID người dùng Google Play",
+    "supabaseUserId": "ID người dùng Supabase",
+    "username": "Tên người dùng"
   },
   "forms": {
     "labels": {

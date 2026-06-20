@@ -129,7 +129,19 @@
     "deleteProgressionFinalMessage": "ゲームの進行状況が完全にリセットされます。プロフィール（選択した属性など）は保持されます。\n\n本当によろしいですか？",
     "deleteFinalConfirm": "はい、完全に削除します",
     "deleteAccountFailed": "アカウントとデータを削除できませんでした。接続を確認して再試行してください。",
-    "deleteProgressionFailed": "進行状況を削除できませんでした。接続を確認して再試行してください。"
+    "deleteProgressionFailed": "進行状況を削除できませんでした。接続を確認して再試行してください。",
+    "accountInformation": "アカウント情報",
+    "accountInfoDescription": "サポートへの連絡やメールでの削除依頼の際は、以下の情報をコピーして送ってください。",
+    "accountInfoSupportHint": "アカウント削除を依頼する場合は、上記の情報を添えて support@calyx.guru までメールしてください。設定から直接削除することもできます。",
+    "accountInfoNotAvailable": "なし",
+    "accountType": "アカウント種別",
+    "accountTypeGuest": "ゲスト",
+    "accountTypeGooglePlay": "Google Play",
+    "accountTypeEmail": "メール",
+    "profileId": "プロフィール ID",
+    "googlePlayUserId": "Google Play ユーザー ID",
+    "supabaseUserId": "Supabase ユーザー ID",
+    "username": "ユーザー名"
   },
   "forms": {
     "labels": {

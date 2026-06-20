@@ -1,0 +1,16 @@
+{
+  "Metadata": {
+    "title": "Calyx Guru",
+    "description": "Trang đích Calyx Guru"
+  },
+  "HomePage": {
+    "title": "Để bắt đầu, hãy chỉnh sửa tệp page.tsx.",
+    "descriptionBefore": "Bạn cần điểm khởi đầu hoặc hướng dẫn thêm? Hãy truy cập",
+    "templates": "Mẫu",
+    "descriptionMiddle": "hoặc",
+    "learning": "Học tập",
+    "descriptionAfter": "trung tâm.",
+    "deployNow": "Triển khai ngay",
+    "documentation": "Tài liệu"
+  }
+}

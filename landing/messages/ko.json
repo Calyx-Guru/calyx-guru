@@ -1,0 +1,16 @@
+{
+  "Metadata": {
+    "title": "Calyx Guru",
+    "description": "Calyx Guru 랜딩 페이지"
+  },
+  "HomePage": {
+    "title": "시작하려면 page.tsx 파일을 편집하세요.",
+    "descriptionBefore": "시작점이나 더 많은 안내가 필요하신가요?",
+    "templates": "템플릿",
+    "descriptionMiddle": "또는",
+    "learning": "학습",
+    "descriptionAfter": "센터를 방문해 보세요.",
+    "deployNow": "지금 배포하기",
+    "documentation": "문서"
+  }
+}

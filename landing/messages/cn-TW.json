@@ -1,0 +1,16 @@
+{
+  "Metadata": {
+    "title": "Calyx Guru",
+    "description": "Calyx Guru 著陸頁"
+  },
+  "HomePage": {
+    "title": "要開始使用，請編輯 page.tsx 檔案。",
+    "descriptionBefore": "需要起點或更多說明？請前往",
+    "templates": "範本",
+    "descriptionMiddle": "或",
+    "learning": "學習",
+    "descriptionAfter": "中心。",
+    "deployNow": "立即部署",
+    "documentation": "文件"
+  }
+}

@@ -129,7 +129,19 @@
     "deleteProgressionFinalMessage": "這將永久重置所有遊戲進度。您的檔案（例如所選元素）將保留。\n\n您確定要繼續嗎？",
     "deleteFinalConfirm": "是的，永久刪除",
     "deleteAccountFailed": "無法刪除帳戶與資料。請檢查網路連線後再試一次。",
-    "deleteProgressionFailed": "無法刪除進度。請檢查網路連線後再試一次。"
+    "deleteProgressionFailed": "無法刪除進度。請檢查網路連線後再試一次。",
+    "accountInformation": "帳戶資訊",
+    "accountInfoDescription": "聯絡客服或透過電子郵件申請刪除帳戶時，請複製以下資訊一併寄出。",
+    "accountInfoSupportHint": "若要申請刪除帳戶，請寄信至 support@calyx.guru 並附上以上資訊。您也可以在設定中直接刪除資料。",
+    "accountInfoNotAvailable": "無",
+    "accountType": "帳戶類型",
+    "accountTypeGuest": "訪客",
+    "accountTypeGooglePlay": "Google Play",
+    "accountTypeEmail": "電子郵件",
+    "profileId": "個人檔案 ID",
+    "googlePlayUserId": "Google Play 使用者 ID",
+    "supabaseUserId": "Supabase 使用者 ID",
+    "username": "使用者名稱"
   },
   "forms": {
     "labels": {
