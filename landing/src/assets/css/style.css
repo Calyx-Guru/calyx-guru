@@ -2024,7 +2024,7 @@ p.as_pricing_subheading {
 /* footer css end */
 /* breadcrum start */
 .as_breadcrum_wrapper{
-    background-image: url(../images/bg10.jpg);
+    background-image: url(../images/banner.png);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -2050,7 +2050,9 @@ p.as_pricing_subheading {
 }
 .as_breadcrum_wrapper  h1 {
     margin: 0px 0 15px;
-    font-size: 28px;
+    font-size: 64px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    font-weight: 600;
 }
 .as_breadcrum_wrapper .breadcrumb {
     display: inline-flex;

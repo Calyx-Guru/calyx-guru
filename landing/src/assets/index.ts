@@ -26,3 +26,7 @@ export { default as mapIcon } from "./images/svg/map.svg";
 export { default as phoneIcon } from "./images/svg/phone.svg";
 export { default as mailIcon } from "./images/svg/mail.svg";
 export { default as planeIcon } from "./images/svg/plane.svg";
+export { default as screenshotSettings } from "./images/screenshots/settings.png";
+export { default as screenshotDeleteSelection } from "./images/screenshots/delete-selection.png";
+export { default as screenshotDeleteAccount } from "./images/screenshots/delete-account.png";
+export { default as screenshotDeleteProgression } from "./images/screenshots/delete-progression.png";

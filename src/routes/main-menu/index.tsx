@@ -22,8 +22,6 @@ import { blueSquareButton, circleBlueButton } from "@/assets/images/ui";
 import { NormalVideo } from "@/components/video/NormalVideo";
 
 import { MAX_PET_POWER } from "@/constants";
-import { getPetStatusTier } from "@/lib/app/petStatus";
-import { VIDEOS } from "./constants";
 import { CalendarEastern } from "@/features/calendar/eastern";
 import { CalendarWestern } from "@/features/calendar/western";
 import { KaucimOrb } from "@/features/kau-cim/orb";
@@ -33,9 +31,11 @@ import { useAppState } from "@/hooks/useAppState";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
+import { getPetStatusTier } from "@/lib/app/petStatus";
 import { KAUCIM_CONCERNS } from "@/types/UserState";
 import { router, useFocusEffect, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { VIDEOS } from "./constants";
 
 export function RouteMainMenu() {
   const insets = useSafeAreaInsets();

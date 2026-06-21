@@ -218,7 +218,7 @@ export function RouteSettings() {
       </View>
 
       {ENV.DEBUG_MODE && (
-        <View style={styles.section}>
+        <View style={[styles.section, styles.developerSection]}>
           <Text style={styles.sectionTitle}>Developer</Text>
           <Pressable
             onPress={() => router.push("/debug" as Href)}
@@ -247,6 +247,9 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
     gap: 8,
+  },
+  developerSection: {
+    marginTop: 300,
   },
   sectionTitle: {
     fontSize: 14,
