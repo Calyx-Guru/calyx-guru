@@ -36,6 +36,27 @@ h6,
   padding: 0;
 }
 
+.as_logo_link {
+  align-items: center;
+  display: inline-flex;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.as_logo_wordmark {
+  background: linear-gradient(180deg, #f1f6f3 0%, #4a4e52 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-philosopher), "Philosopher", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.05;
+  text-transform: capitalize;
+}
+
 .as_menu_parent {
   background: none;
   border: none;
@@ -350,6 +371,18 @@ h6,
   margin-top: 10px;
 }
 
+.as_legal_required {
+  color: #f4a636;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.as_legal_optional {
+  color: #a3a3a3;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
 .as_legal_list--check {
   list-style: none;
   padding-left: 0;
@@ -601,7 +634,236 @@ h6,
   text-underline-offset: 3px;
 }
 
+/* Home page */
+.as_banner_wrapper::before {
+  background: rgba(8, 0, 20, 0.58);
+  content: "";
+  inset: 0;
+  position: absolute;
+  z-index: 0;
+}
+
+.as_banner_wrapper > div {
+  position: relative;
+  z-index: 1;
+}
+
+.as_banner_detail h5 {
+  color: #f4a636;
+  font-weight: 700;
+}
+
+.as_home_vision_tagline {
+  color: #f4a636;
+  font-family: var(--font-philosopher), "Philosopher", sans-serif;
+  font-size: 22px;
+  margin: 8px 0 18px;
+  text-transform: capitalize;
+}
+
+.as_home_vision_lead {
+  margin: 0 auto 36px;
+  max-width: 860px;
+}
+
+.as_home_section_lead {
+  margin: 0 auto 32px;
+  max-width: 760px;
+}
+
+.as_home_feature_box {
+  background: rgba(15, 2, 33, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  min-height: 100%;
+  padding: 28px 20px 24px;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.as_home_feature_box:hover {
+  border-color: rgba(244, 166, 54, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+}
+
+.as_home_feature_box .as_sign {
+  display: inline-flex;
+  margin-bottom: 14px;
+}
+
+.as_home_feature_box h5 {
+  color: #ffffff;
+  font-size: 22px;
+  margin: 0 0 6px;
+  text-transform: capitalize;
+}
+
+.as_home_feature_subtitle {
+  color: #f4a636;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.as_home_feature_desc {
+  color: #8b89a3;
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.as_home_offerings_row {
+  margin-top: 8px;
+  text-align: left;
+}
+
+.as_home_offering_card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  height: 100%;
+  margin-bottom: 24px;
+  padding: 26px 24px 22px;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.as_home_offering_card:hover {
+  border-color: rgba(92, 16, 192, 0.45);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+.as_home_offering_icon {
+  align-items: center;
+  background: linear-gradient(
+    135deg,
+    rgba(92, 16, 192, 0.35) 0%,
+    rgba(244, 166, 54, 0.2) 100%
+  );
+  border-radius: 50%;
+  display: inline-flex;
+  height: 52px;
+  justify-content: center;
+  margin-bottom: 16px;
+  width: 52px;
+}
+
+.as_home_offering_icon svg {
+  height: 28px;
+  width: 28px;
+}
+
+.as_home_offering_card .as_subheading {
+  color: #ffffff;
+  margin: 0 0 10px;
+}
+
+.as_home_contact_row {
+  margin-top: 8px;
+}
+
+.as_home_contact_card {
+  background: linear-gradient(
+    155deg,
+    rgba(42, 10, 94, 0.45) 0%,
+    rgba(15, 2, 33, 0.65) 100%
+  );
+  border: 1px solid rgba(244, 166, 54, 0.2);
+  border-radius: 12px;
+  height: 100%;
+  margin-bottom: 24px;
+  padding: 28px 24px 22px;
+}
+
+.as_home_contact_card .as_subheading {
+  color: #ffffff;
+  margin: 0 0 10px;
+}
+
+.as_home_contact_link {
+  color: #f4a636;
+  display: inline-block;
+  font-weight: 700;
+  margin-top: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.as_home_contact_link:hover {
+  color: #ffffff;
+}
+
+.as_home_email_cta {
+  align-items: center;
+  background: linear-gradient(
+    145deg,
+    rgba(42, 10, 94, 0.35) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  border: 1px solid rgba(244, 166, 54, 0.25);
+  border-radius: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 920px;
+  padding: 36px 32px;
+  text-align: left;
+}
+
+.as_home_email_cta__icon {
+  align-items: center;
+  background: rgba(244, 166, 54, 0.15);
+  border-radius: 50%;
+  display: flex;
+  flex-shrink: 0;
+  height: 64px;
+  justify-content: center;
+  width: 64px;
+}
+
+.as_home_email_cta__content {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.as_home_email_cta__title {
+  font-size: 30px;
+  margin: 0 0 8px;
+}
+
+.as_home_email_cta__content p {
+  margin: 0;
+}
+
+.as_home_email_btn {
+  flex: 0 1 auto;
+  min-width: min(100%, 220px);
+}
+
 @media (max-width: 991px) {
+  .as_home_email_cta {
+    flex-direction: column;
+    padding: 28px 22px;
+    text-align: center;
+  }
+
+  .as_home_email_cta__content {
+    text-align: center;
+  }
+
+  .as_home_email_btn {
+    min-width: 100%;
+  }
+
   .as_legal_sidebar {
     margin-top: 12px;
     position: static;

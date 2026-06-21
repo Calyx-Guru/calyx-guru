@@ -1,13 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
-import {
-  logoImg,
-  mailIcon,
-  mapIcon,
-  phoneIcon,
-  planeIcon,
-} from "@/assets";
+import { mailIcon, mapIcon, planeIcon } from "@/assets";
+import { SiteLogo } from "@/components/home/SiteLogo";
 import { SUPPORT_EMAIL } from "@/config/constants";
+import Image from "next/image";
 
 export function SiteFooter() {
   return (
@@ -21,9 +15,7 @@ export function SiteFooter() {
                   <div className="col-lg-3 col-md-6 col-sm-12">
                     <div className="as_footer_widget">
                       <div className="as_footer_logo">
-                        <Link href="/">
-                          <Image src={logoImg} alt="Calyx Guru" />
-                        </Link>
+                        <SiteLogo />
                       </div>
                       <p>
                         Calyx Guru — astrology-inspired guidance and mindful
@@ -32,13 +24,7 @@ export function SiteFooter() {
                       <ul className="as_contact_list">
                         <li>
                           <Image src={mapIcon} alt="" />
-                          <p>NY 10018, California, USA</p>
-                        </li>
-                        <li>
-                          <Image src={phoneIcon} alt="" />
-                          <p>
-                            <a href="tel:+911800124105">+ (91) 1800-124-105</a>
-                          </p>
+                          <p>L6C 2J1, Markham, CA</p>
                         </li>
                         <li>
                           <Image src={mailIcon} alt="" />
@@ -52,61 +38,17 @@ export function SiteFooter() {
                     </div>
                   </div>
                   <div className="col-lg-3 col-md-6 col-sm-12">
-                    <div className="as_footer_widget">
-                      <h3 className="as_footer_heading">Quick Links</h3>
-                      <ul>
-                        <li>
-                          <Link href="/">Home</Link>
-                        </li>
-                        <li>
-                          <a href="#">About Us</a>
-                        </li>
-                        <li>
-                          <a href="#">Blog</a>
-                        </li>
-                        <li>
-                          <Link href="/privacy-policy">Privacy Policy</Link>
-                        </li>
-                        <li>
-                          <Link href="/terms-of-service">Terms of Service</Link>
-                        </li>
-                        <li>
-                          <Link href="/delete-account">Delete account</Link>
-                        </li>
-                        <li>
-                          <a href="#">Contact Us</a>
-                        </li>
-                      </ul>
-                    </div>
+                    <div className="as_footer_widget"></div>
                   </div>
                   <div className="col-lg-3 col-md-6 col-sm-12">
-                    <div className="as_footer_widget">
-                      <h3 className="as_footer_heading">Horoscope Forecasts</h3>
-                      <ul>
-                        <li>
-                          <a href="#">My Daily Horoscope</a>
-                        </li>
-                        <li>
-                          <a href="#">My Weekly Horoscope</a>
-                        </li>
-                        <li>
-                          <a href="#">My Monthly Horoscope</a>
-                        </li>
-                        <li>
-                          <a href="#">My Love Horoscope</a>
-                        </li>
-                        <li>
-                          <a href="#">My Career Horoscope</a>
-                        </li>
-                      </ul>
-                    </div>
+                    <div className="as_footer_widget"></div>
                   </div>
                   <div className="col-lg-3 col-md-6 col-sm-12">
                     <div className="as_footer_widget">
                       <h3 className="as_footer_heading">Our Newsletter</h3>
                       <p>
-                        Get updates on new features, horoscope insights, and
-                        app releases.
+                        Get updates on new features, horoscope insights, and app
+                        releases.
                       </p>
                       <div className="as_newsletter_wrapper">
                         <div className="as_newsletter_box">

@@ -182,6 +182,73 @@ export default function DeleteAccount() {
                   </p>
                 </div>
 
+                <h3 className="as_legal_subheading">What to include in your email</h3>
+                <p className="as_text_color">
+                  To help us verify and process your request, please include the
+                  following details in your message:
+                </p>
+                <ul className="as_legal_list">
+                  <li>
+                    <strong>Google Play Gamer Name</strong>{" "}
+                    <span className="as_legal_required">(required)</span>
+                    <br />
+                    <span className="as_text_color">
+                      For example, <em>DragonSlayer99</em>. You can find this in
+                      the Google Play app (your Play Games profile / gamer name).
+                    </span>
+                  </li>
+                  <li>
+                    <strong>
+                      Verification question 1: &ldquo;When was your last time
+                      playing?&rdquo;
+                    </strong>{" "}
+                    <span className="as_legal_required">(required)</span>
+                    <br />
+                    <span className="as_text_color">
+                      Answer based on your own memory (for example, a date or
+                      approximate time frame).
+                    </span>
+                  </li>
+                  <li>
+                    <strong>
+                      Verification question 2: &ldquo;Provide the Google Play
+                      Order Number (GPA.xxxx-xxxx&hellip;) from any in-app
+                      purchase receipt found in your email.&rdquo;
+                    </strong>{" "}
+                    <span className="as_legal_optional">(optional)</span>
+                    <br />
+                    <span className="as_text_color">
+                      Only needed if you have made in-app purchases. Check your
+                      email for a Google Play receipt and copy the order number
+                      starting with <em>GPA.</em>
+                    </span>
+                  </li>
+                  <li>
+                    <strong>
+                      Verification question 3: &ldquo;Your Google Play unique
+                      ID&rdquo;
+                    </strong>{" "}
+                    <span className="as_legal_optional">(optional)</span>
+                    <br />
+                    <span className="as_text_color">
+                      Open our app, go to <strong>Settings</strong> &rarr;{" "}
+                      <strong>Account Information</strong>, and copy your Google
+                      Play user ID shown there.
+                    </span>
+                  </li>
+                  <li>
+                    <strong>Contact email</strong>{" "}
+                    <span className="as_legal_optional">(optional)</span>
+                    <br />
+                    <span className="as_text_color">
+                      An email address where we can confirm your data has been
+                      deleted. We only use this to reply; it does not need to
+                      match an account. Include this only if your contact email
+                      is different from the address you send the request from.
+                    </span>
+                  </li>
+                </ul>
+
                 <p className="as_legal_email_timeline as_text_color">
                   We will verify your request and process it as soon as
                   possible, usually within 30 days as complication.

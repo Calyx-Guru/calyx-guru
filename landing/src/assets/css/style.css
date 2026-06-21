@@ -362,7 +362,7 @@ button.as_btn {
 }
 .as_logo {
     display: flex;
-    padding: 10px 0 0;
+    padding: 0;
 }
 .as_menu ul {
     padding: 0;
@@ -881,14 +881,16 @@ button.as_btn {
     font-size: 40px;
 }
 .as_about_inner1 p {
-    padding: 0px 0px 15px 35px !important;
+    align-items: center;
+    display: flex;
+    gap: 10px;
     margin: 0;
-    position: relative;
+    padding: 0 0 15px !important;
 }
 .as_about_inner1 p span {
-    position: absolute;
-    left: 0;
-    top: 0px;
+    display: inline-flex;
+    flex-shrink: 0;
+    position: static;
 }
 .as_about_inner1 p span svg {
     width: 25px;
@@ -1469,8 +1471,9 @@ button.as_btn {
 
 /* zodiec sign css end */
 span.as_title_line {
+    display: flex;
+    justify-content: center;
     padding: 5px 0 10px;
-    display: block;
 }
 /* blog css start */
 .as_blog_wrapper {

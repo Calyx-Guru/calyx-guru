@@ -1,9 +1,9 @@
 "use client";
 
+import { menuIcon } from "@/assets";
+import { SiteLogo } from "@/components/home/SiteLogo";
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useState } from "react";
-import { logoImg, menuIcon } from "@/assets";
 
 function SubmenuArrow() {
   return (
@@ -48,11 +48,7 @@ export function SiteHeader() {
       <div className="container">
         <div className="row">
           <div className="col-lg-3 col-md-3 col-sm-4 col-xs-6">
-            <div className="as_logo">
-              <Link href="/">
-                <Image src={logoImg} alt="" priority />
-              </Link>
-            </div>
+            <SiteLogo className="pt-2 pb-2" priority />
           </div>
           <div className="col-lg-9 col-md-9 col-sm-8 col-xs-6">
             <div className="as_right_info">
@@ -68,102 +64,7 @@ export function SiteHeader() {
                 >
                   <Image src={menuIcon} alt="" />
                 </button>
-                <div className={`as_menu${menuOpen ? " open" : ""}`}>
-                  <ul>
-                    <li>
-                      <Link href="/" className="active">
-                        home
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="#">about us</Link>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleSubmenu("pages");
-                        }}
-                      >
-                        pages
-                      </a>
-                      <SubmenuArrow />
-                      <ul
-                        className={`as_submenu${openSubmenu === "pages" ? " openSub_menu" : ""}`}
-                      >
-                        <li>
-                          <Link href="#">service</Link>
-                        </li>
-                        <li>
-                          <Link href="#">service single</Link>
-                        </li>
-                        <li>
-                          <Link href="#">appointment</Link>
-                        </li>
-                        <li>
-                          <Link href="#">pricing plans</Link>
-                        </li>
-                        <li>
-                          <Link href="/delete-account">delete account</Link>
-                        </li>
-                        <li>
-                          <Link href="#">404</Link>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleSubmenu("shop");
-                        }}
-                      >
-                        shop
-                      </a>
-                      <SubmenuArrow />
-                      <ul
-                        className={`as_submenu${openSubmenu === "shop" ? " openSub_menu" : ""}`}
-                      >
-                        <li>
-                          <Link href="#">Shop</Link>
-                        </li>
-                        <li>
-                          <Link href="#">Shop Single</Link>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleSubmenu("blog");
-                        }}
-                      >
-                        blog
-                      </a>
-                      <SubmenuArrow />
-                      <ul
-                        className={`as_submenu${openSubmenu === "blog" ? " openSub_menu" : ""}`}
-                      >
-                        <li>
-                          <Link href="#">blog</Link>
-                        </li>
-                        <li>
-                          <Link href="#">blog single</Link>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <Link href="#">contact</Link>
-                    </li>
-                  </ul>
-                </div>
+                <div className={`as_menu${menuOpen ? " open" : ""}`}></div>
               </div>
             </div>
           </div>
