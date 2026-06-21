@@ -63,10 +63,10 @@ export const supabase: SupabaseClient = ENV.USE_MOCK_DATA
     });
 
 if (!ENV.USE_MOCK_DATA) {
-  console.log("Using real Supabase client");
+  console.log("Using real Supabase client (USE_MOCK_DATA=false)");
 } else {
   console.log(
-    "Using mock Supabase client - set USE_MOCK_DATA to false in constants/general.ts to use real API",
+    "Using mock Supabase client (USE_MOCK_DATA=true) — set EXPO_PUBLIC_USE_MOCK_DATA=false in .env.local and restart Metro with cache clear",
   );
 }
 

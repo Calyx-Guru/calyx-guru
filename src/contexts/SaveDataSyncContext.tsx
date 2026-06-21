@@ -61,7 +61,7 @@ export function SaveDataSyncProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { googlePlayUserId, user } = useSupabaseAuth();
+  const { googlePlayUserId, user, userEmail } = useSupabaseAuth();
   const { profile, applyServerProfile } = useUserProfile();
   const { userState, applyServerUserState } = useUserState();
   const [syncStatus, setSyncStatus] = useState(getSavedataSyncStatus);
@@ -69,45 +69,57 @@ export function SaveDataSyncProvider({
   useEffect(() => subscribeSavedataSync(setSyncStatus), []);
 
   const userId = googlePlayUserId ?? user?.id ?? null;
-  const isEnabled = isSavedataStorageEnabled(userId);
-  const debugInfo = useMemo(() => getSavedataDebugInfo(userId), [userId]);
+  const storagePathKey = userEmail;
+  const isEnabled = isSavedataStorageEnabled(userId, storagePathKey);
+  const debugInfo = useMemo(
+    () => getSavedataDebugInfo(userId, storagePathKey),
+    [storagePathKey, userId],
+  );
 
   const readProfile = useCallback(async () => {
-    if (!userId) return null;
-    return hydrateSavedataFromStorage<UserProfile>(userId, "profile");
-  }, [userId]);
+    if (!userId || !storagePathKey) return null;
+    return hydrateSavedataFromStorage<UserProfile>(
+      storagePathKey,
+      userId,
+      "profile",
+    );
+  }, [storagePathKey, userId]);
 
   const readState = useCallback(async () => {
-    if (!userId) return null;
-    return hydrateSavedataFromStorage<UserState>(userId, "state");
-  }, [userId]);
+    if (!userId || !storagePathKey) return null;
+    return hydrateSavedataFromStorage<UserState>(
+      storagePathKey,
+      userId,
+      "state",
+    );
+  }, [storagePathKey, userId]);
 
   const upsertProfile = useCallback(
     async (profile: UserProfile) => {
-      if (!userId) return;
-      await upsertSavedataJson(userId, "profile", { ...profile, id: userId });
+      if (!userId || !storagePathKey) return;
+      await upsertSavedataJson(storagePathKey, "profile", { ...profile, id: userId });
       applyServerProfile({ ...profile, id: userId });
       await storage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
     },
-    [applyServerProfile, userId],
+    [applyServerProfile, storagePathKey, userId],
   );
 
   const upsertState = useCallback(
     async (state: UserState) => {
-      if (!userId) return;
-      await upsertSavedataJson(userId, "state", { ...state, id: userId });
+      if (!userId || !storagePathKey) return;
+      await upsertSavedataJson(storagePathKey, "state", { ...state, id: userId });
       applyServerUserState({ ...state, id: userId });
       await storage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
     },
-    [applyServerUserState, userId],
+    [applyServerUserState, storagePathKey, userId],
   );
 
   const refreshFromStorage = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || !storagePathKey) return;
 
     const [remoteProfile, remoteState] = await Promise.all([
-      fetchSavedataJson<UserProfile>(userId, "profile"),
-      fetchSavedataJson<UserState>(userId, "state"),
+      fetchSavedataJson<UserProfile>(storagePathKey, "profile"),
+      fetchSavedataJson<UserState>(storagePathKey, "state"),
     ]);
 
     if (remoteProfile) {
@@ -121,57 +133,67 @@ export function SaveDataSyncProvider({
       applyServerUserState(userState);
       await storage.setItem(STATE_STORAGE_KEY, JSON.stringify(userState));
     }
-  }, [applyServerProfile, applyServerUserState, userId]);
+  }, [applyServerProfile, applyServerUserState, storagePathKey, userId]);
 
   const pushLocalProfileToRemote =
     useCallback(async (): Promise<SavedataSyncActionResult> => {
-      const path = userId ? getSavedataObjectPath(userId, "profile") : undefined;
-      if (!userId || !profile) {
+      const path = storagePathKey
+        ? getSavedataObjectPath(storagePathKey, "profile")
+        : undefined;
+      if (!userId || !storagePathKey || !profile) {
         return {
           ok: false,
           kind: "profile",
           path,
-          message: "No Google Play user or local profile loaded",
+          message: "No signed-in user email or local profile loaded",
         };
       }
       try {
-        await upsertSavedataJson(userId, "profile", { ...profile, id: userId });
+        await upsertSavedataJson(storagePathKey, "profile", {
+          ...profile,
+          id: userId,
+        });
         return { ok: true, kind: "profile", path, message: "Profile uploaded" };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         return { ok: false, kind: "profile", path, message };
       }
-    }, [profile, userId]);
+    }, [profile, storagePathKey, userId]);
 
   const pushLocalStateToRemote =
     useCallback(async (): Promise<SavedataSyncActionResult> => {
-      const path = userId ? getSavedataObjectPath(userId, "state") : undefined;
-      if (!userId || !userState) {
+      const path = storagePathKey
+        ? getSavedataObjectPath(storagePathKey, "state")
+        : undefined;
+      if (!userId || !storagePathKey || !userState) {
         return {
           ok: false,
           kind: "state",
           path,
-          message: "No Google Play user or local state loaded",
+          message: "No signed-in user email or local state loaded",
         };
       }
       try {
-        await upsertSavedataJson(userId, "state", { ...userState, id: userId });
+        await upsertSavedataJson(storagePathKey, "state", {
+          ...userState,
+          id: userId,
+        });
         return { ok: true, kind: "state", path, message: "State uploaded" };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         return { ok: false, kind: "state", path, message };
       }
-    }, [userId, userState]);
+    }, [storagePathKey, userId, userState]);
 
   const pullAllFromRemote = useCallback(async (): Promise<
     SavedataSyncActionResult[]
   > => {
-    if (!userId) {
+    if (!userId || !storagePathKey) {
       return [
         {
           ok: false,
           kind: "all",
-          message: "No Google Play user signed in",
+          message: "No signed-in user with email available",
         },
       ];
     }
@@ -179,7 +201,10 @@ export function SaveDataSyncProvider({
     const results: SavedataSyncActionResult[] = [];
 
     try {
-      const remoteProfile = await fetchSavedataJson<UserProfile>(userId, "profile");
+      const remoteProfile = await fetchSavedataJson<UserProfile>(
+        storagePathKey,
+        "profile",
+      );
       if (remoteProfile) {
         const nextProfile = { ...remoteProfile, id: userId };
         applyServerProfile(nextProfile);
@@ -187,14 +212,14 @@ export function SaveDataSyncProvider({
         results.push({
           ok: true,
           kind: "profile",
-          path: getSavedataObjectPath(userId, "profile"),
+          path: getSavedataObjectPath(storagePathKey, "profile"),
           message: "Profile downloaded and applied",
         });
       } else {
         results.push({
           ok: false,
           kind: "profile",
-          path: getSavedataObjectPath(userId, "profile"),
+          path: getSavedataObjectPath(storagePathKey, "profile"),
           message: "No remote profile file found",
         });
       }
@@ -202,13 +227,16 @@ export function SaveDataSyncProvider({
       results.push({
         ok: false,
         kind: "profile",
-        path: getSavedataObjectPath(userId, "profile"),
+        path: getSavedataObjectPath(storagePathKey, "profile"),
         message: err instanceof Error ? err.message : String(err),
       });
     }
 
     try {
-      const remoteState = await fetchSavedataJson<UserState>(userId, "state");
+      const remoteState = await fetchSavedataJson<UserState>(
+        storagePathKey,
+        "state",
+      );
       if (remoteState) {
         const nextState = { ...remoteState, id: userId };
         applyServerUserState(nextState);
@@ -216,14 +244,14 @@ export function SaveDataSyncProvider({
         results.push({
           ok: true,
           kind: "state",
-          path: getSavedataObjectPath(userId, "state"),
+          path: getSavedataObjectPath(storagePathKey, "state"),
           message: "State downloaded and applied",
         });
       } else {
         results.push({
           ok: false,
           kind: "state",
-          path: getSavedataObjectPath(userId, "state"),
+          path: getSavedataObjectPath(storagePathKey, "state"),
           message: "No remote state file found",
         });
       }
@@ -231,13 +259,13 @@ export function SaveDataSyncProvider({
       results.push({
         ok: false,
         kind: "state",
-        path: getSavedataObjectPath(userId, "state"),
+        path: getSavedataObjectPath(storagePathKey, "state"),
         message: err instanceof Error ? err.message : String(err),
       });
     }
 
     return results;
-  }, [applyServerProfile, applyServerUserState, userId]);
+  }, [applyServerProfile, applyServerUserState, storagePathKey, userId]);
 
   useEffect(() => {
     if (!userId) {

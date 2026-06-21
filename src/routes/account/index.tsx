@@ -21,6 +21,7 @@ export function RouteAccount() {
   const {
     user,
     googlePlayUserId,
+    userEmail,
     isGooglePlaySignedIn,
     isSignedIn,
   } = useSupabaseAuth();
@@ -48,7 +49,10 @@ export function RouteAccount() {
   ]);
 
   const email =
-    profile?.email?.trim() || user?.email?.trim() || notAvailable;
+    userEmail?.trim() ||
+    profile?.email?.trim() ||
+    user?.email?.trim() ||
+    notAvailable;
 
   const rows = [
     { label: t("auth.accountType"), value: accountType },

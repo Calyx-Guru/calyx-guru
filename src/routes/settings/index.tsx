@@ -9,10 +9,12 @@ import { isGuestUserId } from "@/lib/app/guestMode";
 import {
   getStoredGooglePlayUserId,
 } from "@/lib/auth/googlePlaySignIn";
+import { getStoredUserEmail } from "@/lib/auth/userEmailStorage";
 import { useTranslation } from "@/hooks/useTranslation";
 import { router, type Href } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Pressable,
   ScrollView,
@@ -25,9 +27,11 @@ async function resolveDeleteTargets(
   googlePlayUserId: string | null,
   supabaseUserId: string | null,
   profileId: string | undefined,
+  userEmail: string | null,
 ) {
   const storedGooglePlayUserId =
     googlePlayUserId ?? (await getStoredGooglePlayUserId());
+  const storedUserEmail = userEmail ?? (await getStoredUserEmail());
   const guestUserId =
     profileId && isGuestUserId(profileId) ? profileId : null;
 
@@ -35,6 +39,7 @@ async function resolveDeleteTargets(
     googlePlayUserId: storedGooglePlayUserId,
     supabaseUserId,
     guestUserId,
+    userEmail: storedUserEmail,
   };
 }
 
@@ -47,26 +52,35 @@ export function RouteSettings() {
     isSignedIn,
     googlePlayUserId,
     user,
+    userEmail,
   } = useSupabaseAuth();
   const { profile } = useUserProfile();
   const { resetProgression } = useUserState();
   const { resetAppState } = useAppState();
   const { t } = useTranslation();
+  const [isBlocking, setIsBlocking] = useState(false);
 
   const showDeleteAccount =
     isGooglePlaySignedIn || isSignedIn || isGuestUserId(profile?.id);
 
   const handleLogout = useCallback(async () => {
+    if (isBlocking) return;
+
+    setIsBlocking(true);
     try {
       await logout();
       router.replace("/");
     } catch (error) {
       console.error("Logout failed:", error);
       Alert.alert(t("auth.logout"), t("auth.logoutFailed"));
+      setIsBlocking(false);
     }
-  }, [logout, t]);
+  }, [isBlocking, logout, t]);
 
   const handleDeleteAccount = useCallback(async () => {
+    if (isBlocking) return;
+
+    setIsBlocking(true);
     try {
       await deleteAccountAndData();
       resetAppState();
@@ -74,15 +88,20 @@ export function RouteSettings() {
     } catch (error) {
       console.error("Delete account failed:", error);
       Alert.alert(t("auth.deleteAccountTitle"), t("auth.deleteAccountFailed"));
+      setIsBlocking(false);
     }
-  }, [deleteAccountAndData, resetAppState, t]);
+  }, [deleteAccountAndData, isBlocking, resetAppState, t]);
 
   const handleDeleteProgressionOnly = useCallback(async () => {
+    if (isBlocking) return;
+
+    setIsBlocking(true);
     try {
       const target = await resolveDeleteTargets(
         googlePlayUserId,
         user?.id ?? null,
         profile?.id,
+        userEmail,
       );
       await deleteUserProgression(target, resetProgression);
       resetAppState();
@@ -92,8 +111,19 @@ export function RouteSettings() {
         t("auth.deleteAccountTitle"),
         t("auth.deleteProgressionFailed"),
       );
+    } finally {
+      setIsBlocking(false);
     }
-  }, [googlePlayUserId, profile?.id, resetAppState, resetProgression, t, user?.id]);
+  }, [
+    googlePlayUserId,
+    isBlocking,
+    profile?.id,
+    resetAppState,
+    resetProgression,
+    t,
+    user?.id,
+    userEmail,
+  ]);
 
   const confirmDeleteAccount = useCallback(() => {
     Alert.alert(
@@ -145,11 +175,12 @@ export function RouteSettings() {
   }, [confirmDeleteAccount, confirmDeleteProgression, t]);
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.root}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={!isBlocking}
+      >
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Language</Text>
         {SUPPORTED_LANGUAGES.map((lang) => (
@@ -196,19 +227,23 @@ export function RouteSettings() {
           <Text style={styles.optionLabel}>{t("auth.accountInformation")}</Text>
         </Pressable>
         <Pressable
-          onPress={handleLogout}
-          style={styles.option}
+          onPress={() => void handleLogout()}
+          disabled={isBlocking}
+          style={[styles.option, isBlocking && styles.optionDisabled]}
           accessibilityRole="button"
           accessibilityLabel={t("auth.logout")}
+          accessibilityState={{ disabled: isBlocking, busy: isBlocking }}
         >
           <Text style={styles.logoutLabel}>{t("auth.logout")}</Text>
         </Pressable>
         {showDeleteAccount ? (
           <Pressable
             onPress={handleDeleteAccountAndData}
-            style={styles.option}
+            disabled={isBlocking}
+            style={[styles.option, isBlocking && styles.optionDisabled]}
             accessibilityRole="button"
             accessibilityLabel={t("auth.deleteAccountTitle")}
+            accessibilityState={{ disabled: isBlocking }}
           >
             <Text style={styles.deleteAccountLabel}>
               {t("auth.deleteAccountTitle")}
@@ -230,7 +265,14 @@ export function RouteSettings() {
           </Pressable>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+
+      {isBlocking ? (
+        <View style={styles.blockingOverlay} accessibilityLabel="Loading">
+          <ActivityIndicator size="large" color="#0B3C49" />
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -265,6 +307,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#ffffff",
   },
+  optionDisabled: {
+    opacity: 0.6,
+  },
   optionSelected: {
     backgroundColor: "#d6a12d",
   },
@@ -282,5 +327,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#7f1d1d",
+  },
+  blockingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    backgroundColor: "rgba(244, 247, 248, 0.72)",
+    justifyContent: "center",
   },
 });

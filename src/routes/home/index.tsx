@@ -1,37 +1,36 @@
 import splashIcon from "@/assets/images/splash-icon.png";
-import { ButtonPrimary } from "@/components/typography/ButtonPrimary";
-import { HeadingPrimary } from "@/components/typography/HeadingPrimary";
 import { TextInput } from "@/components/typography/TextInput";
-import { AppAppearanceContext } from "@/contexts/AppAppearanceContext";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import { enableGuestMode } from "@/lib/app/guestMode";
 import {
+  GooglePlaySignInUnavailableError,
   GoogleSignInCancelledError,
   isGooglePlaySignInAvailable,
 } from "@/lib/auth/googlePlaySignIn";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const SPLASH_BACKGROUND = "#030a1e";
+const ACCENT_COLOR = "#01875f";
 
 export function RouteHome() {
   const insets = useSafeAreaInsets();
-  const { colors } = useContext(AppAppearanceContext);
   const { t } = useTranslation();
   const {
     isGooglePlaySignedIn,
@@ -40,33 +39,43 @@ export function RouteHome() {
     signInWithGooglePlay,
     signInWithEmailPassword,
   } = useSupabaseAuth();
-  const { isLoading: isLoadingProfile, initializeProfileForUser } =
-    useUserProfile();
-  const { isLoading: isLoadingUserState, initializeUserStateForUser } =
-    useUserState();
+  const {
+    isLoading: isLoadingProfile,
+    profile,
+    initializeProfileForUser,
+  } = useUserProfile();
+  const {
+    isLoading: isLoadingUserState,
+    userState,
+    initializeUserStateForUser,
+  } = useUserState();
   const [isStartingGuest, setIsStartingGuest] = useState(false);
   const [isSigningInWithGoogle, setIsSigningInWithGoogle] = useState(false);
-  const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSigningInWithEmail, setIsSigningInWithEmail] = useState(false);
+  const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
   const showGooglePlaySignIn = isGooglePlaySignInAvailable();
   const hasAutoNavigatedRef = useRef(false);
 
   const isAuthenticated = isGooglePlaySignedIn || isSignedIn;
   const isInitialDataLoading =
     isAuthLoading || isLoadingProfile || isLoadingUserState;
+  const isSessionDataReady =
+    !isInitialDataLoading && profile != null && userState != null;
+  const isBusy =
+    isStartingGuest || isSigningInWithGoogle || isSigningInWithEmail;
 
   useEffect(() => {
     if (!isAuthenticated) {
       hasAutoNavigatedRef.current = false;
       return;
     }
-    if (isInitialDataLoading || hasAutoNavigatedRef.current) return;
+    if (!isSessionDataReady || hasAutoNavigatedRef.current) return;
 
     hasAutoNavigatedRef.current = true;
     router.replace("/main-menu");
-  }, [isAuthenticated, isInitialDataLoading]);
+  }, [isAuthenticated, isSessionDataReady]);
 
   const handleGooglePlayLogin = useCallback(async () => {
     if (isSigningInWithGoogle) return;
@@ -76,6 +85,10 @@ export function RouteHome() {
       await signInWithGooglePlay();
     } catch (error) {
       if (error instanceof GoogleSignInCancelledError) {
+        return;
+      }
+      if (error instanceof GooglePlaySignInUnavailableError) {
+        console.warn("Google Play sign-in unavailable:", error.message);
         return;
       }
       console.error("Google Play sign-in failed:", error);
@@ -137,45 +150,80 @@ export function RouteHome() {
     }
   }, [email, password, signInWithEmailPassword, t]);
 
-  if (isInitialDataLoading || isAuthenticated) {
+  if (isInitialDataLoading || (isAuthenticated && !isSessionDataReady)) {
     return (
-      <View style={[styles.splash, { backgroundColor: SPLASH_BACKGROUND }]}>
+      <View style={styles.loading}>
         <Image
           source={splashIcon}
-          style={styles.splashIcon}
+          style={styles.loadingIcon}
           contentFit="contain"
         />
+        <Text style={styles.loadingLabel}>{t("auth.welcome")}</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <Image source={splashIcon} style={styles.logo} contentFit="contain" />
-        <HeadingPrimary>{t("auth.welcome")}</HeadingPrimary>
-      </View>
-
-      <View style={styles.actions}>
-        {showGooglePlaySignIn ? (
-          <View style={styles.buttonSlot}>
-            <ButtonPrimary
-              onPress={handleGooglePlayLogin}
-              disabled={isSigningInWithGoogle || isStartingGuest}
-            >
-              {t("auth.signInGooglePlay")}
-            </ButtonPrimary>
-          </View>
-        ) : null}
-        <View style={styles.buttonSlot}>
-          <ButtonPrimary
-            onPress={handlePlayAsGuest}
-            disabled={isStartingGuest || isSigningInWithGoogle}
-          >
-            {t("auth.playAsGuest")}
-          </ButtonPrimary>
+    <View style={styles.root}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Image source={splashIcon} style={styles.logo} contentFit="contain" />
+          <Text style={styles.title}>{t("auth.welcome")}</Text>
         </View>
-      </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t("auth.signIn")}</Text>
+          {showGooglePlaySignIn ? (
+            <Pressable
+              onPress={() => void handleGooglePlayLogin()}
+              disabled={isBusy}
+              style={({ pressed }) => [
+                styles.option,
+                styles.optionAccent,
+                (pressed || isSigningInWithGoogle) && styles.optionPressed,
+                isBusy && styles.optionDisabled,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={t("auth.signInGooglePlay")}
+            >
+              <View style={styles.optionContent}>
+                <Ionicons
+                  name="logo-google-playstore"
+                  size={20}
+                  color="#ffffff"
+                />
+                <Text style={styles.optionLabelAccent}>
+                  {isSigningInWithGoogle
+                    ? t("auth.signingIn")
+                    : t("auth.signInGooglePlay")}
+                </Text>
+              </View>
+            </Pressable>
+          ) : null}
+          <Pressable
+            onPress={() => void handlePlayAsGuest()}
+            disabled={isBusy}
+            style={({ pressed }) => [
+              styles.option,
+              (pressed || isStartingGuest) && styles.optionPressed,
+              isBusy && styles.optionDisabled,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={t("auth.playAsGuest")}
+          >
+            <View style={styles.optionContent}>
+              <Ionicons name="person-outline" size={20} color="#0B3C49" />
+              <Text style={styles.optionLabel}>
+                {isStartingGuest ? t("auth.signingIn") : t("auth.playAsGuest")}
+              </Text>
+            </View>
+          </Pressable>
+          <Text style={styles.hint}>{t("auth.guestDataLossHint")}</Text>
+        </View>
+      </ScrollView>
 
       <Pressable
         style={({ pressed }) => [
@@ -184,7 +232,7 @@ export function RouteHome() {
             right: Math.max(insets.right, 16),
             bottom: Math.max(insets.bottom, 16),
           },
-          pressed && styles.emailSignInButtonPressed,
+          pressed && styles.optionPressed,
         ]}
         onPress={() => setIsEmailModalVisible(true)}
         accessibilityRole="button"
@@ -204,12 +252,7 @@ export function RouteHome() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <Pressable style={styles.modalBackdrop} onPress={closeEmailModal} />
-          <View
-            style={[
-              styles.modalCard,
-              { backgroundColor: colors.surface ?? "#ffffff" },
-            ]}
-          >
+          <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>{t("auth.signIn")}</Text>
             <TextInput
               label={t("forms.labels.email")}
@@ -233,7 +276,7 @@ export function RouteHome() {
               <Pressable
                 style={({ pressed }) => [
                   styles.modalSecondaryButton,
-                  pressed && styles.modalButtonPressed,
+                  pressed && styles.optionPressed,
                 ]}
                 onPress={closeEmailModal}
                 disabled={isSigningInWithEmail}
@@ -245,14 +288,16 @@ export function RouteHome() {
               <Pressable
                 style={({ pressed }) => [
                   styles.modalPrimaryButton,
-                  pressed && styles.modalButtonPressed,
-                  isSigningInWithEmail && styles.modalButtonDisabled,
+                  pressed && styles.optionPressed,
+                  isSigningInWithEmail && styles.optionDisabled,
                 ]}
                 onPress={() => void handleEmailSignIn()}
                 disabled={isSigningInWithEmail}
               >
                 <Text style={styles.modalPrimaryLabel}>
-                  {isSigningInWithEmail ? t("auth.signingIn") : t("auth.signIn")}
+                  {isSigningInWithEmail
+                    ? t("auth.signingIn")
+                    : t("auth.signIn")}
                 </Text>
               </Pressable>
             </View>
@@ -264,52 +309,108 @@ export function RouteHome() {
 }
 
 const styles = StyleSheet.create({
-  splash: {
+  root: {
+    flex: 1,
+    backgroundColor: "#f4f7f8",
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 88,
+  },
+  loading: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#f4f7f8",
+    gap: 16,
   },
-  splashIcon: {
-    width: 200,
-    height: 200,
+  loadingIcon: {
+    width: 120,
+    height: 120,
   },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: "center",
+  loadingLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#0B3C49",
   },
   header: {
     alignItems: "center",
-    marginBottom: 48,
+    marginBottom: 28,
+    gap: 12,
   },
   logo: {
-    width: 160,
-    height: 160,
+    width: 96,
+    height: 96,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#0B3C49",
+    textAlign: "center",
+  },
+  section: {
     marginBottom: 24,
+    gap: 24,
   },
-  actions: {
-    gap: 16,
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#0B3C49",
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-  buttonSlot: {
-    width: "100%",
-    maxWidth: 360,
-    alignSelf: "center",
-    aspectRatio: 3,
+  option: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: "#ffffff",
+  },
+  optionAccent: {
+    backgroundColor: ACCENT_COLOR,
+  },
+  optionContent: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+  },
+  optionPressed: {
+    opacity: 0.85,
+  },
+  optionDisabled: {
+    opacity: 0.6,
+  },
+  optionLabel: {
+    flexShrink: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#0B3C49",
+  },
+  optionLabelAccent: {
+    flexShrink: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#ffffff",
+  },
+  hint: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#64748b",
+    marginTop: 4,
+    paddingHorizontal: 2,
   },
   emailSignInButton: {
     position: "absolute",
     paddingVertical: 10,
     paddingHorizontal: 14,
-    borderRadius: 999,
-    backgroundColor: "rgba(11, 60, 73, 0.92)",
-  },
-  emailSignInButtonPressed: {
-    opacity: 0.85,
+    borderRadius: 10,
+    backgroundColor: "#0B3C49",
   },
   emailSignInLabel: {
-    color: "#f8fafc",
     fontSize: 13,
     fontWeight: "600",
+    color: "#ffffff",
   },
   modalOverlay: {
     flex: 1,
@@ -321,7 +422,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.45)",
   },
   modalCard: {
-    borderRadius: 16,
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
     padding: 20,
     gap: 12,
     zIndex: 1,
@@ -347,12 +449,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 10,
     backgroundColor: "#0B3C49",
-  },
-  modalButtonPressed: {
-    opacity: 0.85,
-  },
-  modalButtonDisabled: {
-    opacity: 0.6,
   },
   modalSecondaryLabel: {
     color: "#0B3C49",

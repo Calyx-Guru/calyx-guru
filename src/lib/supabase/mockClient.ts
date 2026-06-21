@@ -109,6 +109,8 @@ export const createMockFromClient = () => {
           return {
             select: function () {
               return {
+                single: async () => createMockQueryResponse(_data),
+                maybeSingle: async () => createMockQueryResponse(_data),
                 then: async () => createMockQueryResponse(_data),
                 catch: () => {},
               };

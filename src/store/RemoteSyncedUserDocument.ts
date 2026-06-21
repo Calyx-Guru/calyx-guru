@@ -3,7 +3,9 @@
  */
 
 import { isGuestUserId } from '@/lib/app/guestMode';
+import { isStaleMockDevIdentity } from '@/lib/auth/mockDevIdentity';
 import { isSavedataStorageUserId } from '@/lib/auth/savedataUserId';
+import { getStoredUserEmail } from '@/lib/auth/userEmailStorage';
 import {
   hydrateSavedataFromStorage,
   resetSavedataSync,
@@ -62,6 +64,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   private debounceMs = REMOTE_DEBOUNCE_MS;
   private label: string;
   private currentUserId: string | null = null;
+  private currentStoragePathKey: string | null = null;
 
   constructor(private readonly cfg: RemoteSyncedUserDocumentConfig<T, S>) {
     this.debounceMs = cfg.debounceMs ?? REMOTE_DEBOUNCE_MS;
@@ -70,6 +73,10 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
   initializeForUser = async (userId: string | null): Promise<void> => {
     this.currentUserId = userId;
+    this.currentStoragePathKey =
+      userId && isSavedataStorageUserId(userId)
+        ? await getStoredUserEmail()
+        : null;
     this.remoteFlushEpoch++;
     this.cancelDebounce();
     this.needsAnotherRemoteWrite = false;
@@ -82,10 +89,12 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     if (
       userId &&
       isSavedataStorageUserId(userId) &&
-      this.cfg.savedataKind
+      this.cfg.savedataKind &&
+      this.currentStoragePathKey
     ) {
       try {
         const remote = await hydrateSavedataFromStorage<T>(
+          this.currentStoragePathKey,
           userId,
           this.cfg.savedataKind,
         );
@@ -156,21 +165,33 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
       if (loadEpoch !== this.remoteFlushEpoch) return;
       if (raw) {
         const parsed = JSON.parse(raw) as T;
-        const record = this.withUserId(parsed, userId);
-        this.patch({
-          [this.cfg.recordKey]: record,
-          isLoading: false,
-          error: null,
-        });
-        try {
-          await storage.setItem(this.cfg.storageKey, JSON.stringify(record));
-        } catch (e) {
-          console.error(`[${this.label}] Error persisting local record:`, e);
+        const parsedEmail =
+          typeof (parsed as { email?: unknown }).email === 'string'
+            ? (parsed as { email: string }).email
+            : undefined;
+
+        if (isStaleMockDevIdentity(parsed.id, parsedEmail)) {
+          console.warn(
+            `[${this.label}] Discarding stale mock-mode local cache for ${parsed.id}`,
+          );
+          await storage.removeItem(this.cfg.storageKey);
+        } else {
+          const record = this.withUserId(parsed, userId);
+          this.patch({
+            [this.cfg.recordKey]: record,
+            isLoading: false,
+            error: null,
+          });
+          try {
+            await storage.setItem(this.cfg.storageKey, JSON.stringify(record));
+          } catch (e) {
+            console.error(`[${this.label}] Error persisting local record:`, e);
+          }
+          if (shouldBackfillSavedata && userId) {
+            this.backfillSavedataToStorage(record, userId);
+          }
+          return;
         }
-        if (shouldBackfillSavedata && userId) {
-          this.backfillSavedataToStorage(record, userId);
-        }
-        return;
       }
     } catch (e) {
       console.error(`[${this.label}] Error reading local record:`, e);
@@ -210,6 +231,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
   clearRecord = async (): Promise<void> => {
     this.currentUserId = null;
+    this.currentStoragePathKey = null;
     this.remoteFlushEpoch++;
     this.cancelDebounce();
     this.needsAnotherRemoteWrite = false;
@@ -263,8 +285,13 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     }
   }
 
+  private shouldSkipRemoteSync(): boolean {
+    const userId = this.currentUserId ?? this.getRecord()?.id ?? null;
+    return this.getRemoteDisabled() || isLocalOnlyUserId(userId);
+  }
+
   private scheduleRemoteFlush(): void {
-    if (this.getRemoteDisabled() || isLocalOnlyUserId(this.getRecord()?.id)) return;
+    if (this.shouldSkipRemoteSync()) return;
     this.cancelDebounce();
     this.debounceTimer = setTimeout(() => {
       this.debounceTimer = null;
@@ -274,7 +301,8 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
   private scheduleSavedataFlush(): void {
     const userId = this.resolveSavedataUserId();
-    if (!userId || !this.cfg.savedataKind) {
+    const storagePathKey = this.currentStoragePathKey;
+    if (!userId || !storagePathKey || !this.cfg.savedataKind) {
       return;
     }
 
@@ -285,9 +313,9 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     };
 
     if (this.cfg.savedataKind === 'profile') {
-      scheduleSavedataProfileUpload(userId, getPayload);
+      scheduleSavedataProfileUpload(userId, storagePathKey, getPayload);
     } else {
-      scheduleSavedataStateUpload(userId, getPayload);
+      scheduleSavedataStateUpload(userId, storagePathKey, getPayload);
     }
   }
 
@@ -309,10 +337,16 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
 
   /** Upload local record when remote savedata file is missing (non-blocking). */
   private backfillSavedataToStorage(record: T, userId: string): void {
-    if (!this.cfg.savedataKind || !isSavedataStorageEnabled(userId)) return;
+    const storagePathKey = this.currentStoragePathKey;
+    if (
+      !this.cfg.savedataKind ||
+      !isSavedataStorageEnabled(userId, storagePathKey)
+    ) {
+      return;
+    }
 
     const payload = this.withUserId(record, userId);
-    void upsertSavedataJson(userId, this.cfg.savedataKind, payload)
+    void upsertSavedataJson(storagePathKey!, this.cfg.savedataKind, payload)
       .then(() => {
         console.info(
           `[${this.label}] Backfilled local savedata to storage in background`,
@@ -324,7 +358,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
   }
 
   private async flushRemote(): Promise<void> {
-    if (this.getRemoteDisabled() || isLocalOnlyUserId(this.getRecord()?.id)) return;
+    if (this.shouldSkipRemoteSync()) return;
 
     if (this.isRemoteWriting) {
       this.needsAnotherRemoteWrite = true;

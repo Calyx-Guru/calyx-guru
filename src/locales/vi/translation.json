@@ -118,6 +118,7 @@
     "googlePlayComingSoon": "Đăng nhập Google Play sẽ sớm có.",
     "googlePlaySignInFailed": "Không thể đăng nhập bằng Google Play. Vui lòng thử lại.",
     "guestStartFailed": "Không thể bắt đầu phiên khách. Vui lòng thử lại.",
+    "guestDataLossHint": "Chơi với tư cách khách chỉ lưu tiến trình trên thiết bị này. Nếu gỡ cài đặt ứng dụng, dữ liệu của bạn có thể bị mất. Hãy đăng nhập để sao lưu tiến trình.",
     "account": "Tài khoản",
     "logout": "Đăng xuất",
     "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại.",

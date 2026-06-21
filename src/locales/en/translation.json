@@ -118,6 +118,7 @@
     "googlePlayComingSoon": "Google Play login is coming soon.",
     "googlePlaySignInFailed": "Could not sign in with Google Play. Please try again.",
     "guestStartFailed": "Could not start a guest session. Please try again.",
+    "guestDataLossHint": "Playing as a guest saves progress only on this device. If you uninstall the app, your data may be lost. Sign in to keep your progress backed up.",
     "account": "Account",
     "logout": "Log out",
     "logoutFailed": "Could not log out. Please try again.",

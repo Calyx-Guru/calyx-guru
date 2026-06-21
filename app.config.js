@@ -1,7 +1,20 @@
 const path = require("path");
 
-// Ensure .env.local is loaded before Metro inlines EXPO_PUBLIC_* variables.
+// Load env before Expo/Metro read EXPO_PUBLIC_* values. .env.local wins.
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
-require("dotenv").config({ path: path.resolve(__dirname, ".env.local") });
+require("dotenv").config({
+  path: path.resolve(__dirname, ".env.local"),
+  override: true,
+});
 
-module.exports = require("./app.json");
+const appJson = require("./app.json");
+
+module.exports = {
+  expo: {
+    ...appJson.expo,
+    extra: {
+      ...(appJson.expo?.extra ?? {}),
+      useMockData: process.env.EXPO_PUBLIC_USE_MOCK_DATA === "true",
+    },
+  },
+};

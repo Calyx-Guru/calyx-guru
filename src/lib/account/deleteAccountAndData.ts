@@ -9,7 +9,22 @@ export type DeleteAccountTarget = {
   googlePlayUserId?: string | null;
   supabaseUserId?: string | null;
   guestUserId?: string | null;
+  userEmail?: string | null;
 };
+
+async function deleteSavedataForTarget(target: DeleteAccountTarget): Promise<void> {
+  const storagePathKey = target.userEmail?.trim();
+  if (!storagePathKey) return;
+  await deleteSavedataFromStorage(storagePathKey);
+}
+
+async function deleteSavedataProgressionForTarget(
+  target: DeleteAccountTarget,
+): Promise<void> {
+  const storagePathKey = target.userEmail?.trim();
+  if (!storagePathKey) return;
+  await deleteSavedataKindFromStorage(storagePathKey, 'state');
+}
 
 /**
  * Delete remote user data before clearing local state (Google Play policy).
@@ -18,16 +33,13 @@ export type DeleteAccountTarget = {
 export async function deleteRemoteUserData(
   target: DeleteAccountTarget,
 ): Promise<void> {
-  const ids = new Set(
-    [target.googlePlayUserId, target.supabaseUserId].filter(
-      (id): id is string => !!id,
-    ),
-  );
+  const hasSavedataUser =
+    (target.googlePlayUserId &&
+      isSavedataStorageUserId(target.googlePlayUserId)) ||
+    (target.supabaseUserId && isSavedataStorageUserId(target.supabaseUserId));
 
-  for (const userId of ids) {
-    if (isSavedataStorageUserId(userId)) {
-      await deleteSavedataFromStorage(userId);
-    }
+  if (hasSavedataUser) {
+    await deleteSavedataForTarget(target);
   }
 }
 
@@ -35,16 +47,13 @@ export async function deleteRemoteUserData(
 export async function deleteRemoteProgression(
   target: DeleteAccountTarget,
 ): Promise<void> {
-  const ids = new Set(
-    [target.googlePlayUserId, target.supabaseUserId].filter(
-      (id): id is string => !!id,
-    ),
-  );
+  const hasSavedataUser =
+    (target.googlePlayUserId &&
+      isSavedataStorageUserId(target.googlePlayUserId)) ||
+    (target.supabaseUserId && isSavedataStorageUserId(target.supabaseUserId));
 
-  for (const userId of ids) {
-    if (isSavedataStorageUserId(userId)) {
-      await deleteSavedataKindFromStorage(userId, 'state');
-    }
+  if (hasSavedataUser) {
+    await deleteSavedataProgressionForTarget(target);
   }
 }
 

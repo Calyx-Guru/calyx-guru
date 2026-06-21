@@ -48,6 +48,7 @@ export function subscribeSavedataSync(listener: SyncListener): () => void {
 class DebouncedSavedataUploader<T extends { id: string }> {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private userId: string | null = null;
+  private storagePathKey: string | null = null;
   private getPayload: (() => T | null) | null = null;
   private isUploading = false;
   private needsAnotherWrite = false;
@@ -58,15 +59,20 @@ class DebouncedSavedataUploader<T extends { id: string }> {
     private readonly uploadingKey: keyof SavedataSyncStatus,
   ) {}
 
-  schedule(userId: string, getPayload: () => T | null): void {
-    if (!isSavedataStorageEnabled(userId)) {
+  schedule(
+    userId: string,
+    storagePathKey: string,
+    getPayload: () => T | null,
+  ): void {
+    if (!isSavedataStorageEnabled(userId, storagePathKey)) {
       console.warn(
-        `[savedata:${this.kind}] Skipping upload — storage sync disabled for userId=${userId || "(empty)"}`,
+        `[savedata:${this.kind}] Skipping upload — storage sync disabled for userId=${userId || "(empty)"}, email=${storagePathKey || "(empty)"}`,
       );
       return;
     }
 
     this.userId = userId;
+    this.storagePathKey = storagePathKey;
     this.getPayload = getPayload;
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
@@ -74,7 +80,7 @@ class DebouncedSavedataUploader<T extends { id: string }> {
       void this.flush();
     }, SAVEDATA_SYNC_DEBOUNCE_MS);
     console.info(
-      `[savedata:${this.kind}] Upload scheduled in ${SAVEDATA_SYNC_DEBOUNCE_MS}ms for ${userId}`,
+      `[savedata:${this.kind}] Upload scheduled in ${SAVEDATA_SYNC_DEBOUNCE_MS}ms for ${storagePathKey}`,
     );
   }
 
@@ -85,13 +91,14 @@ class DebouncedSavedataUploader<T extends { id: string }> {
       this.timer = null;
     }
     this.userId = null;
+    this.storagePathKey = null;
     this.getPayload = null;
     this.needsAnotherWrite = false;
     patchStatus({ [this.uploadingKey]: false } as Partial<SavedataSyncStatus>);
   }
 
   private async flush(): Promise<void> {
-    if (!this.userId || !this.getPayload) return;
+    if (!this.userId || !this.storagePathKey || !this.getPayload) return;
 
     if (this.isUploading) {
       this.needsAnotherWrite = true;
@@ -105,17 +112,21 @@ class DebouncedSavedataUploader<T extends { id: string }> {
       while (true) {
         this.needsAnotherWrite = false;
         const userId = this.userId;
+        const storagePathKey = this.storagePathKey;
         const getPayload = this.getPayload;
-        if (!userId || !getPayload) break;
+        if (!userId || !storagePathKey || !getPayload) break;
 
         const epochBefore = this.epoch;
         const payload = getPayload();
         if (!payload) break;
 
         try {
-          await upsertSavedataJson(userId, this.kind, { ...payload, id: userId });
+          await upsertSavedataJson(storagePathKey, this.kind, {
+            ...payload,
+            id: userId,
+          });
           console.info(
-            `[savedata:${this.kind}] Uploaded ${getSavedataObjectPath(userId, this.kind)}`,
+            `[savedata:${this.kind}] Uploaded ${getSavedataObjectPath(storagePathKey, this.kind)}`,
           );
           patchStatus({ lastError: null });
         } catch (err) {
@@ -147,16 +158,18 @@ const stateUploader = new DebouncedSavedataUploader<{ id: string }>(
 
 export function scheduleSavedataProfileUpload(
   userId: string,
+  storagePathKey: string,
   getPayload: () => { id: string } | null,
 ): void {
-  profileUploader.schedule(userId, getPayload);
+  profileUploader.schedule(userId, storagePathKey, getPayload);
 }
 
 export function scheduleSavedataStateUpload(
   userId: string,
+  storagePathKey: string,
   getPayload: () => { id: string } | null,
 ): void {
-  stateUploader.schedule(userId, getPayload);
+  stateUploader.schedule(userId, storagePathKey, getPayload);
 }
 
 export function resetSavedataSync(): void {
@@ -170,11 +183,12 @@ export function resetSavedataSync(): void {
 }
 
 export async function hydrateSavedataFromStorage<T extends { id: string }>(
+  storagePathKey: string,
   userId: string,
   kind: SavedataKind,
 ): Promise<T | null> {
-  if (!isSavedataStorageEnabled(userId)) return null;
-  const remote = await fetchSavedataJson<T>(userId, kind);
+  if (!isSavedataStorageEnabled(userId, storagePathKey)) return null;
+  const remote = await fetchSavedataJson<T>(storagePathKey, kind);
   if (!remote) return null;
   return { ...remote, id: userId };
 }

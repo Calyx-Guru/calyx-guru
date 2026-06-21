@@ -1,10 +1,15 @@
 import { STORAGE_GOOGLE_PLAY_USER_ID_KEY } from "@/constants/common";
 import { ENV } from "@/constants/env";
 import { createRandomUuid } from "@/lib/app/helper";
+import {
+  clearStoredUserEmail,
+  persistUserEmail,
+} from "@/lib/auth/userEmailStorage";
 import { storage } from "@/lib/storage";
-import { Platform } from "react-native";
+import { Platform, TurboModuleRegistry } from "react-native";
 
 const GOOGLE_ID_PREFIX = "google_";
+const GOOGLE_SIGN_IN_TURBO_MODULE = "RNGoogleSignin";
 
 export class GoogleSignInCancelledError extends Error {
   constructor() {
@@ -13,11 +18,29 @@ export class GoogleSignInCancelledError extends Error {
   }
 }
 
+export class GooglePlaySignInUnavailableError extends Error {
+  constructor() {
+    super("Google Play sign-in is not available on this device or build");
+    this.name = "GooglePlaySignInUnavailableError";
+  }
+}
+
+function isGoogleSignInNativeModuleAvailable(): boolean {
+  if (Platform.OS !== "android") return false;
+  try {
+    return TurboModuleRegistry.get(GOOGLE_SIGN_IN_TURBO_MODULE) != null;
+  } catch {
+    return false;
+  }
+}
+
 export type GooglePlaySignInResult = {
   /** App user id (`google_<Google account id>`). */
   userId: string;
   /** Raw Google account id from the sign-in SDK. */
   googleAccountId: string;
+  /** Google account email used for savedata storage paths. */
+  email: string;
 };
 
 export function isGooglePlayUserId(userId: string | null | undefined): boolean {
@@ -31,7 +54,8 @@ export function toGooglePlayUserId(googleAccountId: string): string {
 export function isGooglePlaySignInAvailable(): boolean {
   if (ENV.USE_MOCK_DATA) return true;
   if (Platform.OS !== "android") return false;
-  return !!ENV.GOOGLE_WEB_CLIENT_ID;
+  if (!ENV.GOOGLE_WEB_CLIENT_ID) return false;
+  return isGoogleSignInNativeModuleAvailable();
 }
 
 export async function getStoredGooglePlayUserId(): Promise<string | null> {
@@ -48,6 +72,7 @@ async function persistGooglePlayUserId(userId: string): Promise<void> {
 
 export async function clearGooglePlaySession(): Promise<void> {
   await storage.removeItem(STORAGE_GOOGLE_PLAY_USER_ID_KEY);
+  await clearStoredUserEmail();
 }
 
 export async function signInWithGooglePlay(): Promise<GooglePlaySignInResult> {
@@ -56,8 +81,10 @@ export async function signInWithGooglePlay(): Promise<GooglePlaySignInResult> {
     // replace the first 4 characters with "mock"
     googleAccountId = "MOCK" + googleAccountId.slice(4);
     const userId = toGooglePlayUserId(googleAccountId);
+    const email = `mock-${googleAccountId.substring(googleAccountId.length - 10, googleAccountId.length).toLowerCase()}@calyx.local`;
     await persistGooglePlayUserId(userId);
-    return { userId, googleAccountId };
+    await persistUserEmail(email);
+    return { userId, googleAccountId, email };
   }
 
   if (Platform.OS !== "android") {
@@ -65,9 +92,11 @@ export async function signInWithGooglePlay(): Promise<GooglePlaySignInResult> {
   }
 
   if (!ENV.GOOGLE_WEB_CLIENT_ID) {
-    throw new Error(
-      "Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID. Add your Google Web Client ID to .env.local.",
-    );
+    throw new GooglePlaySignInUnavailableError();
+  }
+
+  if (!isGoogleSignInNativeModuleAvailable()) {
+    throw new GooglePlaySignInUnavailableError();
   }
 
   const { GoogleSignin, isCancelledResponse, isSuccessResponse, statusCodes } =
@@ -95,9 +124,15 @@ export async function signInWithGooglePlay(): Promise<GooglePlaySignInResult> {
       throw new Error("No Google user id returned from sign-in");
     }
 
+    const email = response.data.user.email?.trim();
+    if (!email) {
+      throw new Error("No Google account email returned from sign-in");
+    }
+
     const userId = toGooglePlayUserId(googleAccountId);
     await persistGooglePlayUserId(userId);
-    return { userId, googleAccountId };
+    await persistUserEmail(email);
+    return { userId, googleAccountId, email };
   } catch (error: unknown) {
     const code =
       error && typeof error === "object" && "code" in error
@@ -116,6 +151,7 @@ export async function signOutGooglePlay(): Promise<void> {
   await clearGooglePlaySession();
 
   if (Platform.OS !== "android" || ENV.USE_MOCK_DATA) return;
+  if (!isGoogleSignInNativeModuleAvailable()) return;
 
   try {
     const { GoogleSignin } =

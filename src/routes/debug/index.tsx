@@ -1,3 +1,5 @@
+import { INITIAL_PET_POWER } from "@/constants";
+import type { SavedataSyncActionResult } from "@/contexts/SaveDataSyncContext";
 import { useAppState } from "@/hooks/useAppState";
 import { useSaveDataSync } from "@/hooks/useSaveDataSync";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
@@ -8,7 +10,6 @@ import {
   getDebugTimeOffset,
   setDebugTimeOffset,
 } from "@/lib/app/time";
-import type { SavedataSyncActionResult } from "@/contexts/SaveDataSyncContext";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -64,17 +65,26 @@ export function RouteDebug() {
 
   const formatSyncResults = (results: SavedataSyncActionResult[]) =>
     results
-      .map((r) => `${r.ok ? "OK" : "ERR"} [${r.kind}] ${r.path ?? "—"}: ${r.message}`)
+      .map(
+        (r) =>
+          `${r.ok ? "OK" : "ERR"} [${r.kind}] ${r.path ?? "—"}: ${r.message}`,
+      )
       .join("\n");
 
   const runSavedataAction = useCallback(
-    async (action: () => Promise<SavedataSyncActionResult | SavedataSyncActionResult[]>) => {
+    async (
+      action: () => Promise<
+        SavedataSyncActionResult | SavedataSyncActionResult[]
+      >,
+    ) => {
       setSavedataBusy(true);
       setSavedataLog("Running…");
       try {
         const result = await action();
         setSavedataLog(
-          Array.isArray(result) ? formatSyncResults(result) : formatSyncResults([result]),
+          Array.isArray(result)
+            ? formatSyncResults(result)
+            : formatSyncResults([result]),
         );
       } catch (error) {
         setSavedataLog(error instanceof Error ? error.message : String(error));
@@ -112,7 +122,7 @@ export function RouteDebug() {
     }
     if (userState) {
       await updateUserState({
-        petPower: 0,
+        petPower: INITIAL_PET_POWER,
         kaucimHistory: [],
       });
     }
@@ -144,9 +154,7 @@ export function RouteDebug() {
         <Text style={styles.mono}>
           Signed in: {isGooglePlaySignedIn ? "yes" : "no"}
         </Text>
-        <Text style={styles.monoMuted}>
-          UUID: {googlePlayUserId ?? "—"}
-        </Text>
+        <Text style={styles.monoMuted}>UUID: {googlePlayUserId ?? "—"}</Text>
       </View>
 
       <View style={styles.section}>
@@ -180,7 +188,9 @@ export function RouteDebug() {
           state={syncStatus.isUploadingState ? "yes" : "no"}
         </Text>
         {syncStatus.lastError ? (
-          <Text style={styles.errorText}>Last error: {syncStatus.lastError}</Text>
+          <Text style={styles.errorText}>
+            Last error: {syncStatus.lastError}
+          </Text>
         ) : null}
         <View style={styles.row}>
           <Pressable

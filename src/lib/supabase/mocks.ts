@@ -3,10 +3,15 @@
  * Used for development and testing when USE_MOCK_DATA is enabled
  */
 
+import {
+  MOCK_DEV_EMAIL,
+  MOCK_DEV_USER_ID,
+} from '@/lib/auth/mockDevIdentity';
+
 // Mock user data
 export const mockUser = {
-  id: 'mock-user-123',
-  email: 'test@example.com',
+  id: MOCK_DEV_USER_ID,
+  email: MOCK_DEV_EMAIL,
   user_metadata: {
     name: 'Test User',
   },

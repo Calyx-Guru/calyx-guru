@@ -10,7 +10,7 @@ import type {
 import { useCallback } from 'react';
 
 export function useUserState() {
-  const { googlePlayUserId, user } = useSupabaseAuth();
+  const { googlePlayUserId, user, userEmail } = useSupabaseAuth();
   const savedataUserId = googlePlayUserId ?? user?.id ?? null;
   const getState = useUserStateStore.getState;
   const userState = useUserStateStore((s) => s.userState);
@@ -31,8 +31,8 @@ export function useUserState() {
   const storeResetProgression = useUserStateStore((s) => s.resetProgression);
 
   const scheduleStateUpload = useCallback(() => {
-    scheduleSavedataStateUploadFromStore(savedataUserId);
-  }, [savedataUserId]);
+    scheduleSavedataStateUploadFromStore(savedataUserId, userEmail);
+  }, [savedataUserId, userEmail]);
 
   const updateUserState = useCallback(
     async (updates: Partial<UserState>) => {

@@ -118,6 +118,7 @@
     "googlePlayComingSoon": "Google Playログインは近日公開予定です。",
     "googlePlaySignInFailed": "Google Playでログインできませんでした。もう一度お試しください。",
     "guestStartFailed": "ゲストセッションを開始できませんでした。もう一度お試しください。",
+    "guestDataLossHint": "ゲストプレイの進行状況はこの端末にのみ保存されます。アプリを削除するとデータが失われる場合があります。サインインして進行状況をバックアップしてください。",
     "account": "アカウント",
     "logout": "ログアウト",
     "logoutFailed": "ログアウトできませんでした。もう一度お試しください。",

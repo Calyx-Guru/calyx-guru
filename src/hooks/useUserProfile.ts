@@ -9,7 +9,7 @@ import type { UserProfile } from '@/types/UserProfile';
 import { useCallback } from 'react';
 
 export function useUserProfile() {
-  const { googlePlayUserId, user } = useSupabaseAuth();
+  const { googlePlayUserId, user, userEmail } = useSupabaseAuth();
   const savedataUserId = googlePlayUserId ?? user?.id ?? null;
   const getState = useUserProfileStore.getState;
   const profile = useUserProfileStore((state) => state.profile);
@@ -28,17 +28,17 @@ export function useUserProfile() {
   const updateProfile = useCallback(
     async (updates: Partial<UserProfile>) => {
       await storeUpdateProfile(updates);
-      scheduleSavedataProfileUploadFromStore(savedataUserId);
+      scheduleSavedataProfileUploadFromStore(savedataUserId, userEmail);
     },
-    [savedataUserId, storeUpdateProfile],
+    [savedataUserId, storeUpdateProfile, userEmail],
   );
 
   const applyServerProfile = useCallback(
     (nextProfile: UserProfile) => {
       storeApplyServerProfile(nextProfile);
-      scheduleSavedataProfileUploadFromStore(savedataUserId);
+      scheduleSavedataProfileUploadFromStore(savedataUserId, userEmail);
     },
-    [savedataUserId, storeApplyServerProfile],
+    [savedataUserId, storeApplyServerProfile, userEmail],
   );
 
   return {

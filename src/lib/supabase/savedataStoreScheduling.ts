@@ -12,12 +12,13 @@ export { resolveSavedataStorageUserId as resolveSavedataUserId };
 /** Debounced upload of the latest profile from the Zustand store. */
 export function scheduleSavedataProfileUploadFromStore(
   fallbackUserId?: string | null,
+  storagePathKey?: string | null,
 ): void {
   const profile = useUserProfileStore.getState().profile;
   const userId = resolveSavedataStorageUserId(profile?.id, fallbackUserId);
-  if (!userId || !isSavedataStorageEnabled(userId)) return;
+  if (!userId || !isSavedataStorageEnabled(userId, storagePathKey)) return;
 
-  scheduleSavedataProfileUpload(userId, () => {
+  scheduleSavedataProfileUpload(userId, storagePathKey!, () => {
     const latest = useUserProfileStore.getState().profile;
     return latest ? { ...latest, id: userId } : null;
   });
@@ -26,12 +27,13 @@ export function scheduleSavedataProfileUploadFromStore(
 /** Debounced upload of the latest user state from the Zustand store. */
 export function scheduleSavedataStateUploadFromStore(
   fallbackUserId?: string | null,
+  storagePathKey?: string | null,
 ): void {
   const userState = useUserStateStore.getState().userState;
   const userId = resolveSavedataStorageUserId(userState?.id, fallbackUserId);
-  if (!userId || !isSavedataStorageEnabled(userId)) return;
+  if (!userId || !isSavedataStorageEnabled(userId, storagePathKey)) return;
 
-  scheduleSavedataStateUpload(userId, () => {
+  scheduleSavedataStateUpload(userId, storagePathKey!, () => {
     const latest = useUserStateStore.getState().userState;
     return latest ? { ...latest, id: userId } : null;
   });

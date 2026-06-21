@@ -22,23 +22,29 @@ export function getSavedataStoragePrefix(): string {
     : SAVEDATA_STORAGE_PROD_PREFIX;
 }
 
-/** Object path: `{mock|prod}/{userId}/profile.json` or `{mock|prod}/{userId}/state.json` */
+/** Object path: `{mock|prod}/{email}/profile.json` or `{mock|prod}/{email}/state.json` */
 export function getSavedataObjectPath(
-  userId: string,
+  storagePathKey: string,
   kind: SavedataKind,
 ): string {
-  return `${getSavedataStoragePrefix()}/${userId}/${FILE_NAMES[kind]}`;
+  return `${getSavedataStoragePrefix()}/${storagePathKey}/${FILE_NAMES[kind]}`;
 }
 
-export function getSavedataDebugInfo(userId: string | null | undefined) {
+export function getSavedataDebugInfo(
+  userId: string | null | undefined,
+  storagePathKey?: string | null,
+) {
+  const pathKey = storagePathKey ?? null;
   return {
     bucket: SAVEDATA_STORAGE_BUCKET,
     prefix: getSavedataStoragePrefix(),
-    profilePath: userId ? getSavedataObjectPath(userId, "profile") : null,
-    statePath: userId ? getSavedataObjectPath(userId, "state") : null,
+    profilePath: pathKey ? getSavedataObjectPath(pathKey, "profile") : null,
+    statePath: pathKey ? getSavedataObjectPath(pathKey, "state") : null,
     storageClientReady: supabaseStorageClient != null,
     supabaseUrl: ENV.SUPABASE_URL ?? null,
     useMockData: ENV.USE_MOCK_DATA,
+    userId: userId ?? null,
+    storagePathKey: pathKey,
   };
 }
 
@@ -53,8 +59,15 @@ function jsonToUploadBody(body: string): Uint8Array {
   return bytes;
 }
 
-export function isSavedataStorageEnabled(userId: string | null | undefined): boolean {
-  return isSavedataStorageUserId(userId) && supabaseStorageClient != null;
+export function isSavedataStorageEnabled(
+  userId: string | null | undefined,
+  storagePathKey?: string | null,
+): boolean {
+  return (
+    isSavedataStorageUserId(userId) &&
+    !!storagePathKey?.trim() &&
+    supabaseStorageClient != null
+  );
 }
 
 async function blobToText(blob: Blob): Promise<string> {
@@ -70,12 +83,12 @@ async function blobToText(blob: Blob): Promise<string> {
 }
 
 export async function fetchSavedataJson<T>(
-  userId: string,
+  storagePathKey: string,
   kind: SavedataKind,
 ): Promise<T | null> {
-  if (!isSavedataStorageEnabled(userId) || !supabaseStorageClient) return null;
+  if (!supabaseStorageClient) return null;
 
-  const path = getSavedataObjectPath(userId, kind);
+  const path = getSavedataObjectPath(storagePathKey, kind);
   const { data, error } = await supabaseStorageClient.storage
     .from(SAVEDATA_STORAGE_BUCKET)
     .download(path);
@@ -100,14 +113,14 @@ export async function fetchSavedataJson<T>(
 }
 
 export async function upsertSavedataJson<T extends { id: string }>(
-  userId: string,
+  storagePathKey: string,
   kind: SavedataKind,
   payload: T,
 ): Promise<void> {
-  if (!isSavedataStorageEnabled(userId) || !supabaseStorageClient) return;
+  if (!supabaseStorageClient) return;
 
-  const path = getSavedataObjectPath(userId, kind);
-  const body = JSON.stringify({ ...payload, id: userId });
+  const path = getSavedataObjectPath(storagePathKey, kind);
+  const body = JSON.stringify(payload);
 
   const { error } = await supabaseStorageClient.storage
     .from(SAVEDATA_STORAGE_BUCKET)
@@ -128,24 +141,24 @@ function isStorageObjectNotFound(error: unknown): boolean {
   return message.includes("not found");
 }
 
-function savedataPathsForKind(userId: string, kind: SavedataKind): string[] {
+function savedataPathsForKind(storagePathKey: string, kind: SavedataKind): string[] {
   const fileName = FILE_NAMES[kind];
   return [
-    `${SAVEDATA_STORAGE_MOCK_PREFIX}/${userId}/${fileName}`,
-    `${SAVEDATA_STORAGE_PROD_PREFIX}/${userId}/${fileName}`,
+    `${SAVEDATA_STORAGE_MOCK_PREFIX}/${storagePathKey}/${fileName}`,
+    `${SAVEDATA_STORAGE_PROD_PREFIX}/${storagePathKey}/${fileName}`,
   ];
 }
 
 /** Remove one savedata JSON file for a user from both mock and prod prefixes. */
 export async function deleteSavedataKindFromStorage(
-  userId: string,
+  storagePathKey: string,
   kind: SavedataKind,
 ): Promise<void> {
-  if (!supabaseStorageClient || !isSavedataStorageUserId(userId)) return;
+  if (!supabaseStorageClient || !storagePathKey.trim()) return;
 
   const { error } = await supabaseStorageClient.storage
     .from(SAVEDATA_STORAGE_BUCKET)
-    .remove(savedataPathsForKind(userId, kind));
+    .remove(savedataPathsForKind(storagePathKey, kind));
 
   if (error && !isStorageObjectNotFound(error)) {
     throw error;
@@ -153,12 +166,14 @@ export async function deleteSavedataKindFromStorage(
 }
 
 /** Remove profile and state JSON for a user from both mock and prod prefixes. */
-export async function deleteSavedataFromStorage(userId: string): Promise<void> {
-  if (!supabaseStorageClient || !isSavedataStorageUserId(userId)) return;
+export async function deleteSavedataFromStorage(
+  storagePathKey: string,
+): Promise<void> {
+  if (!supabaseStorageClient || !storagePathKey.trim()) return;
 
   const paths = [
-    ...savedataPathsForKind(userId, "profile"),
-    ...savedataPathsForKind(userId, "state"),
+    ...savedataPathsForKind(storagePathKey, "profile"),
+    ...savedataPathsForKind(storagePathKey, "state"),
   ];
 
   const { error } = await supabaseStorageClient.storage
