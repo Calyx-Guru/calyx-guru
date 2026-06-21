@@ -24,6 +24,8 @@ export const STORAGE_THEME_KEY = "appearance";
 export const STORAGE_ANALYTICS_FIRST_OPEN_AT_KEY = "analytics_first_open_at";
 export const STORAGE_GUEST_MODE_KEY = "guest_mode";
 export const STORAGE_GOOGLE_PLAY_USER_ID_KEY = "google_play_user_id";
+export const STORAGE_GOOGLE_PLAY_PATH_BY_ACCOUNT_PREFIX =
+  "google_play_path_";
 export const STORAGE_USER_EMAIL_KEY = "user_email";
 
 export const STORAGE_BUCKET = "calyx-fortune-data";

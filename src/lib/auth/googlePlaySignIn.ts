@@ -1,15 +1,19 @@
-import { STORAGE_GOOGLE_PLAY_USER_ID_KEY } from "@/constants/common";
+import {
+  STORAGE_GOOGLE_PLAY_PATH_BY_ACCOUNT_PREFIX,
+  STORAGE_GOOGLE_PLAY_USER_ID_KEY,
+} from "@/constants/common";
 import { ENV } from "@/constants/env";
 import { createRandomUuid } from "@/lib/app/helper";
 import {
   clearStoredUserEmail,
-  persistUserEmail,
+  persistSavedataPathKey,
 } from "@/lib/auth/userEmailStorage";
 import { storage } from "@/lib/storage";
 import { Platform, TurboModuleRegistry } from "react-native";
 
 const GOOGLE_ID_PREFIX = "google_";
 const GOOGLE_SIGN_IN_TURBO_MODULE = "RNGoogleSignin";
+const DEFAULT_DISPLAY_NAME = "Player";
 
 export class GoogleSignInCancelledError extends Error {
   constructor() {
@@ -39,8 +43,10 @@ export type GooglePlaySignInResult = {
   userId: string;
   /** Raw Google account id from the sign-in SDK. */
   googleAccountId: string;
-  /** Google account email used for savedata storage paths. */
-  email: string;
+  /** Savedata storage path (`<displayName>_<uuid>`). */
+  storagePathKey: string;
+  /** Google account display name from sign-in. */
+  displayName: string;
 };
 
 export function isGooglePlayUserId(userId: string | null | undefined): boolean {
@@ -49,6 +55,50 @@ export function isGooglePlayUserId(userId: string | null | undefined): boolean {
 
 export function toGooglePlayUserId(googleAccountId: string): string {
   return `${GOOGLE_ID_PREFIX}${googleAccountId}`;
+}
+
+export function fromGooglePlayUserId(
+  userId: string | null | undefined,
+): string | null {
+  if (!isGooglePlayUserId(userId)) return null;
+  return userId!.slice(GOOGLE_ID_PREFIX.length);
+}
+
+function googlePlayPathMappingKey(googleAccountId: string): string {
+  return `${STORAGE_GOOGLE_PLAY_PATH_BY_ACCOUNT_PREFIX}${googleAccountId}`;
+}
+
+function sanitizeDisplayNameForStoragePath(displayName: string): string {
+  const sanitized = displayName
+    .trim()
+    .replace(/[/\\?%*:|"<>]/g, "_")
+    .replace(/\s+/g, " ")
+    .slice(0, 64);
+  return sanitized || DEFAULT_DISPLAY_NAME;
+}
+
+export function buildGooglePlayStoragePathKey(displayName: string): string {
+  const safeName = sanitizeDisplayNameForStoragePath(displayName);
+  return `${safeName}_${createRandomUuid()}`;
+}
+
+async function resolveGooglePlayStoragePathKey(
+  googleAccountId: string,
+  displayName: string,
+): Promise<string> {
+  const mappingKey = googlePlayPathMappingKey(googleAccountId);
+  const existing = await storage.getItem(mappingKey);
+  if (existing?.trim()) return existing.trim();
+
+  const pathKey = buildGooglePlayStoragePathKey(displayName);
+  await storage.setItem(mappingKey, pathKey);
+  return pathKey;
+}
+
+export async function clearGooglePlayPathMapping(
+  googleAccountId: string,
+): Promise<void> {
+  await storage.removeItem(googlePlayPathMappingKey(googleAccountId));
 }
 
 export function isGooglePlaySignInAvailable(): boolean {
@@ -78,13 +128,16 @@ export async function clearGooglePlaySession(): Promise<void> {
 export async function signInWithGooglePlay(): Promise<GooglePlaySignInResult> {
   if (ENV.USE_MOCK_DATA) {
     let googleAccountId = createRandomUuid();
-    // replace the first 4 characters with "mock"
     googleAccountId = "MOCK" + googleAccountId.slice(4);
+    const displayName = "MockPlayer";
     const userId = toGooglePlayUserId(googleAccountId);
-    const email = `mock-${googleAccountId.substring(googleAccountId.length - 10, googleAccountId.length).toLowerCase()}@calyx.local`;
+    const storagePathKey = await resolveGooglePlayStoragePathKey(
+      googleAccountId,
+      displayName,
+    );
     await persistGooglePlayUserId(userId);
-    await persistUserEmail(email);
-    return { userId, googleAccountId, email };
+    await persistSavedataPathKey(storagePathKey);
+    return { userId, googleAccountId, storagePathKey, displayName };
   }
 
   if (Platform.OS !== "android") {
@@ -105,6 +158,7 @@ export async function signInWithGooglePlay(): Promise<GooglePlaySignInResult> {
   GoogleSignin.configure({
     webClientId: ENV.GOOGLE_WEB_CLIENT_ID,
     offlineAccess: false,
+    scopes: ["profile"],
   });
 
   try {
@@ -124,15 +178,19 @@ export async function signInWithGooglePlay(): Promise<GooglePlaySignInResult> {
       throw new Error("No Google user id returned from sign-in");
     }
 
-    const email = response.data.user.email?.trim();
-    if (!email) {
-      throw new Error("No Google account email returned from sign-in");
-    }
+    const displayName =
+      response.data.user.name?.trim() ||
+      response.data.user.givenName?.trim() ||
+      DEFAULT_DISPLAY_NAME;
+    const storagePathKey = await resolveGooglePlayStoragePathKey(
+      googleAccountId,
+      displayName,
+    );
 
     const userId = toGooglePlayUserId(googleAccountId);
     await persistGooglePlayUserId(userId);
-    await persistUserEmail(email);
-    return { userId, googleAccountId, email };
+    await persistSavedataPathKey(storagePathKey);
+    return { userId, googleAccountId, storagePathKey, displayName };
   } catch (error: unknown) {
     const code =
       error && typeof error === "object" && "code" in error

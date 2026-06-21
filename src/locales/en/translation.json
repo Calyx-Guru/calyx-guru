@@ -133,7 +133,7 @@
     "deleteProgressionFailed": "Could not delete your progression. Check your connection and try again.",
     "accountInformation": "Account information",
     "accountInfoDescription": "Copy the details below when you contact support or request account deletion by email.",
-    "accountInfoSupportHint": "To request account deletion, email support@calyx.guru and include the information above. You can also delete data in Settings.",
+    "accountInfoSupportHint": "To request account deletion, email {{supportEmail}} and include the information above. You can also delete data in Settings.",
     "accountInfoNotAvailable": "Not available",
     "accountType": "Account type",
     "accountTypeGuest": "Guest",

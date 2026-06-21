@@ -133,7 +133,7 @@
     "deleteProgressionFailed": "Không thể xóa tiến trình. Kiểm tra kết nối và thử lại.",
     "accountInformation": "Thông tin tài khoản",
     "accountInfoDescription": "Hãy sao chép các thông tin bên dưới khi liên hệ hỗ trợ hoặc yêu cầu xóa tài khoản qua email.",
-    "accountInfoSupportHint": "Để yêu cầu xóa tài khoản, gửi email tới support@calyx.guru kèm thông tin ở trên. Bạn cũng có thể xóa dữ liệu trong Cài đặt.",
+    "accountInfoSupportHint": "Để yêu cầu xóa tài khoản, gửi email tới {{supportEmail}} kèm thông tin ở trên. Bạn cũng có thể xóa dữ liệu trong Cài đặt.",
     "accountInfoNotAvailable": "Không có",
     "accountType": "Loại tài khoản",
     "accountTypeGuest": "Khách",

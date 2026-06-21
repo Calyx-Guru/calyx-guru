@@ -1,10 +1,11 @@
+import { CONTACT_EMAIL, SUPPORT_EMAIL } from "@/config/constants";
 import { type Locale, locales, routing } from "@/i18n/routing";
 
 export const SITE_NAME = "Calyx Guru";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://calyx.guru";
-export const SUPPORT_EMAIL = "support@calyx.guru";
-export const CONTACT_EMAIL = "calyx.guru@gmail.com";
+
+export { CONTACT_EMAIL, SUPPORT_EMAIL };
 
 /** Open Graph locale tags (language_TERRITORY). */
 export const openGraphLocale: Record<Locale, string> = {

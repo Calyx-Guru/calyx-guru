@@ -133,7 +133,7 @@
     "deleteProgressionFailed": "無法刪除進度。請檢查網路連線後再試一次。",
     "accountInformation": "帳戶資訊",
     "accountInfoDescription": "聯絡客服或透過電子郵件申請刪除帳戶時，請複製以下資訊一併寄出。",
-    "accountInfoSupportHint": "若要申請刪除帳戶，請寄信至 support@calyx.guru 並附上以上資訊。您也可以在設定中直接刪除資料。",
+    "accountInfoSupportHint": "若要申請刪除帳戶，請寄信至 {{supportEmail}} 並附上以上資訊。您也可以在設定中直接刪除資料。",
     "accountInfoNotAvailable": "無",
     "accountType": "帳戶類型",
     "accountTypeGuest": "訪客",

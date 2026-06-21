@@ -6,9 +6,8 @@ import {
   screenshotSettings,
 } from "@/assets";
 import { SunGlyph } from "@/components/home/SunGlyph";
+import { DELETE_ACCOUNT_EMAIL } from "@/config/constants";
 import Image, { type StaticImageData } from "next/image";
-
-const SUPPORT_EMAIL = "support@calyx.guru";
 
 const DELETE_FLOW_SCREENSHOTS = [
   {
@@ -93,7 +92,7 @@ function ScreenshotFrame({
 }
 
 export default function DeleteAccount() {
-  const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Account deletion request")}`;
+  const mailto = `mailto:${DELETE_ACCOUNT_EMAIL}?subject=${encodeURIComponent("Account deletion request")}`;
 
   return (
     <>
@@ -176,7 +175,7 @@ export default function DeleteAccount() {
                     If you cannot access the app or need assistance, send a
                     message to{" "}
                     <a href={mailto} className="as_legal_email_link">
-                      {SUPPORT_EMAIL}
+                      {DELETE_ACCOUNT_EMAIL}
                     </a>{" "}
                     with the subject line{" "}
                     <strong>Account deletion request</strong>.
@@ -205,7 +204,7 @@ export default function DeleteAccount() {
                       Open email app
                     </span>
                     <span className="as_legal_email_cta__btn-email">
-                      {SUPPORT_EMAIL}
+                      {DELETE_ACCOUNT_EMAIL}
                     </span>
                   </a>
                 </div>

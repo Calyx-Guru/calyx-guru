@@ -9,9 +9,9 @@ import {
   LegalRelatedLinks,
   LegalSection,
 } from "@/components/legal/LegalDocumentLayout";
+import { CONTACT_EMAIL } from "@/config/constants";
 
 const DEVELOPER_PAGE_URL: string | null = null;
-const CONTACT_EMAIL = "calyx.guru@gmail.com";
 
 export default function TermsOfService() {
   return (

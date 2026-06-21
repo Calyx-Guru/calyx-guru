@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL } from "@/constants/config";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -86,9 +87,11 @@ export function RouteAccount() {
         ))}
       </View>
 
-      <Text style={styles.hint}>{t("auth.accountInfoSupportHint")}</Text>
+      <Text style={styles.hint}>
+        {t("auth.accountInfoSupportHint", { supportEmail: SUPPORT_EMAIL })}
+      </Text>
       <Text selectable style={styles.email}>
-        support@calyx.guru
+        {SUPPORT_EMAIL}
       </Text>
     </ScrollView>
   );

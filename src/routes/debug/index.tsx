@@ -5,6 +5,7 @@ import { useSaveDataSync } from "@/hooks/useSaveDataSync";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
+import { clearAllLocalAppStorage } from "@/lib/app/clearLocalAppStorage";
 import {
   createDate,
   getDebugTimeOffset,
@@ -12,7 +13,14 @@ import {
 } from "@/lib/app/time";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const HOUR_MS = 3_600_000;
@@ -47,7 +55,7 @@ function formatOffsetHuman(ms: number): string {
 
 export function RouteDebug() {
   const insets = useSafeAreaInsets();
-  const { isGooglePlaySignedIn, googlePlayUserId } = useSupabaseAuth();
+  const { isGooglePlaySignedIn, googlePlayUserId, logout } = useSupabaseAuth();
   const {
     isEnabled: isSavedataEnabled,
     syncStatus,
@@ -62,6 +70,7 @@ export function RouteDebug() {
   const [offsetMs, setOffsetMs] = useState(getDebugTimeOffset);
   const [savedataLog, setSavedataLog] = useState<string | null>(null);
   const [savedataBusy, setSavedataBusy] = useState(false);
+  const [storageClearBusy, setStorageClearBusy] = useState(false);
 
   const formatSyncResults = (results: SavedataSyncActionResult[]) =>
     results
@@ -113,6 +122,44 @@ export function RouteDebug() {
     },
     [updateUserState, userState],
   );
+
+  const onClearAllLocalStorage = useCallback(() => {
+    Alert.alert(
+      "Clear all local storage?",
+      "Removes auth, profile, state, settings, and other persisted app data on this device. The app will return to the home screen.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear",
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              setStorageClearBusy(true);
+              try {
+                const clearedKeys = await clearAllLocalAppStorage();
+                setDebugTimeOffset(0);
+                setOffsetMs(0);
+                resetAppState();
+                await logout();
+                setSavedataLog(
+                  clearedKeys.length > 0
+                    ? `Cleared ${clearedKeys.length} key(s).`
+                    : "Storage clear skipped (not a dev build).",
+                );
+                router.replace("/");
+              } catch (error) {
+                setSavedataLog(
+                  error instanceof Error ? error.message : String(error),
+                );
+              } finally {
+                setStorageClearBusy(false);
+              }
+            })();
+          },
+        },
+      ],
+    );
+  }, [logout, resetAppState]);
 
   const onResetUserStateAndRoot = useCallback(async () => {
     if (profile) {
@@ -230,6 +277,27 @@ export function RouteDebug() {
         {savedataLog ? (
           <Text style={styles.monoMuted}>{savedataLog}</Text>
         ) : null}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Local storage</Text>
+        <Text style={styles.monoMuted}>
+          Wipes SecureStore / localStorage keys (auth, profile, state, theme,
+          analytics, guest mode, Google Play mappings).
+        </Text>
+        <Pressable
+          disabled={storageClearBusy}
+          style={({ pressed }) => [
+            styles.dangerButton,
+            storageClearBusy && styles.stepButtonDisabled,
+            !storageClearBusy && pressed && styles.dangerButtonPressed,
+          ]}
+          onPress={onClearAllLocalStorage}
+        >
+          <Text style={styles.dangerButtonLabel}>
+            {storageClearBusy ? "Clearing…" : "Clear all local storage"}
+          </Text>
+        </Pressable>
       </View>
 
       <View style={styles.section}>
@@ -465,5 +533,21 @@ const styles = StyleSheet.create({
     color: "#fafafa",
     fontSize: 16,
     fontWeight: "600",
+  },
+  dangerButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: "#991b1b",
+    alignItems: "center",
+  },
+  dangerButtonPressed: {
+    opacity: 0.88,
+  },
+  dangerButtonLabel: {
+    color: "#fef2f2",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
 });

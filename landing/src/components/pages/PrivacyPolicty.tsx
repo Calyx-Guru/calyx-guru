@@ -8,12 +8,12 @@ import {
   LegalRelatedLinks,
   LegalSection,
 } from "@/components/legal/LegalDocumentLayout";
+import { CONTACT_EMAIL } from "@/config/constants";
 
 const GAME_ANALYTICS_PRIVACY_URL = "https://gameanalytics.com/privacy";
 const SUPABASE_PRIVACY_URL = "https://supabase.com/privacy";
 const GOOGLE_PRIVACY_URL = "https://policies.google.com/privacy";
 const DEVELOPER_PAGE_URL: string | null = null;
-const CONTACT_EMAIL = "calyx.guru@gmail.com";
 
 export default function PrivacyPolicy() {
   return (

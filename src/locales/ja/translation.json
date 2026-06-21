@@ -133,7 +133,7 @@
     "deleteProgressionFailed": "進行状況を削除できませんでした。接続を確認して再試行してください。",
     "accountInformation": "アカウント情報",
     "accountInfoDescription": "サポートへの連絡やメールでの削除依頼の際は、以下の情報をコピーして送ってください。",
-    "accountInfoSupportHint": "アカウント削除を依頼する場合は、上記の情報を添えて support@calyx.guru までメールしてください。設定から直接削除することもできます。",
+    "accountInfoSupportHint": "アカウント削除を依頼する場合は、上記の情報を添えて {{supportEmail}} までメールしてください。設定から直接削除することもできます。",
     "accountInfoNotAvailable": "なし",
     "accountType": "アカウント種別",
     "accountTypeGuest": "ゲスト",

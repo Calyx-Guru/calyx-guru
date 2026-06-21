@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL } from "@/constants/config";
 import { DEVELOPER_PAGE_URL } from "@/constants/links";
 import type { ReactNode } from "react";
 import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -243,7 +244,7 @@ export function RoutePrivacyPolicy() {
           Privacy Policy while using Calyx Guru, please feel free to contact us
           directly:
         </Paragraph>
-        <Bullet>By email: calyx.guru@gmail.com</Bullet>
+        <Bullet>By email: {SUPPORT_EMAIL}</Bullet>
         <Bullet>
           Developer Page:{" "}
           {DEVELOPER_PAGE_URL ? (

@@ -7,14 +7,17 @@ import {
   isGuestMode,
 } from '@/lib/app/guestMode';
 import {
+  clearGooglePlayPathMapping,
+  fromGooglePlayUserId,
   getStoredGooglePlayUserId,
   signInWithGooglePlay as performGooglePlaySignIn,
   signOutGooglePlay,
 } from '@/lib/auth/googlePlaySignIn';
 import {
   clearStoredUserEmail,
-  getStoredUserEmail,
+  getStoredSavedataPathKey,
   normalizeUserEmail,
+  persistSavedataPathKey,
   persistUserEmail,
 } from '@/lib/auth/userEmailStorage';
 import { isStaleMockDevIdentity } from '@/lib/auth/mockDevIdentity';
@@ -101,23 +104,32 @@ export function SupabaseAuthProvider({
     setUserEmail(normalized);
   }, []);
 
+  const applySignedInStoragePathKey = useCallback(
+    async (pathKey: string | null | undefined) => {
+      if (!pathKey?.trim()) return;
+      await persistSavedataPathKey(pathKey);
+      setUserEmail(pathKey.trim());
+    },
+    [],
+  );
+
   const initializeSupabaseProfile = async () => {
     const loadLocalProfile = async () => {
       const storedGooglePlayUserId = await getStoredGooglePlayUserId();
-      let storedEmail = await getStoredUserEmail();
-      if (storedEmail && isStaleMockDevIdentity(null, storedEmail)) {
+      let storedPathKey = await getStoredSavedataPathKey();
+      if (storedPathKey && isStaleMockDevIdentity(null, storedPathKey)) {
         await clearStoredUserEmail();
-        storedEmail = null;
+        storedPathKey = null;
       }
       if (storedGooglePlayUserId) {
         setGooglePlayUserId(storedGooglePlayUserId);
-        setUserEmail(storedEmail);
+        setUserEmail(storedPathKey);
         await Promise.all([
           initializeProfileForUser(storedGooglePlayUserId),
           initializeUserStateForUser(storedGooglePlayUserId),
         ]);
-        if (storedEmail) {
-          await syncProfileEmail(storedEmail);
+        if (storedPathKey?.includes('@')) {
+          await syncProfileEmail(storedPathKey);
         }
         return;
       }
@@ -319,18 +331,22 @@ export function SupabaseAuthProvider({
     const storedGooglePlayUserId = googlePlayUserId ?? (await getStoredGooglePlayUserId());
     const supabaseUserId = session?.user?.id ?? null;
     const guestUserId = (await isGuestMode()) ? await getGuestUserId() : null;
-    const storedEmail = userEmail ?? (await getStoredUserEmail());
+    const storedPathKey = userEmail ?? (await getStoredSavedataPathKey());
+    const googleAccountId = fromGooglePlayUserId(storedGooglePlayUserId);
 
     await deleteRemoteUserData({
       googlePlayUserId: storedGooglePlayUserId,
       supabaseUserId,
       guestUserId,
-      userEmail: storedEmail,
+      userEmail: storedPathKey,
     });
 
     resetSavedataSync();
     await clearGuestMode();
     await signOutGooglePlay();
+    if (googleAccountId) {
+      await clearGooglePlayPathMapping(googleAccountId);
+    }
     setGooglePlayUserId(null);
     setUserEmail(null);
     await clearStoredUserEmail();
@@ -422,17 +438,20 @@ export function SupabaseAuthProvider({
     setSession(null);
     setUser(null);
 
-    const { userId, email } = await performGooglePlaySignIn();
+    const { userId, storagePathKey } = await performGooglePlaySignIn();
     setGooglePlayUserId(userId);
-    setUserEmail(normalizeUserEmail(email));
+    await applySignedInStoragePathKey(storagePathKey);
     setIsLoading(false);
     await clearGuestMode();
     await Promise.all([
       initializeProfileForUser(userId),
       initializeUserStateForUser(userId),
     ]);
-    await syncProfileEmail(email);
-  }, [initializeProfileForUser, initializeUserStateForUser, syncProfileEmail]);
+  }, [
+    applySignedInStoragePathKey,
+    initializeProfileForUser,
+    initializeUserStateForUser,
+  ]);
 
   const signInWithOAuth = useCallback(async (provider: OAuthProvider) => {
     try {

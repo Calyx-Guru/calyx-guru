@@ -5,7 +5,7 @@
 import { isGuestUserId } from '@/lib/app/guestMode';
 import { isStaleMockDevIdentity } from '@/lib/auth/mockDevIdentity';
 import { isSavedataStorageUserId } from '@/lib/auth/savedataUserId';
-import { getStoredUserEmail } from '@/lib/auth/userEmailStorage';
+import { getStoredSavedataPathKey } from '@/lib/auth/userEmailStorage';
 import {
   hydrateSavedataFromStorage,
   resetSavedataSync,
@@ -75,7 +75,7 @@ export class RemoteSyncedUserDocument<T extends { id: string }, S extends object
     this.currentUserId = userId;
     this.currentStoragePathKey =
       userId && isSavedataStorageUserId(userId)
-        ? await getStoredUserEmail()
+        ? await getStoredSavedataPathKey()
         : null;
     this.remoteFlushEpoch++;
     this.cancelDebounce();

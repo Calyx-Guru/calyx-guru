@@ -133,7 +133,7 @@
     "deleteProgressionFailed": "无法删除进度。请检查网络连接后重试。",
     "accountInformation": "账户信息",
     "accountInfoDescription": "联系客服或通过邮件申请删除账户时，请复制以下信息一并发送。",
-    "accountInfoSupportHint": "如需申请删除账户，请发送邮件至 support@calyx.guru 并附上以上信息。您也可以在设置中直接删除数据。",
+    "accountInfoSupportHint": "如需申请删除账户，请发送邮件至 {{supportEmail}} 并附上以上信息。您也可以在设置中直接删除数据。",
     "accountInfoNotAvailable": "暂无",
     "accountType": "账户类型",
     "accountTypeGuest": "访客",

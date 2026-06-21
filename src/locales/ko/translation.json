@@ -133,7 +133,7 @@
     "deleteProgressionFailed": "진행 데이터를 삭제할 수 없습니다. 연결을 확인하고 다시 시도하세요.",
     "accountInformation": "계정 정보",
     "accountInfoDescription": "지원팀에 문의하거나 이메일로 계정 삭제를 요청할 때 아래 정보를 복사해 보내 주세요.",
-    "accountInfoSupportHint": "계정 삭제를 요청하려면 support@calyx.guru로 위 정보를 포함해 이메일을 보내 주세요. 설정에서 직접 삭제할 수도 있습니다.",
+    "accountInfoSupportHint": "계정 삭제를 요청하려면 {{supportEmail}}로 위 정보를 포함해 이메일을 보내 주세요. 설정에서 직접 삭제할 수도 있습니다.",
     "accountInfoNotAvailable": "없음",
     "accountType": "계정 유형",
     "accountTypeGuest": "게스트",

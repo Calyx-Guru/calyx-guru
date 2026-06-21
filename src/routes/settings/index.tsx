@@ -9,7 +9,7 @@ import { isGuestUserId } from "@/lib/app/guestMode";
 import {
   getStoredGooglePlayUserId,
 } from "@/lib/auth/googlePlaySignIn";
-import { getStoredUserEmail } from "@/lib/auth/userEmailStorage";
+import { getStoredSavedataPathKey } from "@/lib/auth/userEmailStorage";
 import { useTranslation } from "@/hooks/useTranslation";
 import { router, type Href } from "expo-router";
 import { useCallback, useState } from "react";
@@ -31,7 +31,7 @@ async function resolveDeleteTargets(
 ) {
   const storedGooglePlayUserId =
     googlePlayUserId ?? (await getStoredGooglePlayUserId());
-  const storedUserEmail = userEmail ?? (await getStoredUserEmail());
+  const storedUserEmail = userEmail ?? (await getStoredSavedataPathKey());
   const guestUserId =
     profileId && isGuestUserId(profileId) ? profileId : null;
 

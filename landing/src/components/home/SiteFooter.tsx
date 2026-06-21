@@ -7,8 +7,7 @@ import {
   phoneIcon,
   planeIcon,
 } from "@/assets";
-
-const SUPPORT_EMAIL = "support@calyx.guru";
+import { SUPPORT_EMAIL } from "@/config/constants";
 
 export function SiteFooter() {
   return (
