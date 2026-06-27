@@ -3,6 +3,7 @@ import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { isGuestUserId } from "@/lib/app/guestMode";
+import { isGoogleEmailUserId } from "@/lib/auth/savedataUserId";
 import { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -21,9 +22,7 @@ export function RouteAccount() {
   const { profile } = useUserProfile();
   const {
     user,
-    googlePlayUserId,
     userEmail,
-    isGooglePlaySignedIn,
     isSignedIn,
   } = useSupabaseAuth();
   const { t } = useTranslation();
@@ -31,8 +30,8 @@ export function RouteAccount() {
   const notAvailable = t("auth.accountInfoNotAvailable");
 
   const accountType = useMemo(() => {
-    if (isGooglePlaySignedIn) {
-      return t("auth.accountTypeGooglePlay");
+    if (isGoogleEmailUserId(profile?.id) || isGoogleEmailUserId(user?.id)) {
+      return t("auth.accountTypeGoogle");
     }
     if (isSignedIn) {
       return t("auth.accountTypeEmail");
@@ -41,13 +40,7 @@ export function RouteAccount() {
       return t("auth.accountTypeGuest");
     }
     return notAvailable;
-  }, [
-    isGooglePlaySignedIn,
-    isSignedIn,
-    notAvailable,
-    profile?.id,
-    t,
-  ]);
+  }, [isSignedIn, notAvailable, profile?.id, user?.id, t]);
 
   const email =
     userEmail?.trim() ||
@@ -58,10 +51,6 @@ export function RouteAccount() {
   const rows = [
     { label: t("auth.accountType"), value: accountType },
     { label: t("auth.profileId"), value: profile?.id ?? notAvailable },
-    {
-      label: t("auth.googlePlayUserId"),
-      value: googlePlayUserId ?? notAvailable,
-    },
     {
       label: t("auth.supabaseUserId"),
       value: user?.id ?? notAvailable,

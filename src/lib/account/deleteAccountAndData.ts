@@ -1,4 +1,4 @@
-import { isSavedataStorageUserId } from '@/lib/auth/savedataUserId';
+import { isSavedataStorageUserId, isGoogleEmailUserId } from '@/lib/auth/savedataUserId';
 import {
   deleteSavedataFromStorage,
   deleteSavedataKindFromStorage,
@@ -6,11 +6,21 @@ import {
 import { resetSavedataSync } from '@/lib/supabase/savedataSync';
 
 export type DeleteAccountTarget = {
-  googlePlayUserId?: string | null;
   supabaseUserId?: string | null;
   guestUserId?: string | null;
   userEmail?: string | null;
 };
+
+function hasSavedataTarget(target: DeleteAccountTarget): boolean {
+  const storagePathKey = target.userEmail?.trim();
+  if (!storagePathKey) return false;
+
+  return (
+    (!!target.supabaseUserId &&
+      isSavedataStorageUserId(target.supabaseUserId)) ||
+    isGoogleEmailUserId(storagePathKey)
+  );
+}
 
 async function deleteSavedataForTarget(target: DeleteAccountTarget): Promise<void> {
   const storagePathKey = target.userEmail?.trim();
@@ -27,18 +37,13 @@ async function deleteSavedataProgressionForTarget(
 }
 
 /**
- * Delete remote user data before clearing local state (Google Play policy).
+ * Delete remote user data before clearing local state.
  * Throws if a required remote delete fails.
  */
 export async function deleteRemoteUserData(
   target: DeleteAccountTarget,
 ): Promise<void> {
-  const hasSavedataUser =
-    (target.googlePlayUserId &&
-      isSavedataStorageUserId(target.googlePlayUserId)) ||
-    (target.supabaseUserId && isSavedataStorageUserId(target.supabaseUserId));
-
-  if (hasSavedataUser) {
+  if (hasSavedataTarget(target)) {
     await deleteSavedataForTarget(target);
   }
 }
@@ -47,12 +52,7 @@ export async function deleteRemoteUserData(
 export async function deleteRemoteProgression(
   target: DeleteAccountTarget,
 ): Promise<void> {
-  const hasSavedataUser =
-    (target.googlePlayUserId &&
-      isSavedataStorageUserId(target.googlePlayUserId)) ||
-    (target.supabaseUserId && isSavedataStorageUserId(target.supabaseUserId));
-
-  if (hasSavedataUser) {
+  if (hasSavedataTarget(target)) {
     await deleteSavedataProgressionForTarget(target);
   }
 }

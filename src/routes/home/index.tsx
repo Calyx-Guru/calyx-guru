@@ -5,11 +5,6 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import { enableGuestMode } from "@/lib/app/guestMode";
-import {
-  GooglePlaySignInUnavailableError,
-  GoogleSignInCancelledError,
-  isGooglePlaySignInAvailable,
-} from "@/lib/auth/googlePlaySignIn";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -27,17 +22,17 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const ACCENT_COLOR = "#01875f";
+/** Set to true when Google Sign-In is ready to ship. */
+const SHOW_GOOGLE_SIGN_IN = false;
 
 export function RouteHome() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const {
-    isGooglePlaySignedIn,
     isSignedIn,
     isLoading: isAuthLoading,
-    signInWithGooglePlay,
     signInWithEmailPassword,
+    signInWithGoogle,
   } = useSupabaseAuth();
   const {
     isLoading: isLoadingProfile,
@@ -55,16 +50,14 @@ export function RouteHome() {
   const [password, setPassword] = useState("");
   const [isSigningInWithEmail, setIsSigningInWithEmail] = useState(false);
   const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
-  const showGooglePlaySignIn = isGooglePlaySignInAvailable();
   const hasAutoNavigatedRef = useRef(false);
 
-  const isAuthenticated = isGooglePlaySignedIn || isSignedIn;
+  const isAuthenticated = isSignedIn;
   const isInitialDataLoading =
     isAuthLoading || isLoadingProfile || isLoadingUserState;
   const isSessionDataReady =
     !isInitialDataLoading && profile != null && userState != null;
-  const isBusy =
-    isStartingGuest || isSigningInWithGoogle || isSigningInWithEmail;
+  const isBusy = isStartingGuest || isSigningInWithEmail || isSigningInWithGoogle;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -77,26 +70,19 @@ export function RouteHome() {
     router.replace("/main-menu");
   }, [isAuthenticated, isSessionDataReady]);
 
-  const handleGooglePlayLogin = useCallback(async () => {
+  const handleGoogleSignIn = useCallback(async () => {
     if (isSigningInWithGoogle) return;
 
     setIsSigningInWithGoogle(true);
     try {
-      await signInWithGooglePlay();
+      await signInWithGoogle();
     } catch (error) {
-      if (error instanceof GoogleSignInCancelledError) {
-        return;
-      }
-      if (error instanceof GooglePlaySignInUnavailableError) {
-        console.warn("Google Play sign-in unavailable:", error.message);
-        return;
-      }
-      console.error("Google Play sign-in failed:", error);
-      Alert.alert(t("auth.signInGooglePlay"), t("auth.googlePlaySignInFailed"));
+      console.error("Google sign-in failed:", error);
+      Alert.alert(t("auth.signInGoogle"), t("auth.googleSignInFailed"));
     } finally {
       setIsSigningInWithGoogle(false);
     }
-  }, [isSigningInWithGoogle, signInWithGooglePlay, t]);
+  }, [isSigningInWithGoogle, signInWithGoogle, t]);
 
   const handlePlayAsGuest = useCallback(async () => {
     if (isStartingGuest) return;
@@ -176,29 +162,24 @@ export function RouteHome() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("auth.signIn")}</Text>
-          {showGooglePlaySignIn ? (
+          {SHOW_GOOGLE_SIGN_IN ? (
             <Pressable
-              onPress={() => void handleGooglePlayLogin()}
+              onPress={() => void handleGoogleSignIn()}
               disabled={isBusy}
               style={({ pressed }) => [
-                styles.option,
-                styles.optionAccent,
+                styles.googleOption,
                 (pressed || isSigningInWithGoogle) && styles.optionPressed,
                 isBusy && styles.optionDisabled,
               ]}
               accessibilityRole="button"
-              accessibilityLabel={t("auth.signInGooglePlay")}
+              accessibilityLabel={t("auth.signInGoogle")}
             >
               <View style={styles.optionContent}>
-                <Ionicons
-                  name="logo-google-playstore"
-                  size={20}
-                  color="#ffffff"
-                />
-                <Text style={styles.optionLabelAccent}>
+                <Ionicons name="logo-google" size={20} color="#ffffff" />
+                <Text style={styles.googleOptionLabel}>
                   {isSigningInWithGoogle
                     ? t("auth.signingIn")
-                    : t("auth.signInGooglePlay")}
+                    : t("auth.signInGoogle")}
                 </Text>
               </View>
             </Pressable>
@@ -367,9 +348,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#ffffff",
   },
-  optionAccent: {
-    backgroundColor: ACCENT_COLOR,
-  },
   optionContent: {
     alignItems: "center",
     flexDirection: "row",
@@ -387,7 +365,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#0B3C49",
   },
-  optionLabelAccent: {
+  googleOption: {
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: "#EA4335",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  googleOptionLabel: {
     flexShrink: 1,
     fontSize: 16,
     fontWeight: "600",

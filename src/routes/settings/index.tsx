@@ -1,4 +1,4 @@
-import { ENV, LANGUAGE_NATIVE_LABELS, SUPPORTED_LANGUAGES } from "@/constants";
+import { ENV, LANGUAGE_NATIVE_LABELS, SKIP_SIGN_IN_SCREEN, SUPPORTED_LANGUAGES } from "@/constants";
 import { useAppAppearance } from "@/contexts/AppAppearanceContext";
 import { useAppState } from "@/hooks/useAppState";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
@@ -6,9 +6,6 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserState } from "@/hooks/useUserState";
 import { deleteUserProgression } from "@/lib/account/deleteAccountAndData";
 import { isGuestUserId } from "@/lib/app/guestMode";
-import {
-  getStoredGooglePlayUserId,
-} from "@/lib/auth/googlePlaySignIn";
 import { getStoredSavedataPathKey } from "@/lib/auth/userEmailStorage";
 import { useTranslation } from "@/hooks/useTranslation";
 import { router, type Href } from "expo-router";
@@ -24,19 +21,15 @@ import {
 } from "react-native";
 
 async function resolveDeleteTargets(
-  googlePlayUserId: string | null,
   supabaseUserId: string | null,
   profileId: string | undefined,
   userEmail: string | null,
 ) {
-  const storedGooglePlayUserId =
-    googlePlayUserId ?? (await getStoredGooglePlayUserId());
   const storedUserEmail = userEmail ?? (await getStoredSavedataPathKey());
   const guestUserId =
     profileId && isGuestUserId(profileId) ? profileId : null;
 
   return {
-    googlePlayUserId: storedGooglePlayUserId,
     supabaseUserId,
     guestUserId,
     userEmail: storedUserEmail,
@@ -48,9 +41,7 @@ export function RouteSettings() {
   const {
     logout,
     deleteAccountAndData,
-    isGooglePlaySignedIn,
     isSignedIn,
-    googlePlayUserId,
     user,
     userEmail,
   } = useSupabaseAuth();
@@ -61,7 +52,7 @@ export function RouteSettings() {
   const [isBlocking, setIsBlocking] = useState(false);
 
   const showDeleteAccount =
-    isGooglePlaySignedIn || isSignedIn || isGuestUserId(profile?.id);
+    isSignedIn || isGuestUserId(profile?.id);
 
   const handleLogout = useCallback(async () => {
     if (isBlocking) return;
@@ -69,7 +60,7 @@ export function RouteSettings() {
     setIsBlocking(true);
     try {
       await logout();
-      router.replace("/");
+      router.replace((SKIP_SIGN_IN_SCREEN ? "/main-menu" : "/") as Href);
     } catch (error) {
       console.error("Logout failed:", error);
       Alert.alert(t("auth.logout"), t("auth.logoutFailed"));
@@ -84,7 +75,7 @@ export function RouteSettings() {
     try {
       await deleteAccountAndData();
       resetAppState();
-      router.replace("/");
+      router.replace((SKIP_SIGN_IN_SCREEN ? "/main-menu" : "/") as Href);
     } catch (error) {
       console.error("Delete account failed:", error);
       Alert.alert(t("auth.deleteAccountTitle"), t("auth.deleteAccountFailed"));
@@ -98,7 +89,6 @@ export function RouteSettings() {
     setIsBlocking(true);
     try {
       const target = await resolveDeleteTargets(
-        googlePlayUserId,
         user?.id ?? null,
         profile?.id,
         userEmail,
@@ -115,7 +105,6 @@ export function RouteSettings() {
       setIsBlocking(false);
     }
   }, [
-    googlePlayUserId,
     isBlocking,
     profile?.id,
     resetAppState,

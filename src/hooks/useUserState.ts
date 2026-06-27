@@ -10,8 +10,8 @@ import type {
 import { useCallback } from 'react';
 
 export function useUserState() {
-  const { googlePlayUserId, user, userEmail } = useSupabaseAuth();
-  const savedataUserId = googlePlayUserId ?? user?.id ?? null;
+  const { user, userEmail } = useSupabaseAuth();
+  const savedataUserId = user?.id ?? null;
   const getState = useUserStateStore.getState;
   const userState = useUserStateStore((s) => s.userState);
   const isLoading = useUserStateStore((s) => s.isLoading);

@@ -3,23 +3,22 @@ import { useUserState } from '@/hooks/useUserState';
 import { runWithTimeout } from '@/lib/app/helper';
 import {
   clearGuestMode,
+  enableGuestMode,
   getGuestUserId,
   isGuestMode,
 } from '@/lib/app/guestMode';
 import {
-  clearGooglePlayPathMapping,
-  fromGooglePlayUserId,
-  getStoredGooglePlayUserId,
-  signInWithGooglePlay as performGooglePlaySignIn,
-  signOutGooglePlay,
-} from '@/lib/auth/googlePlaySignIn';
-import {
   clearStoredUserEmail,
   getStoredSavedataPathKey,
   normalizeUserEmail,
-  persistSavedataPathKey,
   persistUserEmail,
 } from '@/lib/auth/userEmailStorage';
+import {
+  GoogleSignInCancelledError,
+  signInWithGoogleAccount,
+} from '@/lib/auth/googleSignIn';
+import { isGoogleEmailUserId } from '@/lib/auth/savedataUserId';
+import { SKIP_SIGN_IN_SCREEN } from '@/constants/config';
 import { isStaleMockDevIdentity } from '@/lib/auth/mockDevIdentity';
 import { deleteRemoteUserData } from '@/lib/account/deleteAccountAndData';
 import { resetSavedataSync } from '@/lib/supabase/savedataSync';
@@ -38,22 +37,37 @@ export type OAuthProvider =
   | 'twitter'
   | 'twitch';
 
+type GoogleAuthUser = {
+  id: string;
+  email: string;
+};
+
+function createGoogleAuthUser(email: string): User {
+  const normalized = normalizeUserEmail(email);
+  return {
+    id: normalized,
+    email: normalized,
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'google',
+    created_at: new Date().toISOString(),
+  } as User;
+}
+
 type SupabaseAuth = {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
   isSignedIn: boolean;
-  isGooglePlaySignedIn: boolean;
-  googlePlayUserId: string | null;
   userEmail: string | null;
   initializeSupabaseProfile: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithEmailPassword: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   logout: () => Promise<void>;
   deleteAccountAndData: () => Promise<void>;
-  signInWithGooglePlay: () => Promise<void>;
   signInWithOAuth: (provider: OAuthProvider) => Promise<void>;
 };
 
@@ -62,17 +76,15 @@ export const SupabaseAuthContext = createContext<SupabaseAuth>({
   session: null,
   isLoading: true,
   isSignedIn: false,
-  isGooglePlaySignedIn: false,
-  googlePlayUserId: null,
   userEmail: null,
   initializeSupabaseProfile: async () => {},
   signUp: async () => {},
   signIn: async () => {},
   signInWithEmailPassword: async () => {},
+  signInWithGoogle: async () => {},
   signOut: async () => {},
   logout: async () => {},
   deleteAccountAndData: async () => {},
-  signInWithGooglePlay: async () => {},
   signInWithOAuth: async () => {},
 });
 
@@ -83,7 +95,7 @@ export function SupabaseAuthProvider({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [googlePlayUserId, setGooglePlayUserId] = useState<string | null>(null);
+  const [googleUser, setGoogleUser] = useState<GoogleAuthUser | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -104,34 +116,48 @@ export function SupabaseAuthProvider({
     setUserEmail(normalized);
   }, []);
 
-  const applySignedInStoragePathKey = useCallback(
-    async (pathKey: string | null | undefined) => {
-      if (!pathKey?.trim()) return;
-      await persistSavedataPathKey(pathKey);
-      setUserEmail(pathKey.trim());
+  const restoreGoogleSession = useCallback(
+    async (email: string) => {
+      const normalized = normalizeUserEmail(email);
+      setGoogleUser({ id: normalized, email: normalized });
+      setUserEmail(normalized);
+      await Promise.all([
+        initializeProfileForUser(normalized),
+        initializeUserStateForUser(normalized),
+      ]);
+      await syncProfileEmail(normalized);
     },
-    [],
+    [initializeProfileForUser, initializeUserStateForUser, syncProfileEmail],
   );
 
+  const ensureGuestSession = useCallback(async () => {
+    if (!(await isGuestMode())) {
+      await enableGuestMode();
+    }
+    const guestId = await getGuestUserId();
+    await Promise.all([
+      initializeProfileForUser(guestId),
+      initializeUserStateForUser(guestId),
+    ]);
+  }, [initializeProfileForUser, initializeUserStateForUser]);
+
   const initializeSupabaseProfile = async () => {
+    if (SKIP_SIGN_IN_SCREEN) {
+      try {
+        await ensureGuestSession();
+      } catch (error) {
+        console.error('Error initializing guest session:', error);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     const loadLocalProfile = async () => {
-      const storedGooglePlayUserId = await getStoredGooglePlayUserId();
       let storedPathKey = await getStoredSavedataPathKey();
       if (storedPathKey && isStaleMockDevIdentity(null, storedPathKey)) {
         await clearStoredUserEmail();
         storedPathKey = null;
-      }
-      if (storedGooglePlayUserId) {
-        setGooglePlayUserId(storedGooglePlayUserId);
-        setUserEmail(storedPathKey);
-        await Promise.all([
-          initializeProfileForUser(storedGooglePlayUserId),
-          initializeUserStateForUser(storedGooglePlayUserId),
-        ]);
-        if (storedPathKey?.includes('@')) {
-          await syncProfileEmail(storedPathKey);
-        }
-        return;
       }
 
       if (await isGuestMode()) {
@@ -186,7 +212,12 @@ export function SupabaseAuthProvider({
           }
         }
       } else {
-        await loadLocalProfile();
+        const storedPathKey = await getStoredSavedataPathKey();
+        if (storedPathKey && isGoogleEmailUserId(storedPathKey)) {
+          await restoreGoogleSession(storedPathKey);
+        } else {
+          await loadLocalProfile();
+        }
       }
 
       console.log('Initial Supabase session:', initialSession);
@@ -290,9 +321,8 @@ export function SupabaseAuthProvider({
 
   const logout = useCallback(async () => {
     await clearGuestMode();
-    await signOutGooglePlay();
-    setGooglePlayUserId(null);
     setUserEmail(null);
+    setGoogleUser(null);
     await clearStoredUserEmail();
 
     try {
@@ -308,6 +338,12 @@ export function SupabaseAuthProvider({
     setUser(null);
 
     await Promise.all([clearProfile(), clearUserState()]);
+
+    if (SKIP_SIGN_IN_SCREEN) {
+      await ensureGuestSession();
+      return;
+    }
+
     await Promise.all([
       initializeProfileForUser(null),
       initializeUserStateForUser(null),
@@ -316,26 +352,20 @@ export function SupabaseAuthProvider({
     if (await isGuestMode()) {
       throw new Error('Guest mode still active after logout');
     }
-
-    if (await getStoredGooglePlayUserId()) {
-      throw new Error('Google Play session still active after logout');
-    }
   }, [
     clearProfile,
     clearUserState,
+    ensureGuestSession,
     initializeProfileForUser,
     initializeUserStateForUser,
   ]);
 
   const deleteAccountAndData = useCallback(async () => {
-    const storedGooglePlayUserId = googlePlayUserId ?? (await getStoredGooglePlayUserId());
-    const supabaseUserId = session?.user?.id ?? null;
+    const supabaseUserId = session?.user?.id ?? googleUser?.id ?? null;
     const guestUserId = (await isGuestMode()) ? await getGuestUserId() : null;
     const storedPathKey = userEmail ?? (await getStoredSavedataPathKey());
-    const googleAccountId = fromGooglePlayUserId(storedGooglePlayUserId);
 
     await deleteRemoteUserData({
-      googlePlayUserId: storedGooglePlayUserId,
       supabaseUserId,
       guestUserId,
       userEmail: storedPathKey,
@@ -343,12 +373,8 @@ export function SupabaseAuthProvider({
 
     resetSavedataSync();
     await clearGuestMode();
-    await signOutGooglePlay();
-    if (googleAccountId) {
-      await clearGooglePlayPathMapping(googleAccountId);
-    }
-    setGooglePlayUserId(null);
     setUserEmail(null);
+    setGoogleUser(null);
     await clearStoredUserEmail();
 
     try {
@@ -364,6 +390,12 @@ export function SupabaseAuthProvider({
     setUser(null);
 
     await Promise.all([clearProfile(), clearUserState()]);
+
+    if (SKIP_SIGN_IN_SCREEN) {
+      await ensureGuestSession();
+      return;
+    }
+
     await Promise.all([
       initializeProfileForUser(null),
       initializeUserStateForUser(null),
@@ -372,25 +404,21 @@ export function SupabaseAuthProvider({
     if (await isGuestMode()) {
       throw new Error('Guest mode still active after account deletion');
     }
-
-    if (await getStoredGooglePlayUserId()) {
-      throw new Error('Google Play session still active after account deletion');
-    }
   }, [
     clearProfile,
     clearUserState,
-    googlePlayUserId,
+    ensureGuestSession,
     userEmail,
     initializeProfileForUser,
     initializeUserStateForUser,
     session?.user?.id,
+    googleUser?.id,
   ]);
 
   const signInWithEmailPassword = useCallback(
     async (email: string, password: string) => {
       await clearGuestMode();
-      await signOutGooglePlay();
-      setGooglePlayUserId(null);
+      setGoogleUser(null);
       setUserEmail(null);
       await clearStoredUserEmail();
       await Promise.all([clearProfile(), clearUserState()]);
@@ -429,28 +457,53 @@ export function SupabaseAuthProvider({
     ],
   );
 
-  const signInWithGooglePlay = useCallback(async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Supabase sign out before Google Play sign-in:', error);
-    }
-    setSession(null);
-    setUser(null);
-
-    const { userId, storagePathKey } = await performGooglePlaySignIn();
-    setGooglePlayUserId(userId);
-    await applySignedInStoragePathKey(storagePathKey);
-    setIsLoading(false);
+  const signInWithGoogle = useCallback(async () => {
     await clearGuestMode();
+    setGoogleUser(null);
+    setUserEmail(null);
+    await clearStoredUserEmail();
+    await Promise.all([clearProfile(), clearUserState()]);
+
+    let result;
+    try {
+      result = await signInWithGoogleAccount();
+    } catch (error) {
+      if (error instanceof GoogleSignInCancelledError) {
+        return;
+      }
+      throw error;
+    }
+
+    const email = result.email;
+    await applySignedInEmail(email);
+    setGoogleUser({ id: email, email });
+    setIsLoading(false);
+
     await Promise.all([
-      initializeProfileForUser(userId),
-      initializeUserStateForUser(userId),
+      initializeProfileForUser(email),
+      initializeUserStateForUser(email),
     ]);
+    await syncProfileEmail(email);
+
+    const profileUpdates: {
+      email: string;
+      full_name?: string;
+      avatar_url?: string;
+    } = { email };
+    if (result.name?.trim()) {
+      profileUpdates.full_name = result.name.trim();
+    }
+    if (result.photoUrl?.trim()) {
+      profileUpdates.avatar_url = result.photoUrl.trim();
+    }
+    await useUserProfileStore.getState().updateProfile(profileUpdates);
   }, [
-    applySignedInStoragePathKey,
+    applySignedInEmail,
+    clearProfile,
+    clearUserState,
     initializeProfileForUser,
     initializeUserStateForUser,
+    syncProfileEmail,
   ]);
 
   const signInWithOAuth = useCallback(async (provider: OAuthProvider) => {
@@ -466,21 +519,19 @@ export function SupabaseAuthProvider({
   }, []);
 
   const value: SupabaseAuth = {
-    user,
+    user: user ?? (googleUser ? createGoogleAuthUser(googleUser.email) : null),
     session,
     isLoading,
-    isSignedIn: !!session,
-    isGooglePlaySignedIn: !!googlePlayUserId,
-    googlePlayUserId,
+    isSignedIn: !!session || !!googleUser,
     userEmail,
     initializeSupabaseProfile,
     signUp,
     signIn,
     signInWithEmailPassword,
+    signInWithGoogle,
     signOut,
     logout,
     deleteAccountAndData,
-    signInWithGooglePlay,
     signInWithOAuth,
   };
 

@@ -7,10 +7,6 @@ import {
   STORAGE_USER_EMAIL_KEY,
 } from '@/constants/common';
 import { ENV } from '@/constants/env';
-import {
-  fromGooglePlayUserId,
-  signOutGooglePlay,
-} from '@/lib/auth/googlePlaySignIn';
 import { storage } from '@/lib/storage';
 import supabase from '@/lib/supabase/client';
 
@@ -18,6 +14,7 @@ const DEVICE_INSTALL_ID_KEY = 'calyx_device_install_id';
 const USER_PROFILE_STORAGE_KEY = 'userProfile';
 const USER_STATE_STORAGE_KEY = 'userState';
 const FORTUNE_TELLINGS_HISTORY_KEY = 'fortuneTellingsHistory';
+const LEGACY_GOOGLE_PLAY_USER_ID_PREFIX = 'google_';
 
 const GAME_ANALYTICS_STORE_SUFFIXES = [
   'ga_event',
@@ -68,9 +65,10 @@ function getStaticAppStorageKeys(): string[] {
   ];
 }
 
-async function getGooglePlayPathMappingKeys(): Promise<string[]> {
+async function getLegacyGooglePlayPathMappingKeys(): Promise<string[]> {
   const userId = await storage.getItem(STORAGE_GOOGLE_PLAY_USER_ID_KEY);
-  const accountId = fromGooglePlayUserId(userId);
+  if (!userId?.startsWith(LEGACY_GOOGLE_PLAY_USER_ID_PREFIX)) return [];
+  const accountId = userId.slice(LEGACY_GOOGLE_PLAY_USER_ID_PREFIX.length);
   if (!accountId) return [];
   return [`${STORAGE_GOOGLE_PLAY_PATH_BY_ACCOUNT_PREFIX}${accountId}`];
 }
@@ -80,7 +78,7 @@ export async function getAllKnownAppStorageKeys(): Promise<string[]> {
   return [
     ...new Set([
       ...getStaticAppStorageKeys(),
-      ...(await getGooglePlayPathMappingKeys()),
+      ...(await getLegacyGooglePlayPathMappingKeys()),
     ]),
   ];
 }
@@ -112,12 +110,6 @@ export async function clearAllLocalAppStorage(): Promise<string[]> {
     await supabase.auth.signOut({ scope: 'local' });
   } catch (error) {
     console.warn('Supabase local sign-out during storage clear:', error);
-  }
-
-  try {
-    await signOutGooglePlay();
-  } catch (error) {
-    console.warn('Google Play sign-out during storage clear:', error);
   }
 
   return keys;

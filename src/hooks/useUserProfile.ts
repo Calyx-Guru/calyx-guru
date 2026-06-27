@@ -9,8 +9,8 @@ import type { UserProfile } from '@/types/UserProfile';
 import { useCallback } from 'react';
 
 export function useUserProfile() {
-  const { googlePlayUserId, user, userEmail } = useSupabaseAuth();
-  const savedataUserId = googlePlayUserId ?? user?.id ?? null;
+  const { user, userEmail } = useSupabaseAuth();
+  const savedataUserId = user?.id ?? null;
   const getState = useUserProfileStore.getState;
   const profile = useUserProfileStore((state) => state.profile);
   const isLoading = useUserProfileStore((state) => state.isLoading);

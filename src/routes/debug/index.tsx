@@ -55,7 +55,7 @@ function formatOffsetHuman(ms: number): string {
 
 export function RouteDebug() {
   const insets = useSafeAreaInsets();
-  const { isGooglePlaySignedIn, googlePlayUserId, logout } = useSupabaseAuth();
+  const { logout } = useSupabaseAuth();
   const {
     isEnabled: isSavedataEnabled,
     syncStatus,
@@ -195,14 +195,6 @@ export function RouteDebug() {
       keyboardShouldPersistTaps="handled"
     >
       <Text style={styles.title}>Debug</Text>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Google Play</Text>
-        <Text style={styles.mono}>
-          Signed in: {isGooglePlaySignedIn ? "yes" : "no"}
-        </Text>
-        <Text style={styles.monoMuted}>UUID: {googlePlayUserId ?? "—"}</Text>
-      </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Savedata storage</Text>
