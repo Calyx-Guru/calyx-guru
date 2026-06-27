@@ -330,10 +330,10 @@ export function useKaucim() {
     ) => {
       const storyBundle = getKaucimStoryBundle(concern, locale, stickNumber);
       const storyData = storyBundle[storyIndex % storyBundle.length];
-      const storyVerdicts = storyData.verdict.split("\n");
-      const storyOmens = storyData.omen.split("\n");
-      const storyActions = storyData.action.split("\n");
-      const storyConclusions = storyData.conclusion.split("\n");
+      const storyVerdicts = storyData.verdict.split("\n").filter(Boolean);
+      const storyOmens = storyData.omen.split("\n").filter(Boolean);
+      const storyActions = storyData.action.split("\n").filter(Boolean);
+      const storyConclusions = storyData.conclusion.split("\n").filter(Boolean);
       const energyLevel = energyLevels[storyData.element] || 0;
       return {
         ...storyData,
